@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include ury_pos *.css
+recursive-include ury_pos *.csv
+recursive-include ury_pos *.html
+recursive-include ury_pos *.ico
+recursive-include ury_pos *.js
+recursive-include ury_pos *.json
+recursive-include ury_pos *.md
+recursive-include ury_pos *.png
+recursive-include ury_pos *.py
+recursive-include ury_pos *.svg
+recursive-include ury_pos *.txt
+recursive-exclude ury_pos *.pyc

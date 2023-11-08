@@ -1,0 +1,14 @@
+{
+  "name": "ury_pos",
+  "version": "1.0.0",
+  "description": "URY POS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd urypos && yarn dev",
+    "build": "cd urypos && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

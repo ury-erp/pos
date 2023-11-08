@@ -1,0 +1,314 @@
+import { defineStore } from "pinia";
+import router from '../router';
+import { useTableStore } from "./Table.js";
+import { useMenuStore } from "./Menu.js";
+import { useCustomerStore } from "./Customer.js";
+import { useNotifications } from "./Notification.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
+import { useAlert } from "./Alert.js";
+import frappe from "./frappeSdk.js";
+
+import {
+  printWithQz,
+  loadQzPrinter,
+  disconnectQzPrinter,
+} from "./utils/PrintWithQz";
+
+export const useInvoiceDataStore = defineStore("invoiceData", {
+  state: () => ({
+    invoiceDetails: [],
+    defaultModeOfPayment: "Cash",
+    warehouse: "",
+    posProfile: "",
+    waiter: "",
+    cashier: "",modeOfPaymentList:null,
+    alert:useAlert(),
+    currentCart: [],
+    showDialog: false,
+    notification: useNotifications(),
+    menu: useMenuStore(),
+    recentOrders: usetoggleRecentOrder(),
+    printer: null,
+    print_format: null,
+    print_type: null,
+    branch: null,
+    company: null,
+    qz_host: null,
+    grandTotal:null,
+    tableInvoiceNo: null,
+    invoiceNumber: null,
+    showUpdateButtton: true,
+    isChecked: false,
+    isPrinting: false,
+    table: useTableStore(),
+    call: frappe.call(),
+    qz_print: null,
+  }),
+  actions: {
+    async fetchInvoiceDetails() {
+      try {
+        const invoiceDetailses = await this.call
+          .get("ury.ury_pos.api.getPosProfile")
+          .then((result) => {
+            this.invoiceDetails = result.message;
+            this.warehouse = this.invoiceDetails.warehouse;
+            this.posProfile = this.invoiceDetails.pos_profile;
+            this.waiter = this.invoiceDetails.waiter;
+            this.cashier = this.invoiceDetails.cashier;
+            this.branch = this.invoiceDetails.branch;
+            this.company = this.invoiceDetails.company;
+            this.print_format = this.invoiceDetails.print_format;
+            this.qz_print = this.invoiceDetails.qz_print;
+            this.qz_host = this.invoiceDetails.qz_host;
+            this.print_type = this.invoiceDetails.print_type;
+            this.printer = this.invoiceDetails.printer;
+            if (this.qz_host) {
+              loadQzPrinter(this.qz_host);
+            }
+          });
+      } catch (error) {
+        console.error(error);
+      }
+      this.call
+        .get("ury.ury_pos.api.getModeOfPayment")
+        .then((result) => {
+          this.modeOfPaymentList = result.message;
+        })
+        .catch((error) => {
+          // console.error(error)
+        });
+      
+    },
+    invoiceCreation: async function () {
+      this.showUpdateButtton = false;
+      let selectedTables = "";
+      let previousOrderItem = this.table.previousOrderdItem;
+      this.invoiceNo = this.table.invoiceNo;
+      let cart = this.menu.cart;
+      const customers = useCustomerStore();
+      const customerName = customers.search;
+      const numberOfPax = customers.numberOfPax;
+      let invoice = this.recentOrders.invoiceNumber || this.invoiceNumber;
+      selectedTables =
+        this.table.selectedTable || this.recentOrders.restaurantTable;
+
+      const cartCopy = JSON.parse(JSON.stringify(cart));
+      this.currentCart.splice(0, this.currentCart.length, ...cart);
+      if (!numberOfPax) {
+        this.alert.createAlert("Message","Please Select Customer / No of Pax", "OK")
+        this.showUpdateButtton = true;
+      } else {
+        const creatingInvoice = {
+          table: selectedTables,
+          customer: customerName,
+          items: cart,
+          no_of_pax: numberOfPax,
+          mode_of_payment: this.defaultModeOfPayment,
+          cashier: this.cashier,
+          waiter: this.waiter,
+          pos_profile: this.posProfile,
+          invoice: invoice,
+          last_invoice: null,
+        };
+        this.call
+          .post(
+            "ury.ury.doctype.ury_order.ury_order.sync_order",
+            creatingInvoice
+          )
+          .then((response) => {
+            this.showUpdateButtton = true;
+            if (response.message.status === "Failure") {
+              this.alert.createAlert("Message",response.message.message, "OK")
+              router.push("/Table").then(() => {
+                window.location.reload();
+              });
+            } else {
+              this.invoiceNumber = response.message.name;
+              this.grandTotal=response.message.grand_total
+              this.notification.createNotification("Order Update");
+              this.table.fetchTable();
+              this.menu.comments = "";
+              let items = this.menu.items;
+              items.forEach((item) => {
+                item.comment = "";
+              });
+              previousOrderItem.splice(0, previousOrderItem.length);
+              previousOrderItem.splice(
+                0,
+                previousOrderItem.length,
+                ...cartCopy
+              );
+              this.currentCart.splice(0, this.currentCart.length);
+              this.table.modifiedTime = response.message.modified;
+            }
+          })
+          .catch((error) => {
+            this.showUpdateButtton = true;
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message",message.message, "OK")
+            }
+          });
+      }
+    },
+    billing(table) {
+      this.isPrinting = true;
+
+      let tables = table.name;
+      const getOrderInvoice = {
+        table: tables,
+      };
+      this.call
+        .get(
+          "ury.ury.doctype.ury_order.ury_order.get_order_invoice",
+          getOrderInvoice
+        )
+        .then((result) => {
+          this.tableInvoiceNo = result.message.name;
+          this.printFunction();
+        })
+        .catch((error) => console.error(error));
+    },
+    printFunction: async function () {
+      this.isPrinting = true;
+      let invoiceNo =
+        this.recentOrders.invoiceNumber ||
+        this.tableInvoiceNo ||
+        this.invoiceNumber;
+
+      if (this.print_type === "qz") {
+        const printHTML = {
+          doc: "POS Invoice",
+          name: invoiceNo,
+          print_format: this.print_format,
+          _lang: "en",
+        };
+        const result = await this.call.get(
+          "frappe.www.printview.get_html_and_style",
+          printHTML
+        );
+        if (!result?.message?.html) {
+          this.isPrinting = false;
+          this.alert.createAlert("Message","Error while getting the HTML document to print for QZ", "OK")
+        }
+
+        const print = await printWithQz(this.qz_host, result?.message?.html);
+
+        if (print === "printed") {
+          this.notification.createNotification("Print Successful");
+          const updatePrintTable = {
+            invoice: invoiceNo,
+          };
+          this.call
+            .post("ury.ury.api.ury_print.qz_print_update", updatePrintTable)
+            .then(() => {
+              window.location.reload();
+              return 200;
+            })
+            .catch((error) => console.error(error));
+        }
+      } else if (this.print_type === "network") {
+        const sendObj = {
+          doctype: "POS Invoice",
+          name: invoiceNo,
+          printer_setting: this.printer,
+          print_format: this.print_format,
+        };
+        const printingCall = async () => {
+          try {
+            const result = await this.call.post(
+              "ury.ury.api.ury_print.network_printing",
+              sendObj
+            );
+            return result.message;
+          } catch (error) {
+            console.error(error);
+            return ""; 
+          }
+        };
+        let i = 0;
+        let errorMessage = "";
+        do {
+          const res = await printingCall();
+          if (res === "Success") {
+            this.notification.createNotification("Print Successful");
+            const sendObj = {
+              invoice: invoiceNo,
+            };
+            this.call
+              .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+              .then(() => {
+                window.location.reload();
+
+                return 200;
+              })
+              .catch((error) => console.error(error));
+          }
+          errorMessage = res;
+          i++;
+        } while (i < 3);
+        throw {
+          alert:this.alert.createAlert("Message",`Print failed with error ${errorMessage}`, "OK") ,
+          custom: this.isPrinting = false,
+        };
+      } else {
+        const sendObj = {
+          doctype: "POS Invoice",
+          name: invoiceNo,
+          print_format: this.print_format,
+        };
+        this.call
+          .post("ury.ury.api.ury_print.print_pos_page", sendObj)
+          .then((result) => {
+            this.notification.createNotification("Print Successful");
+            window.location.reload();
+            
+            return result.message;
+          })
+          .catch((error) => console.error(error));
+      }
+      throw {
+        custom: true,
+        title: "No printer type specified",
+        message: "printer_type is not specified in pos profile",
+        print:this.isPrinting = false
+      };
+      
+    },
+   
+    loadPrinter: async function (qz_host) {
+      try {
+        const res = await loadQzPrinter(url, qz_host);
+        print(qz_host);
+        if (res === "success")
+          this.notification.createNotification("Printer loaded");
+      } catch (err) {
+        this.alert.createAlert("Message",err.message, "OK")
+        
+      }
+    },
+
+    cancelInvoice: async function () {
+      const recentOrders = usetoggleRecentOrder();
+      let invoiceNo =
+        recentOrders.invoiceNumber ||
+        this.invoiceNumber ||
+        this.table.invoiceNo;
+
+      const updatedFields = {
+        invoice_id: invoiceNo,
+      };
+      this.call
+        .post("ury.ury.doctype.ury_order.ury_order.cancel_order", updatedFields)
+        .then(() => {
+          this.notification.createNotification("Invoice Cancelled");
+          router.push("/Table").then(() => {
+            window.location.reload();
+          });
+        })
+        .catch((error) => console.error(error));
+    },
+    
+  },
+});

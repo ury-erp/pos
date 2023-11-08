@@ -1,0 +1,301 @@
+import { defineStore } from "pinia";
+import router from '../router';
+import { useMenuStore } from "./Menu.js";
+import { useInvoiceDataStore } from "./invoiceData.js";
+import { useAuthStore } from "./Auth.js";
+import { useCustomerStore } from "./Customer.js";
+import { useNotifications } from "./Notification.js";
+import { useAlert } from "./Alert.js";
+import frappe from "./frappeSdk.js";
+
+export const useTableStore = defineStore("table", {
+  state: () => ({
+    tables: [],
+    selectedTable: null,
+    previousOrderdItem: [],
+    invoiceNo: "",
+    alert:useAlert(),
+    previousOrder: [],
+    previousOrderdCustomer: "",
+    activeTable: null,
+    invoiceData: useInvoiceDataStore(),
+    grandTotal: "",
+    notification: useNotifications(),
+    selectedOption: "",
+    isTakeAway: "",
+    showModal: false,
+    newTable: "",
+    showTable: false,
+    searchTable: [],
+    activeDropdown: null,
+    tableName: "",
+    showModalCaptainTransfer: false,
+    showCaptain: false,
+    captain: [],
+    newCaptain: "",
+    invoicePrinted: "",
+    CurrentUser: useAuthStore(),
+    call: frappe.call(),
+    db: frappe.db(),
+    totalMinutes:null,
+    invoiceNumber: null,
+    modifiedTime: null,
+  }),
+  getters: {
+    filteredTables(state) {
+      return state.tables.filter((table) => table.is_take_away === 0);
+    },
+    takeAway(state) {
+      return state.tables.filter((table) => table.is_take_away === 1);
+    },
+  },
+
+  actions: {
+    fetchTable() {
+      this.selectedOption = "Table"; 
+      this.db
+        .getDocList("URY Table", {
+          fields: ["name","occupied","latest_invoice_time","is_take_away"],
+          limit: "*",
+        })
+        .then((docs) => {
+          this.tables = docs.sort((a, b) => {
+            return a.name.localeCompare(b.name, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            });
+          });  
+        })
+        .catch((error) => console.error(error));
+    },
+    tableSearch() {
+      this.db
+        .getDocList("URY Table", {
+          filters: [["occupied", "like", "0%"]],
+        })
+        .then((table) => {
+          this.searchTable = table;
+        })
+        .catch((error) => {
+          // console.error(error)
+        });
+    },
+    fetchCaptain() {
+      this.db
+        .getDocList("User", {
+          fields: ["name"],
+          limit: "*",
+        })
+        .then((docs) => {
+          this.captain = docs;
+        })
+        .catch((error) => console.error(error));
+    },
+    toggleDropdown(index) {
+      this.tableName = index;
+      if (this.activeDropdown === index) {
+        this.activeDropdown = null;
+      } else {
+        this.activeDropdown = index;
+      }
+    },
+    hideDropdown() {
+      this.activeDropdown = null;
+    },
+    selectTable(tables) {
+      this.newTable = tables.name;
+      this.showTable = false;
+    },
+    selectcaptain(captain) {
+      this.newCaptain = captain.name;
+      this.showCaptain = false;
+    },
+    getTimeDifference(table) {
+      const now = new Date();
+      let tableTime = "00:00:00";
+      if (table && table.occupied === 1 && table.latest_invoice_time) {
+        tableTime = table.latest_invoice_time;
+      }
+      const [tableHours, tableMinutes, tableSeconds] = tableTime.split(":");
+      const tableDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        tableHours,
+        tableMinutes,
+        tableSeconds
+      );
+      const timeDifferenceInMs = now - tableDate;
+      const secondsDifference = Math.floor(timeDifferenceInMs / 1000);
+      const minutesDifference = Math.floor(secondsDifference / 60);
+      const hoursDifference = Math.floor(minutesDifference / 60);
+      const formattedTimeDifference = `${hoursDifference}:${
+        minutesDifference % 60
+      }`;
+      return formattedTimeDifference;
+    },
+    getBadgeType(table) {
+      if (table.occupied != 1 && table !== this.activeTable) {
+        return "green";
+      } else if (table === this.activeTable) {
+        return "default";
+      } else if (table.occupied === 1 && table !== this.activeTable) {
+        const timeDifference = this.getTimeDifference(table);
+        const [hours, minutes] = timeDifference.split(":");
+        const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
+        if (totalMinutes > 60) {
+          return "red";
+        } else {
+          return "yellow"; 
+        }
+      }
+    },
+    getBadgeText(table) {
+      if (table.occupied != 1 && table !== this.activeTable) {
+        return "Free";
+      } else if (table === this.activeTable) {
+        return "Active";
+      } else if (table.occupied === 1 && table !== this.activeTable) {
+        const timeDifference = this.getTimeDifference(table);
+        const [hours, minutes] = timeDifference.split(":");
+        const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
+        if (totalMinutes > 60) {
+          return "Attention";
+        } else {
+          return "Occupied";
+        }
+      }
+    },
+    addToSelectedTables(table) {
+      this.selectedTable = table.name;
+      if (this.activeTable === table) {
+        this.activeTable = null;
+      } else {
+        this.activeTable = table;
+      }
+      if (table.is_take_away === 1) {
+        this.isTakeAway = "Take Away";
+      }
+      let previousOrderdNumberOfPax = "";
+      this.previousOrderdItem = "";
+      this.invoiceNo = "";
+      const menu = useMenuStore();
+      let items = menu.items;
+      items.forEach((item) => {
+        item.qty = "";
+      });
+      let cart = menu.cart;
+      cart.splice(0, cart.length);
+      const getPreviousOrder = {
+        table: this.selectedTable,
+      };
+      this.call
+        .get(
+          "ury.ury.doctype.ury_order.ury_order.get_order_invoice",
+          getPreviousOrder
+        )
+        .then((result) => {
+          this.previousOrder = result.message;
+          this.modifiedTime = this.previousOrder.modified;
+          this.invoicePrinted = this.previousOrder.invoice_printed;
+          this.grandTotal = this.previousOrder.grand_total;
+          this.invoiceNo = this.previousOrder.name;
+          if (this.invoiceNo) {
+            if (this.CurrentUser.sessionUser !== this.previousOrder.waiter) {
+              this.alert.createAlert("Message","Table is assigned to " + this.previousOrder.waiter, "OK")
+              router.push("/Table").then(() => {
+                window.location.reload();
+              });
+            } else {
+              this.notification.createNotification("Past Order Fetched");
+            }
+          } else {
+            router.push("/Menu");
+          }
+          this.previousOrderdItem = this.previousOrder.items;
+          this.previousOrderdCustomer = this.previousOrder.customer;
+          previousOrderdNumberOfPax = this.previousOrder.no_of_pax;
+          const customers = useCustomerStore();
+          if (this.previousOrderdCustomer) {
+            customers.search = this.previousOrderdCustomer;
+            customers.numberOfPax = previousOrderdNumberOfPax;
+            customers.fectchCustomerFavouriteItem();
+          } else {
+            customers.search = "";
+            customers.numberOfPax = "";
+            customers.customerFavouriteItems = "";
+          }
+
+          items.forEach((item) => {
+            const previousItem =
+              this.previousOrderdItem &&
+              this.previousOrderdItem.find(
+                (previousItem) => previousItem.item_name === item.item_name
+              );
+            if (previousItem && !item.qty) {
+              const itemIndex = cart.findIndex((obj) => obj.item === item.item);
+              const itemIndexExists = itemIndex !== -1;
+              if (!itemIndexExists) {
+                item.qty = previousItem.qty;
+                item.comment = "";
+                cart.push(item);
+              }
+            }
+          });
+        })
+        .catch((error) => console.error(error));
+    },
+    routeToCart(table) {
+      this.addToSelectedTables(table);
+      router.push("/Cart");
+    },
+    routeToMenu(table) {
+      this.addToSelectedTables(table);
+      router.push("/Menu");
+    },
+    async invoiceNumberFetching() {
+      const tableInvoiceNumber = {
+        table: this.tableName,
+      };
+      try {
+        const result = await this.call.get(
+          "ury.ury.doctype.ury_order.ury_order.get_order_invoice",
+          tableInvoiceNumber
+        );
+        this.invoiceNumber = result.message.name;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    tableTransfer: async function () {
+      await this.invoiceNumberFetching();
+      const transferTable = {
+        table: this.tableName,
+        newTable: this.newTable,
+        invoice: this.invoiceNumber,
+      };
+      this.call
+        .post("ury.ury.doctype.ury_order.ury_order.table_transfer", transferTable)
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((error) => console.error(error));
+    },
+    captianTransfer: async function () {
+      await this.invoiceNumberFetching();
+      let captain = this.invoiceData.waiter;
+      const transferCaptain = {
+        currentCaptain: captain,
+        newCaptain: this.newCaptain,
+        invoice: this.invoiceNumber,
+      };
+      this.call
+        .post("ury.ury.doctype.ury_order.ury_order.captain_transfer", transferCaptain)
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((error) => console.error(error));
+    },
+  },
+});
+
