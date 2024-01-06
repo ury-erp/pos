@@ -15,22 +15,21 @@
       >
         <div class="flex justify-between">
           <div class="flex justify-start px-2 pt-2">
-            <Badge :type="this.table.getBadgeType(table)">
-              <svg
-                aria-hidden="true"
-                class="mr-1 h-3 w-3"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-              <span class="text-xs">{{ this.table.getBadgeText(table) }}</span>
-            </Badge>
+            <span
+              class="me-2 rounded px-2.5 py-0.5 text-sm font-medium"
+              :class="{
+                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300':
+                  this.table.getBadgeType(table) === 'default',
+                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300':
+                  this.table.getBadgeType(table) === 'red',
+                'bg-yellow-100 text-yellow-800':
+                  this.table.getBadgeType(table) === 'yellow',
+                'bg-green-100 text-green-800':
+                  this.table.getBadgeType(table) === 'green',
+              }"
+            >
+              {{ this.table.getBadgeText(table) }}
+            </span>
           </div>
           <div class="relative" v-if="table.occupied === 1">
             <button
@@ -63,7 +62,7 @@
                     >Table Transfer</a
                   >
                 </li>
-                <li>
+                <li v-if="this.auth.hasAccess">
                   <a
                     href="#"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -78,7 +77,11 @@
         <div class="flex flex-col pb-4">
           <div
             class="mt-1 text-center"
-            @click="table.occupied === 1 ? this.table.routeToMenu(table) : ''"
+            @click="
+              table.occupied === 1 && !this.auth.restrictTableOrder
+                ? this.table.routeToMenu(table)
+                : ''
+            "
           >
             <h5
               class="mt-2 text-xl font-medium text-gray-900 dark:text-white"
@@ -91,10 +94,20 @@
             }}</span>
           </div>
           <div class="mt-8 text-center" v-if="table.occupied != 1">
-            <a
-              href="#"
-              class="inline-flex rounded-lg bg-blue-700 px-3 py-2 text-center text-sm font-medium text-white"
-              @click="this.table.addToSelectedTables(table)"
+            <button
+              type="button"
+              class="inline-flex items-center rounded px-2 py-2.5 text-center text-sm font-medium text-white hover:bg-[#2557D6]/90 focus:outline-none focus:ring-4 focus:ring-[#2557D6]/50 dark:focus:ring-[#2557D6]/50"
+              :class="[
+                {
+                  'bg-blue-700': !this.auth.restrictTableOrder,
+                  'pointer-events-none bg-blue-400':
+                    this.auth.restrictTableOrder,
+                },
+              ]"
+              @click="
+                !this.auth.restrictTableOrder &&
+                  this.table.addToSelectedTables(table)
+              "
             >
               Open Table
               <svg
@@ -111,19 +124,16 @@
                   d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
                 ></path>
               </svg>
-            </a>
+            </button>
           </div>
-          <div
-            class="mt-2 flex justify-center"
-            v-if="table.occupied === 1"
-          >
-            <a
-              href="#"
-              class="inline-flex w-24 items-center rounded-lg bg-blue-700 px-2 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          <div class="mt-2 flex justify-center" v-if="table.occupied === 1">
+            <button
+              type="button"
+              class="mb-2 me-2 inline-flex items-center rounded bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-[#2557D6]/90 focus:outline-none focus:ring-4 focus:ring-[#2557D6]/50 dark:focus:ring-[#2557D6]/50"
               @click="this.invoiceData.billing(table)"
             >
               <svg
-                class="svg-icon ml-5"
+                class="svg-icon mr-2"
                 viewBox="0 0 24 24"
                 width="18"
                 height="18"
@@ -134,14 +144,24 @@
                 />
               </svg>
               Bill
-            </a>
+            </button>
             <div
-              @click="this.table.routeToCart(table)"
-              class="ml-6 inline-flex h-10 w-10 items-center rounded-full border border-blue-700 p-2.5 text-center text-sm font-medium text-blue-700 hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-500 dark:hover:text-white dark:focus:ring-blue-800"
+              class="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-500 dark:hover:text-white dark:focus:ring-blue-800"
+              :class="[
+                {
+                  'border-blue-700 text-blue-700':
+                    !this.auth.restrictTableOrder,
+                  'pointer-events-none border-blue-400 text-blue-400':
+                    this.auth.restrictTableOrder,
+                },
+              ]"
+              @click="
+                !this.auth.restrictTableOrder && this.table.routeToCart(table)
+              "
             >
               <svg
                 aria-hidden="true"
-                class="-ml-0.5 h-10 w-10"
+                class="h-10 w-6"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -166,12 +186,9 @@ import { useTableStore } from "@/stores/Table.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
 
-import { Badge } from "flowbite-vue";
 export default {
   name: "takeAwayTable",
-  components: {
-    Badge,
-  },
+
   setup() {
     const table = useTableStore();
     const invoiceData = useInvoiceDataStore();

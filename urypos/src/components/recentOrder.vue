@@ -363,12 +363,74 @@
           v-if="this.recentOrders.selectedTable === null"
           type="button"
           class="mb-2 mr-2 w-36 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-600 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-          @click="this.recentOrders.cancelInvoice()"
+          @click="this.recentOrders.showCancelInvoiceModal()"
         >
           Cancel Order
         </button>
       </div>
-
+      <div
+    v-if="this.recentOrders.cancelInvoiceFlag === true"
+    class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
+  >
+    <div class="mt-20 flex items-center justify-center">
+      <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
+        <div class="flex justify-end">
+          <span class="sr-only">Close</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            @click="this.recentOrders.cancelInvoiceFlag = false"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+        <h2
+          class="mt-1 block text-left text-xl font-medium text-gray-900 dark:text-white"
+        >
+          Are you sure to cancel
+        </h2>
+        <div class="relative">
+          <label
+            for="cancelReason"
+            class="mt-6 block text-left text-gray-900 dark:text-white"
+          >
+            Reason
+          </label>
+          <input
+            type="text"
+            id="cancelReason"
+            class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
+            v-model="this.recentOrders.cancelReason"
+          />
+        </div>
+        <div class="flex justify-end">
+          <button
+            @click="this.recentOrders.cancelInvoiceFlag = false"
+            class="mr-3 mt-6 rounded border border-gray-300 bg-gray-50 px-3 py-2"
+          >
+            No
+          </button>
+          <button
+            @click="
+              this.recentOrders.cancelInvoice();
+              this.recentOrders.cancelInvoiceFlag = false;
+            "
+            class="mt-6 rounded bg-blue-500 px-3 py-2 text-white hover:bg-blue-600"
+          >
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
       <div
         v-if="this.recentOrders.showPayment"
         class="fixed inset-0 z-10 mt-14 overflow-y-auto bg-gray-100"

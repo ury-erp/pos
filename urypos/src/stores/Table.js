@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import router from '../router';
+import router from "../router";
 import { useMenuStore } from "./Menu.js";
 import { useInvoiceDataStore } from "./invoiceData.js";
 import { useAuthStore } from "./Auth.js";
@@ -14,7 +14,7 @@ export const useTableStore = defineStore("table", {
     selectedTable: null,
     previousOrderdItem: [],
     invoiceNo: "",
-    alert:useAlert(),
+    alert: useAlert(),
     previousOrder: [],
     previousOrderdCustomer: "",
     activeTable: null,
@@ -34,10 +34,10 @@ export const useTableStore = defineStore("table", {
     captain: [],
     newCaptain: "",
     invoicePrinted: "",
-    CurrentUser: useAuthStore(),
+    auth: useAuthStore(),
     call: frappe.call(),
     db: frappe.db(),
-    totalMinutes:null,
+    totalMinutes: null,
     invoiceNumber: null,
     modifiedTime: null,
   }),
@@ -52,10 +52,10 @@ export const useTableStore = defineStore("table", {
 
   actions: {
     fetchTable() {
-      this.selectedOption = "Table"; 
+      this.selectedOption = "Table";
       this.db
         .getDocList("URY Table", {
-          fields: ["name","occupied","latest_invoice_time","is_take_away"],
+          fields: ["name", "occupied", "latest_invoice_time", "is_take_away"],
           limit: "*",
         })
         .then((docs) => {
@@ -64,7 +64,7 @@ export const useTableStore = defineStore("table", {
               numeric: true,
               sensitivity: "base",
             });
-          });  
+          });
         })
         .catch((error) => console.error(error));
     },
@@ -146,7 +146,7 @@ export const useTableStore = defineStore("table", {
         if (totalMinutes > 60) {
           return "red";
         } else {
-          return "yellow"; 
+          return "yellow";
         }
       }
     },
@@ -196,13 +196,20 @@ export const useTableStore = defineStore("table", {
         )
         .then((result) => {
           this.previousOrder = result.message;
-          this.modifiedTime = this.previousOrder.modified;
           this.invoicePrinted = this.previousOrder.invoice_printed;
+          this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
           this.invoiceNo = this.previousOrder.name;
           if (this.invoiceNo) {
-            if (this.CurrentUser.sessionUser !== this.previousOrder.waiter) {
-              this.alert.createAlert("Message","Table is assigned to " + this.previousOrder.waiter, "OK")
+            if (
+              !this.auth.hasAccess &&
+              this.auth.sessionUser !== this.previousOrder.waiter
+            ) {
+              this.alert.createAlert(
+                "Message",
+                "Table is assigned to" + this.previousOrder.waiter,
+                "OK"
+              );
               router.push("/Table").then(() => {
                 window.location.reload();
               });
@@ -275,27 +282,35 @@ export const useTableStore = defineStore("table", {
         invoice: this.invoiceNumber,
       };
       this.call
-        .post("ury.ury.doctype.ury_order.ury_order.table_transfer", transferTable)
+        .post(
+          "ury.ury.doctype.ury_order.ury_order.table_transfer",
+          transferTable
+        )
         .then(() => {
           window.location.reload();
         })
         .catch((error) => console.error(error));
     },
+    roleCheck() {},
     captianTransfer: async function () {
       await this.invoiceNumberFetching();
       let captain = this.invoiceData.waiter;
-      const transferCaptain = {
-        currentCaptain: captain,
-        newCaptain: this.newCaptain,
-        invoice: this.invoiceNumber,
-      };
-      this.call
-        .post("ury.ury.doctype.ury_order.ury_order.captain_transfer", transferCaptain)
-        .then(() => {
-          window.location.reload();
-        })
-        .catch((error) => console.error(error));
+      if (this.invoiceNumber) {
+        const transferCaptain = {
+          currentCaptain: captain,
+          newCaptain: this.newCaptain,
+          invoice: this.invoiceNumber,
+        };
+        this.call
+          .post(
+            "ury.ury.doctype.ury_order.ury_order.captain_transfer",
+            transferCaptain
+          )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => console.error(error));
+      }
     },
   },
 });
-

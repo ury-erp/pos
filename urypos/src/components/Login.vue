@@ -5,7 +5,6 @@
         <form class="space-y-6" @submit.prevent="this.auth.login">
           <div class="relative mt-1">
             <input
-              id="user_id"
               name="user_id"
               v-model="this.auth.userId"
               required
@@ -40,7 +39,6 @@
           <div class="mt-1">
             <div class="relative">
               <input
-                id="currentPassword"
                 name="currentPassword"
                 :type="this.auth.passwordFieldType"
                 v-model="this.auth.currentPassword"

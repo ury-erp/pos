@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import router from '../router';
+import router from "../router";
 import { useInvoiceDataStore } from "./invoiceData.js";
 import { useAlert } from "./Alert.js";
 import frappe from "./frappeSdk.js";
@@ -11,7 +11,7 @@ export const posOpening = defineStore("posOpen", {
     startDate: new Date(),
     formattedDateTime: null,
     postingDate: null,
-    alert:useAlert(),
+    alert: useAlert(),
     posOpencreation: true,
     currentDate: new Date(),
     posOpenSaved: false,
@@ -61,7 +61,7 @@ export const posOpening = defineStore("posOpen", {
           if (error._server_messages) {
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);
-            this.alert.createAlert("Message",message.message, "OK")
+            this.alert.createAlert("Message", message.message, "OK");
           }
         });
     },
@@ -99,9 +99,6 @@ export const posOpening = defineStore("posOpen", {
       const month = String(this.currentDate.getMonth() + 1).padStart(2, "0");
       const day = String(this.currentDate.getDate()).padStart(2, "0");
       this.postingDate = `${year}-${month}-${day}`;
-    },
-    changePaidAmount(mode) {
-      // console.log(mode);
     },
     deleteRow(index) {
       this.invoiceData.modeOfPaymentList.splice(index, 1);

@@ -23,12 +23,11 @@
         </div>
         <input
           type="text"
-          id="customerName"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Search Customers"
           v-model="this.customers.search"
           @input="this.customers.pickCustomer()"
-          @click="this.customers.showCustomers = true"
+          @click="this.customers.showCustomers = true;this.customers.showAddNewCustomer= true"
           required
         />
 
@@ -49,7 +48,7 @@
               {{ customer.name }}
             </h1>
             <h2 class="text-sm leading-normal">
-              {{ customer.name }} 
+              {{ customer.name }}
               {{
                 customer.content
                   ? this.customers.extractName(customer.content)
@@ -62,8 +61,7 @@
               href="#"
               class="mt-4 inline-flex items-center text-blue-600 hover:underline"
               @click.prevent="
-                this.customers.showModalNewCustomer = true;
-                this.customers.newCustomerData(this.customers.search);
+                this.customers.newCustomerData(this.customers.search)
               "
             >
               <svg
@@ -87,28 +85,28 @@
       </div>
       <div
         v-if="this.customers.showModalNewCustomer"
-        class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
+        class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
       >
-        <div class="mt-3 flex items-center justify-center">
+        <div class="mt-10 flex items-center justify-center">
           <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
             <div class="flex justify-end">
-          <span class="sr-only">Close</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            @click="this.customers.showModalNewCustomer = false"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </div>
+              <span class="sr-only">Close</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                @click="this.customers.showModalNewCustomer = false"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
 
             <h2
               class="mt-1 block text-left text-xl font-medium text-gray-900 dark:text-white"
@@ -149,7 +147,7 @@
               </label>
               <input
                 type="text"
-                id="customer_name"
+                id="customerGroup"
                 class="mt-4 w-full rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 v-model="this.customers.customerGroup"
                 @click="
@@ -185,7 +183,7 @@
               </label>
               <input
                 type="text"
-                id="customer_name"
+                id="territory"
                 class="mt-4 w-full rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 v-model="this.customers.customerTerritory"
                 @click="
@@ -272,7 +270,7 @@
       >
         <img />
         <div
-          class="cart-item-details  sm:min-w-none grid w-full min-w-0 grid-cols-4 gap-2 py-2 sm:w-full md:w-full lg:w-full"
+          class="cart-item-details sm:min-w-none grid w-full min-w-0 grid-cols-4 gap-2 py-2 sm:w-full md:w-full lg:w-full"
         >
           <h3>{{ item.item_name }}</h3>
 

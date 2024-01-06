@@ -19,12 +19,15 @@ export const useAuthStore = defineStore("auth", {
     table: useTableStore(),
     menu: useMenuStore(),
     invoiceData: useInvoiceDataStore(),
-    userRole: [],
+    cashier: null,
+    restrictTableOrder:null,
     alert: useAlert(),
     sessionUser: "",
     userAuth: localStorage.getItem("userAuth"),
     activeDropdown: false,
     userName: "",
+    hasAccess: false,
+    userRole: [],
     auth: frappe.auth(),
     db: frappe.db(),
     call: frappe.call(),
@@ -82,9 +85,10 @@ export const useAuthStore = defineStore("auth", {
             localStorage.removeItem("userAuth", "true");
           } else {
             this.table.fetchTable();
-            this.invoiceData.fetchInvoiceDetails();
+            this.invoiceData.fetchInvoiceDetails().then(() => {
+              this.fetchUserRole();
+            });
             this.menu.fetchItems();
-            this.fetchUserRole();
             const currentUrl = window.location.href;
             const urlParts = currentUrl.split("/");
             const desiredPart = urlParts[urlParts.length - 1];
@@ -105,12 +109,38 @@ export const useAuthStore = defineStore("auth", {
       this.db
         .getDoc("User", this.sessionUser)
         .then((doc) => {
-          doc.roles.forEach((item) => {
-            if (item.role === "URY Captain") {
-              this.userRole = "Order Taker";
-            }
-          });
+          this.userRole = doc.roles.map((item) => item.role);
+          const getPosProfile = {
+            doctype: "POS Profile",
+            name: this.invoiceData.posProfile,
+          };
+          this.call
+            .get("frappe.client.get", getPosProfile)
+            .then((result) => {
+              var billingRoles = result.message.role_allowed_for_billing.map(
+                (role) => role.role
+              );
+              this.cashier = billingRoles.some((role) =>
+                this.userRole.includes(role)
+              );
+
+              var transferRoles = result.message.transfer_role_permissions.map(
+                (role) => role.role
+              );
+              this.hasAccess = transferRoles.some((role) =>
+                this.userRole.includes(role)
+              );
+              var restrictOrder =
+                result.message.role_restricted_for_table_order_.map(
+                  (role) => role.role
+                );
+              this.restrictTableOrder = restrictOrder.some((role) =>
+                this.userRole.includes(role)
+              );
+            })
+            .catch((error) => console.error(error));
         })
+
         .catch((error) => console.error(error));
     },
     isPosOpenChecking() {

@@ -71,6 +71,7 @@ export const useCustomerStore = defineStore("customers", {
       this.showCustomersTerritory = false;
     },
     newCustomerData(name) {
+      this.showModalNewCustomer = true;
       if (!isNaN(parseFloat(name)) && isFinite(name)) {
         this.newCustomerMobileNo = name;
       } else if (typeof name === "string") {

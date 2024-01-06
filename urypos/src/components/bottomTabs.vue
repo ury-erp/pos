@@ -1,4 +1,3 @@
-
 <template>
   <div
     class="fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700"
@@ -9,17 +8,24 @@
       class="mx-auto grid h-full max-w-lg font-medium"
       :class="[
         {
-          'grid-cols-4': auth.userRole === 'Order Taker',
-          'grid-cols-5': auth.userRole !== 'Order Taker',
+          'grid-cols-4': !auth.cashier,
+          'grid-cols-5': auth.cashier,
         },
       ]"
     >
       <router-link
         to="/Table"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+        @click="activeTab = 'Table'"
       >
         <svg
-          class="h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Table',
+              'text-blue-600': activeTab === 'Table',
+            },
+          ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +37,13 @@
         </svg>
 
         <span
-          class="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Table',
+              'text-blue-600': activeTab === 'Table',
+            },
+          ]"
           >Table</span
         >
       </router-link>
@@ -39,9 +51,16 @@
       <router-link
         to="/Menu"
         class="group inline-flex flex-col items-center justify-center border-r border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+        @click="activeTab = 'Menu'"
       >
         <svg
-          class="h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Menu',
+              'text-blue-600': activeTab === 'Menu',
+            },
+          ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -55,16 +74,29 @@
         </svg>
 
         <span
-          class="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Menu',
+              'text-blue-600': activeTab === 'Menu',
+            },
+          ]"
           >Menu</span
         ></router-link
       >
       <router-link
         to="/Customer"
         class="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
+        @click="activeTab = 'Customer'"
       >
         <svg
-          class="h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Customer',
+              'text-blue-600': activeTab === 'Customer',
+            },
+          ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -78,17 +110,30 @@
         </svg>
 
         <span
-          class="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Customer',
+              'text-blue-600': activeTab === 'Customer',
+            },
+          ]"
           >Customer</span
         ></router-link
       >
       <router-link
         to="/Cart"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+        @click="activeTab = 'Order'"
       >
         <svg
           aria-hidden="true"
-          class="h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Order',
+              'text-blue-600': activeTab === 'Order',
+            },
+          ]"
+          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -99,17 +144,30 @@
         </svg>
 
         <span
-          class="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'Order',
+              'text-blue-600': activeTab === 'Order',
+            },
+          ]"
           >Order</span
         >
       </router-link>
       <router-link
         to="/recentOrder"
-        v-if="this.auth.userRole !== 'Order Taker'"
+        v-if="this.auth.cashier"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+        @click="activeTab = 'recentOrder'"
       >
         <svg
-          class="h-5 w-5 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-5 w-5 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'recentOrder',
+              'text-blue-600': activeTab === 'recentOrder',
+            },
+          ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -124,15 +182,19 @@
         </svg>
 
         <span
-          class="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          :class="[
+            {
+              'text-gray-500': activeTab !== 'recentOrder',
+              'text-blue-600': activeTab === 'recentOrder',
+            },
+          ]"
           >OrderLog</span
         >
       </router-link>
     </div>
   </div>
 </template>
-
-
 
 <script>
 import { useAuthStore } from "@/stores/Auth.js";

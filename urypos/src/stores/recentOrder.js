@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import router from '../router';
+import router from "../router";
 import moment from "moment";
 import { useMenuStore } from "./Menu.js";
 import { useCustomerStore } from "./Customer.js";
@@ -13,7 +13,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     recentOrderList: [],
     selectedStatus: "Draft",
     searchOrder: "",
-    alert:useAlert(),
+    alert: useAlert(),
     showOrder: false,
     selectedOrder: null,
     recentOrderListItems: [],
@@ -43,6 +43,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     setBackground: null,
     selectedTable: null,
     billAmount: 0,
+    cancelInvoiceFlag: false,
+    invoicePrinted: null,
+    cancelReason: null,
     call: frappe.call(),
   }),
   getters: {
@@ -85,11 +88,10 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         .get("ury.ury_pos.api.getPosInvoice", recentOrder)
         .then((result) => {
           this.recentOrderList = result.message;
-         
         })
         .catch((error) => console.error(error));
     },
-    
+
     matchesSearchOrder(order) {
       const query = this.searchOrder.toLowerCase();
       const name = order.name.toLowerCase();
@@ -125,10 +127,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         invoice: this.invoiceNumber,
       };
       this.call
-        .get(
-          "ury.ury_pos.api.getPosInvoiceItems",
-          getPosInvoiceItems
-        )
+        .get("ury.ury_pos.api.getPosInvoiceItems", getPosInvoiceItems)
         .then((result) => {
           this.recentOrderListItems = result.message[0];
           this.texDetails = result.message[1];
@@ -192,7 +191,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         .catch((error) => console.error(error));
     },
     billing: async function () {
-      this.showPayment = true;
       this.call
         .get("ury.ury_pos.api.getModeOfPayment")
         .then((result) => {
@@ -212,9 +210,21 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.customerNameForBilling = this.pastOrder.customer;
           this.posProfile = this.pastOrder.pos_profile;
           this.table = this.pastOrder.restaurant_table;
+          this.invoicePrinted = this.pastOrder.invoice_printed;
+          if (this.invoicePrinted === 0) {
+            this.alert.createAlert(
+              "Alert",
+              "Please Print Invoice before Payment",
+              "OK"
+            );
+            this.isLoading = false;
+          } else {
+            this.showPayment = true;
+          }
         })
         .catch((error) => console.error(error));
     },
+
     calculatePaidAmount(paymentMethod) {
       this.billAmount = this.grandTotal;
       if (this.billAmount - this.total > 0) {
@@ -231,14 +241,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             amount: this.paymentMethod,
           };
           this.payments.push(paidAmount);
-          
         }
       }
     },
     changePaidAmount(name, value) {
       this.modeOfPaymentName = name;
       this.paidAmount = parseFloat(value);
-      if (this.billAmount - this.total > 0) {
+      if (this.paidAmount > 0) {
         let existingEntryIndex = this.payments.findIndex(
           (entry) => entry.mode_of_payment === this.modeOfPaymentName
         );
@@ -253,19 +262,32 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         }
       }
     },
+
     //Making Payment
     makePayment: async function () {
-        this.isLoading = true;
-        const invoicePayment = {
-          table: this.selectedTable,
-          invoice: this.invoiceNumber,
-          customer: this.customerNameForBilling,
-          cashier: this.useInvoiceDataStore.cashier,
-          payments: this.payments,
-          pos_profile: this.posProfile,
-        };
+      this.isLoading = true;
+      const invoicePayment = {
+        table: this.selectedTable,
+        invoice: this.invoiceNumber,
+        customer: this.customerNameForBilling,
+        cashier: this.useInvoiceDataStore.cashier,
+        payments: this.payments,
+        pos_profile: this.posProfile,
+      };
+
+      let pay = this.payments;
+      let amount = pay.reduce((total, obj) => obj.amount + total, 0);
+      let r_total = this.grandTotal;
+      let diff = r_total - amount;
+      if (diff > 5) {
+        this.alert.createAlert("Message", "Round Off Limit Exceeded", "OK");
+        this.isLoading = false;
+      } else {
         this.call
-          .post("ury.ury.doctype.ury_order.ury_order.make_invoice", invoicePayment)
+          .post(
+            "ury.ury.doctype.ury_order.ury_order.make_invoice",
+            invoicePayment
+          )
           .then(() => {
             this.notification.createNotification("Payment Completed");
             window.location.reload();
@@ -276,15 +298,37 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             this.isLoading = false;
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);
-            this.alert.createAlert("Message",message.message, "OK")
+            this.alert.createAlert("Message", message.message, "OK");
             window.location.reload();
-            
           });
+      }
+    },
+    showCancelInvoiceModal() {
+      this.call
+        .get("ury.ury.api.button_permission.cancel_check")
+        .then((result) => {
+          if (result.message === true) {
+            this.cancelInvoiceFlag = true;
+            this.cancelReason = "";
+          } else {
+            this.alert.createAlert(
+              "Message",
+              "You don't Have Permission to Cancel ",
+              "OK"
+            );
+            this.cancelInvoiceFlag = false;
+            this.cancelReason = "";
+          }
+        })
+        .catch((error) => {
+          // console.error(error)
+        });
     },
 
     cancelInvoice: async function () {
       const updatedFields = {
         invoice_id: this.invoiceNumber,
+        reason: this.cancelReason,
       };
       this.call
         .post("ury.ury.doctype.ury_order.ury_order.cancel_order", updatedFields)
@@ -297,6 +341,5 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     toggleRecentOrders() {
       router.push("/recentOrder");
     },
-    
   },
 });

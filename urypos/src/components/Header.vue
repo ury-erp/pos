@@ -1,15 +1,18 @@
 <template>
   <div
-    class="mb-16 border-2 border-b-gray-200 border-l-white border-r-white border-t-white p-2"
+    class="mb-12 lg:mb-16 border-2 border-b-gray-200 border-l-white border-r-white border-t-white p-2"
   >
     <nav
       class="fixed left-0 top-0 z-20 w-full border-b border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-900"
     >
-      <div class="flex flex-wrap items-center justify-between p-4">
+      <div class="mx-auto flex  max-w-screen-2xl flex-wrap items-center justify-between p-4 ">
+        <div >
+        
         <a href="/urypos/Table">
-          <img :src="imagePath" alt="Flowbite logo" class="h-12 w-44" />
+          <img :src="imagePath" alt="Flowbite logo" class="w-32 lg:w-44" />
         </a>
-        <div class="flex md:order-2" v-if="!isLoginPage">
+      </div>
+        <div  v-if="!isLoginPage">
           <button
             type="button"
             class="flex rounded-full bg-gray-400 text-sm focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-400 md:mr-0"
@@ -21,25 +24,29 @@
             ref="dropdownButton"
           >
             <div
-              class="avatar h-10 w-10"
+              class="relative inline-flex h-8 lg:h-11 lg:w-11 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600"
               v-if="this.auth.sessionUser.includes('_')"
             >
-              <h1 class="mt-2">
-                {{ this.auth.sessionUser.charAt(0).toUpperCase()
+              <span class="font-medium text-gray-900 dark:text-gray-300"
+                >{{ this.auth.sessionUser.charAt(0).toUpperCase()
                 }}{{
                   this.auth.sessionUser
                     .charAt(this.auth.sessionUser.indexOf("_") + 1)
                     .toUpperCase()
-                }}
-              </h1>
-            </div>
-            <div class="avatar h-10 w-10" v-else>
-              <h1 class="mt-2">
-                {{ this.auth.sessionUser.charAt(0).toUpperCase() }}
-              </h1>
+                }}</span
+              >
             </div>
             <div
-              class="absolute right-4 mt-11 w-36 divide-y divide-gray-100 rounded-lg bg-white text-left shadow dark:bg-gray-700"
+              class="relative inline-flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600"
+              v-else
+            >
+              <span class="font-medium text-gray-900 dark:text-gray-300">{{
+                this.auth.sessionUser.charAt(0).toUpperCase()
+              }}</span>
+            </div>
+
+            <div
+              class="absolute right-4  lg:right-auto  mt-11 w-36 divide-y divide-gray-100 rounded-lg bg-white text-left shadow dark:bg-gray-700"
               v-show="this.auth.activeDropdown"
             >
               <ul>
@@ -50,7 +57,7 @@
                     {{ this.auth.getLoginAvatar() }}
                   </h1>
                 </li>
-                <li>
+                <li v-if="this.auth.cashier">
                   <a
                     href="#"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -58,7 +65,7 @@
                     >POS Opening</a
                   >
                 </li>
-                <li>
+                <li v-if="this.auth.cashier">
                   <a
                     href="#"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -79,10 +86,10 @@
             </div>
           </button>
         </div>
+        
       </div>
     </nav>
   </div>
-  
 </template>
 
 <script>
@@ -97,7 +104,7 @@ export default {
     const auth = useAuthStore();
     const posOpen = posOpening();
     const posClose = posClosing();
-    return { auth,  posOpen, posClose };
+    return { auth, posOpen, posClose };
   },
   data() {
     return {

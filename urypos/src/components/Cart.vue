@@ -15,7 +15,8 @@
     </button> -->
     <button
       class="rounded px-4 py-2 shadow"
-      @click="this.invoiceData.cancelInvoice()"
+      @click="this.invoiceData.showCancelInvoiceModal()"
+     
     >
       Cancel
     </button>
@@ -102,10 +103,76 @@
   </div>
 
   <div
+    v-if="this.invoiceData.cancelInvoiceFlag === true"
+    class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
+  >
+    <div class="mt-20 flex items-center justify-center">
+      <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
+        <div class="flex justify-end">
+          <span class="sr-only">Close</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            @click="this.invoiceData.cancelInvoiceFlag = false"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+        <h2
+          class="mt-1 block text-left text-xl font-medium text-gray-900 dark:text-white"
+        >
+          Are you sure to cancel
+        </h2>
+        <div class="relative">
+          <label
+            for="cancelReason"
+            class="mt-6 block text-left text-gray-900 dark:text-white"
+          >
+            Reason
+          </label>
+          <input
+            type="text"
+            id="cancelReason"
+            class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
+            v-model="this.invoiceData.cancelReason"
+          />
+        </div>
+        <div class="flex justify-end">
+          <button
+            @click="this.invoiceData.cancelInvoiceFlag = false"
+            class="mr-3 mt-6 rounded border border-gray-300 bg-gray-50 px-3 py-2"
+          >
+            No
+          </button>
+          <button
+            @click="
+              this.invoiceData.cancelInvoice();
+              this.invoiceData.cancelInvoiceFlag = false;
+            "
+            class="mt-6 rounded bg-blue-500 px-3 py-2 text-white hover:bg-blue-600"
+          >
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div
     v-if="menu.showDialogCart"
     class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
   >
-    <div class="mt-3 flex items-center justify-center">
+    <div class="mt-10 flex items-center justify-center">
       <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
         <div class="flex justify-end">
           <span class="sr-only">Close</span>
