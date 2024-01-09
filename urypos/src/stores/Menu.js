@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useInvoiceDataStore } from "./invoiceData.js";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
+import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
 
 export const useMenuStore = defineStore("menu", {
@@ -14,11 +15,14 @@ export const useMenuStore = defineStore("menu", {
     currentPage: 1,
     perPage: 20,
     comments: "",
+    invoiceData : useInvoiceDataStore(),
+    auth: useAuthStore(),
     notification: useNotifications(),
     showDialog: false,
     showDialogCart: false,
     quantity: "",
     item: [],
+    table :useTableStore(),
     itemComments: "",
     call: frappe.call(),
   }),
@@ -64,10 +68,18 @@ export const useMenuStore = defineStore("menu", {
   },
   actions: {
     fetchItems() {
+      const getMenu = {
+        pos_profile:this.invoiceData.posProfile
+      };
       this.call
-        .get("ury.ury_pos.api.getRestaurantMenu")
+        .get("ury.ury_pos.api.getRestaurantMenu",getMenu)
         .then((result) => {
-          this.items = result.message;
+          if (!this.auth.cashier && this.table.tableMenu){
+            this.items=this.table.tableMenu
+          }else{
+            this.items = result.message;
+            
+          }
           this.items.forEach((menuItem) => {
             if (menuItem.special_dish == 1) {
               this.showPriority = true;
@@ -119,7 +131,7 @@ export const useMenuStore = defineStore("menu", {
     addToCart(item) {
       const itemIndex = this.cart.findIndex((obj) => obj.item === item.item);
       const itemIndexExists = itemIndex !== -1;
-      const invoiceData = useInvoiceDataStore();
+      
       if (!itemIndexExists) {
         item.qty = 1;
         item.comment = "";
@@ -132,10 +144,8 @@ export const useMenuStore = defineStore("menu", {
     incrementItemQuantity(item) {
       const itemIndex = this.cart.findIndex((obj) => obj.item === item.item);
       const itemIndexExists = itemIndex !== -1;
-      const invoiceData = useInvoiceDataStore();
-      const posProfile = invoiceData.posProfile;
-      const table = useTableStore();
-      let previousOrderItem = table.previousOrderdItem;
+      const posProfile = this.invoiceData.posProfile;
+      let previousOrderItem = this.table.previousOrderdItem;
       // Check if item exists in previous orders
       const previousItem = previousOrderItem.find(
         (previous_item) => previous_item.item_code === item.item

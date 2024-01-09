@@ -20,7 +20,7 @@ export const useAuthStore = defineStore("auth", {
     menu: useMenuStore(),
     invoiceData: useInvoiceDataStore(),
     cashier: null,
-    restrictTableOrder:null,
+    restrictTableOrder: null,
     alert: useAlert(),
     sessionUser: "",
     userAuth: localStorage.getItem("userAuth"),
@@ -88,7 +88,6 @@ export const useAuthStore = defineStore("auth", {
             this.invoiceData.fetchInvoiceDetails().then(() => {
               this.fetchUserRole();
             });
-            this.menu.fetchItems();
             const currentUrl = window.location.href;
             const urlParts = currentUrl.split("/");
             const desiredPart = urlParts[urlParts.length - 1];
@@ -123,7 +122,9 @@ export const useAuthStore = defineStore("auth", {
               this.cashier = billingRoles.some((role) =>
                 this.userRole.includes(role)
               );
-
+              if (this.cashier) {
+                this.menu.fetchItems();
+              }
               var transferRoles = result.message.transfer_role_permissions.map(
                 (role) => role.role
               );

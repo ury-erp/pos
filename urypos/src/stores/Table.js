@@ -27,6 +27,8 @@ export const useTableStore = defineStore("table", {
     newTable: "",
     showTable: false,
     searchTable: [],
+    menu: useMenuStore(),
+    tableMenu: [],
     activeDropdown: null,
     tableName: "",
     showModalCaptainTransfer: false,
@@ -166,8 +168,10 @@ export const useTableStore = defineStore("table", {
         }
       }
     },
-    addToSelectedTables(table) {
+    async addToSelectedTables(table) {
+
       this.selectedTable = table.name;
+      await this.getMenu();
       if (this.activeTable === table) {
         this.activeTable = null;
       } else {
@@ -179,12 +183,11 @@ export const useTableStore = defineStore("table", {
       let previousOrderdNumberOfPax = "";
       this.previousOrderdItem = "";
       this.invoiceNo = "";
-      const menu = useMenuStore();
-      let items = menu.items;
+      let items = this.tableMenu;
       items.forEach((item) => {
         item.qty = "";
       });
-      let cart = menu.cart;
+      let cart = this.menu.cart;
       cart.splice(0, cart.length);
       const getPreviousOrder = {
         table: this.selectedTable,
@@ -249,6 +252,7 @@ export const useTableStore = defineStore("table", {
               }
             }
           });
+         
         })
         .catch((error) => console.error(error));
     },
@@ -259,6 +263,28 @@ export const useTableStore = defineStore("table", {
     routeToMenu(table) {
       this.addToSelectedTables(table);
       router.push("/Menu");
+    },
+    async getMenu() {
+      const getMenu = {
+        table: this.selectedTable,
+        pos_profile:this.invoiceData.posProfile
+      };
+      try {
+        await this.call
+          .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
+          .then((result) => {
+            this.tableMenu = result.message;
+            this.menu.fetchItems()
+          });
+      } catch (error) {
+        console.error(error);
+      }
+      // this.call
+      //   .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
+      //   .then((result) => {
+      //     this.menu.fetchItems()
+      //     this.tableMenu = result.message;
+      //   });
     },
     async invoiceNumberFetching() {
       const tableInvoiceNumber = {
