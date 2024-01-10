@@ -4,6 +4,8 @@ import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
 import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
+import { useAlert } from "./Alert.js";
+
 
 export const useMenuStore = defineStore("menu", {
   state: () => ({
@@ -15,14 +17,15 @@ export const useMenuStore = defineStore("menu", {
     currentPage: 1,
     perPage: 20,
     comments: "",
-    invoiceData : useInvoiceDataStore(),
+    alert: useAlert(),
+    invoiceData: useInvoiceDataStore(),
     auth: useAuthStore(),
     notification: useNotifications(),
+    table: useTableStore(),
     showDialog: false,
     showDialogCart: false,
     quantity: "",
     item: [],
-    table :useTableStore(),
     itemComments: "",
     call: frappe.call(),
   }),
@@ -69,16 +72,15 @@ export const useMenuStore = defineStore("menu", {
   actions: {
     fetchItems() {
       const getMenu = {
-        pos_profile:this.invoiceData.posProfile
+        pos_profile: this.invoiceData.posProfile,
       };
       this.call
-        .get("ury.ury_pos.api.getRestaurantMenu",getMenu)
+        .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
         .then((result) => {
-          if (!this.auth.cashier && this.table.tableMenu){
-            this.items=this.table.tableMenu
-          }else{
+          if (!this.auth.cashier && this.table.tableMenu) {
+            this.items = this.table.tableMenu;
+            } else {
             this.items = result.message;
-            
           }
           this.items.forEach((menuItem) => {
             if (menuItem.special_dish == 1) {
@@ -87,9 +89,13 @@ export const useMenuStore = defineStore("menu", {
           });
         })
         .catch((error) => {
-          console.error(error);
+          if (error._server_messages) {
+            const messages = JSON.parse(error._server_messages);
+            const message = JSON.parse(messages[0]);
+            this.alert.createAlert("Message", message.message, "OK");
+          }
         });
-    },
+    }, 
     updateSearchTerm() {
       this.currentPage = 1;
     },
@@ -98,7 +104,7 @@ export const useMenuStore = defineStore("menu", {
       this.updateSearchTerm();
     },
     clearSearch(event) {
-      event.target.value=""
+      event.target.value = "";
       this.searchTerm = "";
       this.showAll = true;
     },
@@ -131,7 +137,7 @@ export const useMenuStore = defineStore("menu", {
     addToCart(item) {
       const itemIndex = this.cart.findIndex((obj) => obj.item === item.item);
       const itemIndexExists = itemIndex !== -1;
-      
+
       if (!itemIndexExists) {
         item.qty = 1;
         item.comment = "";

@@ -109,24 +109,6 @@ export default {
     const auth = useAuthStore();
     return { auth };
   },
-  data() {
-    return {
-      user_id: "",
-      pass_word: "",
-      show_password: false,
-    };
-  },
-  // computed: {
-  //   passwordFieldType() {
-  //     return this.show_password ? "text" : "password";
-  //   },
-  // },
-  methods: {
-    login() {
-      let user_id = this.user_id;
-      let pass_word = this.pass_word;
-      this.$emit("login", { pass_word, user_id });
-    },
-  },
+  
 };
 </script>

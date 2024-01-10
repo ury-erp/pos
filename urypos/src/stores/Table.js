@@ -169,7 +169,6 @@ export const useTableStore = defineStore("table", {
       }
     },
     async addToSelectedTables(table) {
-
       this.selectedTable = table.name;
       await this.getMenu();
       if (this.activeTable === table) {
@@ -210,7 +209,7 @@ export const useTableStore = defineStore("table", {
             ) {
               this.alert.createAlert(
                 "Message",
-                "Table is assigned to" + this.previousOrder.waiter,
+                "Table is assigned to " + this.previousOrder.waiter,
                 "OK"
               );
               router.push("/Table").then(() => {
@@ -252,7 +251,6 @@ export const useTableStore = defineStore("table", {
               }
             }
           });
-         
         })
         .catch((error) => console.error(error));
     },
@@ -265,26 +263,24 @@ export const useTableStore = defineStore("table", {
       router.push("/Menu");
     },
     async getMenu() {
-      const getMenu = {
+      const getMenuIem = {
         table: this.selectedTable,
-        pos_profile:this.invoiceData.posProfile
+        pos_profile: this.invoiceData.posProfile,
       };
       try {
         await this.call
-          .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
+          .get("ury.ury_pos.api.getRestaurantMenu", getMenuIem)
           .then((result) => {
             this.tableMenu = result.message;
-            this.menu.fetchItems()
+            this.menu.fetchItems();
           });
       } catch (error) {
-        console.error(error);
+        if (error._server_messages) {
+          const messages = JSON.parse(error._server_messages);
+          const message = JSON.parse(messages[0]);
+          this.alert.createAlert("Message", message.message, "OK");
+        }
       }
-      // this.call
-      //   .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
-      //   .then((result) => {
-      //     this.menu.fetchItems()
-      //     this.tableMenu = result.message;
-      //   });
     },
     async invoiceNumberFetching() {
       const tableInvoiceNumber = {
@@ -297,7 +293,7 @@ export const useTableStore = defineStore("table", {
         );
         this.invoiceNumber = result.message.name;
       } catch (error) {
-        console.error(error);
+        console.error(error._server_messages);
       }
     },
     tableTransfer: async function () {
@@ -317,7 +313,6 @@ export const useTableStore = defineStore("table", {
         })
         .catch((error) => console.error(error));
     },
-    roleCheck() {},
     captianTransfer: async function () {
       await this.invoiceNumberFetching();
       let captain = this.invoiceData.waiter;
@@ -332,7 +327,8 @@ export const useTableStore = defineStore("table", {
             "ury.ury.doctype.ury_order.ury_order.captain_transfer",
             transferCaptain
           )
-          .then(() => {
+          .then((doc) => {
+            console.log(doc,"doc")
             window.location.reload();
           })
           .catch((error) => console.error(error));

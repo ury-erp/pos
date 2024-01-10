@@ -84,6 +84,8 @@ export const useAuthStore = defineStore("auth", {
             this.userAuth = false;
             localStorage.removeItem("userAuth", "true");
           } else {
+            this.userAuth = true;
+            router.push("/Table")
             this.table.fetchTable();
             this.invoiceData.fetchInvoiceDetails().then(() => {
               this.fetchUserRole();
@@ -132,7 +134,7 @@ export const useAuthStore = defineStore("auth", {
                 this.userRole.includes(role)
               );
               var restrictOrder =
-                result.message.role_restricted_for_table_order_.map(
+                result.message.role_restricted_for_table_order.map(
                   (role) => role.role
                 );
               this.restrictTableOrder = restrictOrder.some((role) =>

@@ -1,5 +1,12 @@
 <template>
-  <Search />
+    <div
+    class="flex h-screen items-center justify-center"
+    v-if="this.menu.paginatedItems.length === 0"
+  >
+    <div class="text-center">Please select a table Or Set an active menu</div>
+  </div>
+
+  <Search v-if="this.menu.paginatedItems.length > 0" />
   <div class="container mx-auto" v-if="this.menu.paginatedItems.length > 0">
     <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
       <div
