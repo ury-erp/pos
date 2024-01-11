@@ -376,7 +376,7 @@
           type="text"
           id="newTable"
           class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
-          :value="invoiceData.waiter"
+          :value="this.table.currentCaptain"
           readonly
         />
         <div class="flex justify-end">

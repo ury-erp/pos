@@ -90,9 +90,6 @@ export const useCustomerStore = defineStore("customers", {
         if (!this.newCustomerMobileNo) {
           missingFields.push("Mobile Number");
         }
-        if (!this.newCustomerMobileNo) {
-          missingFields.push("Mobile Number");
-        }
         if (!this.customerGroup) {
           missingFields.push("Customer Group");
         }

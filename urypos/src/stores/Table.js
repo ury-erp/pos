@@ -17,7 +17,6 @@ export const useTableStore = defineStore("table", {
     alert: useAlert(),
     previousOrder: [],
     previousOrderdCustomer: "",
-    activeTable: null,
     invoiceData: useInvoiceDataStore(),
     grandTotal: "",
     notification: useNotifications(),
@@ -30,6 +29,7 @@ export const useTableStore = defineStore("table", {
     menu: useMenuStore(),
     tableMenu: [],
     activeDropdown: null,
+    currentCaptain: null,
     tableName: "",
     showModalCaptainTransfer: false,
     showCaptain: false,
@@ -93,13 +93,14 @@ export const useTableStore = defineStore("table", {
         })
         .catch((error) => console.error(error));
     },
-    toggleDropdown(index) {
+    async toggleDropdown(index) {
       this.tableName = index;
       if (this.activeDropdown === index) {
         this.activeDropdown = null;
       } else {
         this.activeDropdown = index;
       }
+      await this.invoiceNumberFetching();
     },
     hideDropdown() {
       this.activeDropdown = null;
@@ -137,11 +138,11 @@ export const useTableStore = defineStore("table", {
       return formattedTimeDifference;
     },
     getBadgeType(table) {
-      if (table.occupied != 1 && table !== this.activeTable) {
+      if (table.occupied != 1 && table.name !== this.selectedTable) {
         return "green";
-      } else if (table === this.activeTable) {
+      } else if (table.name === this.selectedTable) {
         return "default";
-      } else if (table.occupied === 1 && table !== this.activeTable) {
+      } else if (table.occupied === 1 && table.name !== this.selectedTable) {
         const timeDifference = this.getTimeDifference(table);
         const [hours, minutes] = timeDifference.split(":");
         const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
@@ -153,11 +154,11 @@ export const useTableStore = defineStore("table", {
       }
     },
     getBadgeText(table) {
-      if (table.occupied != 1 && table !== this.activeTable) {
+      if (table.occupied != 1 && table.name !== this.selectedTable) {
         return "Free";
-      } else if (table === this.activeTable) {
+      } else if (table.name === this.selectedTable) {
         return "Active";
-      } else if (table.occupied === 1 && table !== this.activeTable) {
+      } else if (table.occupied === 1 && table.name !== this.selectedTable) {
         const timeDifference = this.getTimeDifference(table);
         const [hours, minutes] = timeDifference.split(":");
         const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
@@ -171,11 +172,7 @@ export const useTableStore = defineStore("table", {
     async addToSelectedTables(table) {
       this.selectedTable = table.name;
       await this.getMenu();
-      if (this.activeTable === table) {
-        this.activeTable = null;
-      } else {
-        this.activeTable = table;
-      }
+
       if (table.is_take_away === 1) {
         this.isTakeAway = "Take Away";
       }
@@ -207,13 +204,14 @@ export const useTableStore = defineStore("table", {
               !this.auth.hasAccess &&
               this.auth.sessionUser !== this.previousOrder.waiter
             ) {
-              this.alert.createAlert(
+             this.alert.createAlert(
                 "Message",
                 "Table is assigned to " + this.previousOrder.waiter,
                 "OK"
-              );
-              router.push("/Table").then(() => {
-                window.location.reload();
+              ).then(() => {
+                router.push("/Table").then(() => {
+                  window.location.reload();
+                });
               });
             } else {
               this.notification.createNotification("Past Order Fetched");
@@ -292,6 +290,7 @@ export const useTableStore = defineStore("table", {
           tableInvoiceNumber
         );
         this.invoiceNumber = result.message.name;
+        this.currentCaptain = result.message.waiter;
       } catch (error) {
         console.error(error._server_messages);
       }
@@ -315,10 +314,9 @@ export const useTableStore = defineStore("table", {
     },
     captianTransfer: async function () {
       await this.invoiceNumberFetching();
-      let captain = this.invoiceData.waiter;
       if (this.invoiceNumber) {
         const transferCaptain = {
-          currentCaptain: captain,
+          currentCaptain: this.currentCaptain,
           newCaptain: this.newCaptain,
           invoice: this.invoiceNumber,
         };
@@ -327,10 +325,12 @@ export const useTableStore = defineStore("table", {
             "ury.ury.doctype.ury_order.ury_order.captain_transfer",
             transferCaptain
           )
-          .then((doc) => {
-            console.log(doc,"doc")
-            window.location.reload();
-          })
+          .then(() =>
+            this.notification.createNotification(
+              "Captain Transferred Successfully"
+            )
+          )
+          .then(() => window.location.reload())
           .catch((error) => console.error(error));
       }
     },

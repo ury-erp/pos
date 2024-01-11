@@ -1,12 +1,5 @@
 <template>
-    <div
-    class="flex h-screen items-center justify-center"
-    v-if="this.menu.paginatedItems.length === 0"
-  >
-    <div class="text-center">Please select a table Or Set an active menu</div>
-  </div>
-
-  <Search v-if="this.menu.paginatedItems.length > 0" />
+  <Search/>
   <div class="container mx-auto" v-if="this.menu.paginatedItems.length > 0">
     <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
       <div
@@ -128,7 +121,14 @@
       </div>
     </div>
   </div>
-
+  <div v-else>
+      <div v-if="this.menu.items.length === 0" class="flex h-screen items-center justify-center">
+        <div class="text-center">No items found. Please select a table or set an active menu.</div>
+      </div>
+      <div v-else class="flex h-screen items-center justify-center">
+        <div class="text-center">No items found.</div>
+      </div>
+    </div>
   <div
     class="mt-4 flex justify-center"
     v-if="this.menu.paginatedItems.length > 0"

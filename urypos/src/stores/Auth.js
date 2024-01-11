@@ -27,6 +27,7 @@ export const useAuthStore = defineStore("auth", {
     activeDropdown: false,
     userName: "",
     hasAccess: false,
+    isPosOpen:true,
     userRole: [],
     auth: frappe.auth(),
     db: frappe.db(),
@@ -154,8 +155,17 @@ export const useAuthStore = defineStore("auth", {
           const innerMessageString = serverMessages[0];
           const innerMessage = JSON.parse(innerMessageString);
           const message = innerMessage.message;
-          this.alert.createAlert("Message", message, "OK");
-          router.push("/posOpen");
+          if (this.cashier) {
+            this.isPosOpen = true;
+            this.alert.createAlert("Message", message, "OK")
+            .then(() => {
+              router.push("/posOpen")
+            });
+            
+          } else {
+            this.isPosOpen = false;
+            this.alert.createAlert("Message", message, "OK");
+          }
         })
         .catch((error) => {
           // console.error(error)

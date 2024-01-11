@@ -298,8 +298,11 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             this.isLoading = false;
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);
-            this.alert.createAlert("Message", message.message, "OK");
-            window.location.reload();
+            this.alert
+              .createAlert("Message", message.message, "OK")
+              .then(() => {
+                window.location.reload();
+              });
           });
       }
     },

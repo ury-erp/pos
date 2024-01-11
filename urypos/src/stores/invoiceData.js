@@ -84,7 +84,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           // console.error(error)
         });
     },
-    
+
     // Method for creating an invoice
     async invoiceCreation() {
       this.showUpdateButtton = false;
@@ -118,7 +118,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         invoice: invoice,
         last_invoice: invoice,
       };
-
       if (!this.auth.cashier && !numberOfPax) {
         this.alert.createAlert(
           "Message",
@@ -142,8 +141,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               const messages = JSON.parse(alert);
               const message = JSON.parse(messages[0]);
 
-              this.alert.createAlert("Message", message.message, "OK");
-              router.push("/Table");
+              this.alert.createAlert("Message", message.message, "OK").then(() => {
+                router.push("/Table").then(() => {
+                  window.location.reload();
+                });
+              })
             } else {
               this.invoiceNumber = response.message.name;
               this.grandTotal = response.message.grand_total;
@@ -179,8 +181,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     },
 
     billing(table) {
-      this.isPrinting = true;
-
       let tables = table.name;
       const getOrderInvoice = {
         table: tables,
@@ -192,7 +192,21 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         )
         .then((result) => {
           this.tableInvoiceNo = result.message.name;
-          this.printFunction();
+          if (
+            !this.auth.hasAccess &&
+            !this.auth.cashier &&
+            this.auth.sessionUser !== result.message.waiter
+          ) {
+            this.alert.createAlert(
+              "Message",
+              "Printing is Blocked Table is assigned to " +
+                result.message.waiter,
+              "OK"
+            );
+          } else {
+            this.isPrinting = true;
+            this.printFunction();
+          }
         })
         .catch((error) => console.error(error));
     },
