@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cd urypos && yarn dev",
-    "build": "cd urypos && yarn build"
+    "build": "cd urypos && npm install && yarn build"
   },
   "keywords": [],
   "author": "",

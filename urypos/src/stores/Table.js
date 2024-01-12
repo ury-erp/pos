@@ -201,7 +201,7 @@ export const useTableStore = defineStore("table", {
           this.invoiceNo = this.previousOrder.name;
           if (this.invoiceNo) {
             if (
-              !this.auth.hasAccess &&
+              !this.auth.hasAccess && !this.auth.cashier &&
               this.auth.sessionUser !== this.previousOrder.waiter
             ) {
              this.alert.createAlert(
