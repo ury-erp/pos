@@ -141,11 +141,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               const messages = JSON.parse(alert);
               const message = JSON.parse(messages[0]);
 
-              this.alert.createAlert("Message", message.message, "OK").then(() => {
-                router.push("/Table").then(() => {
-                  window.location.reload();
+              this.alert
+                .createAlert("Message", message.message, "OK")
+                .then(() => {
+                  router.push("/Table").then(() => {
+                    window.location.reload();
+                  });
                 });
-              })
             } else {
               this.invoiceNumber = response.message.name;
               this.grandTotal = response.message.grand_total;
@@ -253,53 +255,88 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               .catch((error) => console.error(error, "printed"));
           }
         } else if (this.print_type === "network") {
-          const sendObj = {
-            doctype: "POS Invoice",
-            name: invoiceNo,
-            printer_setting: this.printer,
-            print_format: this.print_format,
-          };
-          const printingCall = async () => {
-            try {
-              const result = await this.call.post(
+          if (this.auth.cashier) {
+            const sendObj = {
+              doctype: "POS Invoice",
+              name: invoiceNo,
+              printer_setting: this.printer,
+              print_format: this.print_format,
+            };
+            const printingCall = async () => {
+              const res = await this.call.post(
                 "ury.ury.api.ury_print.network_printing",
                 sendObj
               );
-              return result.message;
-            } catch (error) {
-              console.error(error, "heeeloo");
-              return "";
-            }
-          };
-          let i = 0;
-          let errorMessage = "";
-          do {
-            const res = await printingCall();
-            if (res === "Success") {
-              this.notification.createNotification("Print Successful");
-              const sendObj = {
-                invoice: invoiceNo,
-              };
-              this.call
-                .post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                .then(() => {
-                  window.location.reload();
-
-                  return 200;
-                })
-                .catch((error) => console.error(error));
-            }
-            errorMessage = res;
-            i++;
-          } while (i < 3);
-          throw {
-            alert: this.alert.createAlert(
-              "Message",
-              `Print failed with error ${errorMessage}`,
-              "OK"
-            ),
-            custom: (this.isPrinting = false),
-          };
+              return res.message;
+            };
+            let i = 0;
+            let errorMessage = "";
+            do {
+              const res = await printingCall();
+              if (res === "Success") {
+                this.notification.createNotification("Print Successful");
+                const sendObj = {
+                  invoice: invoiceNo,
+                };
+                await this.call
+                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .then(() => {
+                    window.location.reload();
+                    return 200;
+                  });
+              }
+              errorMessage = res;
+              i++;
+            } while (i < 1);
+            throw {
+              alert: this.alert.createAlert(
+                "Message",
+                `Print failed with error ${errorMessage}`,
+                "OK"
+              ),
+              custom: (this.isPrinting = false),
+            };
+          } else {
+            const networkPrint = {
+              invoice_id: invoiceNo,
+              pos_profile: this.posProfile,
+             
+            };
+            const networkPrintPrintingCall = async () => {
+              const res = await this.call.post(
+                "ury.ury.api.ury_print.select_network_printer",
+                networkPrint
+              );
+              return res.message;
+            };
+            let i = 0;
+            let errorMessage = "";
+            do {
+              const res = await networkPrintPrintingCall();
+              if (res === "Success") {
+                this.notification.createNotification("Print Successful");
+                const sendObj = {
+                  invoice: invoiceNo,
+                };
+                await this.call
+                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .then(() => {
+                    window.location.reload();
+                    return 200;
+                  });
+              }
+              errorMessage = res;
+              i++;
+            } while (i < 1);
+            throw {
+              alert: this.alert.createAlert(
+                "Message",
+                `Print failed with error ${errorMessage}`,
+                "OK"
+              ),
+              custom: (this.isPrinting = false),
+            };
+          }
         } else {
           const sendObj = {
             doctype: "POS Invoice",
@@ -314,21 +351,14 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
 
               return result.message;
             })
-            .catch((error) => console.error(error, "hiiii"));
+            .catch((error) => console.error(error));
         }
-        // throw {
-        //   custom: true,
-        //   title: "No printer type specified",
-        //   message: "printer_type is not specified in pos profile",
-        //   print: (this.isPrinting = false),
-        // };
       } catch (e) {
         if (e?.custom) {
           this.isPrinting = false;
+
           return this.alert.createAlert("Error", e?.title, "OK");
         }
-        this.isPrinting = false;
-        return this.alert.createAlert("Error", e?.response?.status, "Ok");
       }
     },
 
