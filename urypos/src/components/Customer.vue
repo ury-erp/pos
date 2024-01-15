@@ -87,7 +87,7 @@
         v-if="this.customers.showModalNewCustomer"
         class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
       >
-        <div class="mt-10 flex items-center justify-center">
+        <div class="mt-10 mb-16 flex items-center justify-center">
           <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
             <div class="flex justify-end">
               <span class="sr-only">Close</span>
