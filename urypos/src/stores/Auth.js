@@ -155,17 +155,17 @@ export const useAuthStore = defineStore("auth", {
           const innerMessageString = serverMessages[0];
           const innerMessage = JSON.parse(innerMessageString);
           const message = innerMessage.message;
-          if (this.cashier) {
-            this.isPosOpen = true;
-            this.alert.createAlert("Message", message, "OK")
-            .then(() => {
-              router.push("/posOpen")
-            });
+          // if (this.cashier) {
+          //   this.isPosOpen = true;
+          //   this.alert.createAlert("Message", message, "OK")
+          //   .then(() => {
+          //     router.push("/posOpen")
+          //   });
             
-          } else {
+          // } else {
             this.isPosOpen = false;
             this.alert.createAlert("Message", message, "OK");
-          }
+          // }
         })
         .catch((error) => {
           // console.error(error)

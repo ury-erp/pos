@@ -43,6 +43,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     setBackground: null,
     selectedTable: null,
     billAmount: 0,
+    recentWaiter:null,
     cancelInvoiceFlag: false,
     invoicePrinted: null,
     cancelReason: null,
@@ -157,6 +158,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           let pastOrder = result.message;
           this.restaurantTable = pastOrder.restaurant_table;
           this.pastOrderdItem = pastOrder.items;
+          this.recentWaiter=pastOrder.waiter
           previousOrderdCustomer = pastOrder.customer;
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");

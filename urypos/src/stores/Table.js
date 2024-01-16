@@ -34,6 +34,7 @@ export const useTableStore = defineStore("table", {
     showModalCaptainTransfer: false,
     showCaptain: false,
     captain: [],
+    previousWaiter:null,
     newCaptain: "",
     invoicePrinted: "",
     auth: useAuthStore(),
@@ -199,6 +200,7 @@ export const useTableStore = defineStore("table", {
           this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
           this.invoiceNo = this.previousOrder.name;
+          this.previousWaiter=this.previousOrder.waiter
           if (this.invoiceNo) {
             if (
               !this.auth.hasAccess && !this.auth.cashier &&

@@ -104,6 +104,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
       const cartCopy = JSON.parse(JSON.stringify(cart));
+      let waiter =
+        this.table.previousWaiter !== null &&
+        this.table.previousWaiter !== undefined
+          ? this.table.previousWaiter
+          : this.recentOrders.recentWaiter !== null && this.recentOrders.recentWaiter !== undefined
+          ? this.recentOrders.recentWaiter
+          : this.waiter;
 
       const creatingInvoice = {
         table: selectedTables,
@@ -112,7 +119,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         no_of_pax: numberOfPax,
         mode_of_payment: this.defaultModeOfPayment,
         cashier: this.cashier,
-        waiter: this.waiter,
+        waiter: waiter,
         last_modified_time: this.table.modifiedTime,
         pos_profile: this.posProfile,
         invoice: invoice,
@@ -300,7 +307,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             const networkPrint = {
               invoice_id: invoiceNo,
               pos_profile: this.posProfile,
-             
             };
             const networkPrintPrintingCall = async () => {
               const res = await this.call.post(

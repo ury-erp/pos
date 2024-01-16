@@ -124,18 +124,18 @@ export const useMenuStore = defineStore("menu", {
     addToCartAndUpdateQty() {
       const item = this.item;
     
-      // Check if 'qty' is a valid and non-empty value
-      if (this.quantity !== null && this.quantity !== undefined && this.quantity !== '' && this.quantity !== 0) {
+      if (this.quantity !== null && this.quantity !== undefined && this.quantity !== '' && this.quantity > 0) {
         if (!item.qty) {
           this.$set(item, "qty", this.quantity);
         } else {
           item.qty = this.quantity;
           item.comment = this.itemComments;
         }
-      }
+      } 
     
       this.showDialog = false;
     },
+    
     getitemQty(item) {
       item.qty = this.cart.qty;
     },

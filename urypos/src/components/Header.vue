@@ -57,7 +57,7 @@
                     {{ this.auth.getLoginAvatar() }}
                   </h1>
                 </li>
-                <li v-if="this.auth.cashier">
+                <!-- <li v-if="this.auth.cashier">
                   <a
                     href="#"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -72,7 +72,7 @@
                     @click="this.posClose.routeToPosClose"
                     >POS Closing</a
                   >
-                </li>
+                </li> -->
 
                 <li>
                   <a

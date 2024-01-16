@@ -16,7 +16,6 @@
     <button
       class="rounded px-4 py-2 shadow"
       @click="this.invoiceData.showCancelInvoiceModal()"
-     
     >
       Cancel
     </button>
@@ -62,6 +61,7 @@
           this.menu.showModal(cart_item);
           menu.showDialogCart = true;
         "
+        readonly
       />
       <div class="items-center text-center">
         <button
@@ -166,11 +166,9 @@
     </div>
   </div>
 
-
-
   <div
     v-if="menu.showDialogCart"
-    class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
+    class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
   >
     <div class="mt-10 flex items-center justify-center">
       <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
@@ -252,7 +250,6 @@
           for="grand_total"
           class="grand_total mt-10 block text-sm font-medium text-gray-900 dark:text-white"
           v-if="this.table.grandTotal || invoiceData.grandTotal"
-          
         >
           Grand Total
         </label>
@@ -286,9 +283,12 @@
           class="waiter mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
           :class="{ hidden: this.invoiceData.waiter === '' }"
           :value="
-            this.table.newCaptain
-              ? this.table.newCaptain
-              : this.invoiceData.waiter
+          this.table.previousWaiter !== null &&
+        this.table.previousWaiter !== undefined
+          ? this.table.previousWaiter
+          : this.recentOrders.recentWaiter !== null && this.recentOrders.recentWaiter !== undefined
+          ? this.recentOrders.recentWaiter
+          : this.invoiceData.waiter  
           "
           readonly
         />
@@ -328,6 +328,7 @@ import { useMenuStore } from "@/stores/Menu.js";
 import { useTableStore } from "@/stores/Table.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
+import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
   name: "Cart",
@@ -336,8 +337,9 @@ export default {
     const menu = useMenuStore();
     const table = useTableStore();
     const auth = useAuthStore();
+    const recentOrders = usetoggleRecentOrder();
     const invoiceData = useInvoiceDataStore();
-    return { menu, table, invoiceData, auth };
+    return { menu, table, invoiceData, auth, recentOrders };
   },
   methods: {},
 };
