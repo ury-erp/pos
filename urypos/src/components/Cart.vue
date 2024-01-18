@@ -16,8 +16,8 @@
     <button
       class="rounded px-4 py-2 shadow"
       v-if="
-        this.recentOrders.invoicePrinted === 0 ||
-        this.table.invoicePrinted === 0
+        (this.recentOrders.invoicePrinted === 0 ||
+        this.table.invoicePrinted === 0) && !this.auth.cashier
       "
       @click="this.invoiceData.showCancelInvoiceModal()"
     >
