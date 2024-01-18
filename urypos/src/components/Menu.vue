@@ -188,7 +188,9 @@ export default {
   components: {
     Search,
   },
-
+  mounted() {
+    window.scrollTo(0, 0);
+  },
 };
 </script>
 <style>

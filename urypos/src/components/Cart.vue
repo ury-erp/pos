@@ -15,6 +15,10 @@
     </button> -->
     <button
       class="rounded px-4 py-2 shadow"
+      v-if="
+        this.recentOrders.invoicePrinted === 0 ||
+        this.table.invoicePrinted === 0
+      "
       @click="this.invoiceData.showCancelInvoiceModal()"
     >
       Cancel
@@ -283,12 +287,13 @@
           class="waiter mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
           :class="{ hidden: this.invoiceData.waiter === '' }"
           :value="
-          this.table.previousWaiter !== null &&
-        this.table.previousWaiter !== undefined
-          ? this.table.previousWaiter
-          : this.recentOrders.recentWaiter !== null && this.recentOrders.recentWaiter !== undefined
-          ? this.recentOrders.recentWaiter
-          : this.invoiceData.waiter  
+            this.table.previousWaiter !== null &&
+            this.table.previousWaiter !== undefined
+              ? this.table.previousWaiter
+              : this.recentOrders.recentWaiter !== null &&
+                this.recentOrders.recentWaiter !== undefined
+              ? this.recentOrders.recentWaiter
+              : this.invoiceData.waiter
           "
           readonly
         />
@@ -341,7 +346,9 @@ export default {
     const invoiceData = useInvoiceDataStore();
     return { menu, table, invoiceData, auth, recentOrders };
   },
-  methods: {},
+  mounted() {
+    window.scrollTo(0, 0);
+  },
 };
 </script>
 <style>

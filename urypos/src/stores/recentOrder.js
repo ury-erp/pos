@@ -135,6 +135,17 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         })
         .catch((error) => console.error(error));
 
+        const getOrderInvoice = {
+          doctype: "POS Invoice",
+          name: this.invoiceNumber,
+        };
+        this.call
+          .get("frappe.client.get", getOrderInvoice)
+          .then((result) => {
+            this.invoicePrinted=result.message.invoice_printed
+          })
+          .catch((error) => console.error(error));
+  
       this.showOrder = true;
     },
     async editOrder() {
@@ -160,6 +171,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.pastOrderdItem = pastOrder.items;
           this.recentWaiter=pastOrder.waiter
           previousOrderdCustomer = pastOrder.customer;
+          
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
           const customers = useCustomerStore();
@@ -212,7 +224,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.customerNameForBilling = this.pastOrder.customer;
           this.posProfile = this.pastOrder.pos_profile;
           this.table = this.pastOrder.restaurant_table;
-          this.invoicePrinted = this.pastOrder.invoice_printed;
           if (this.invoicePrinted === 0) {
             this.alert.createAlert(
               "Alert",
