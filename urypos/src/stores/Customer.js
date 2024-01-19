@@ -46,6 +46,10 @@ export const useCustomerStore = defineStore("customers", {
         })
         .catch((error) => console.error(error));
     },
+    handleSearchInput(event){
+      this.search = event.target.value;
+      this.pickCustomer();
+    },
     pickCustomerGroup() {
       this.db
         .getDocList("Customer Group")

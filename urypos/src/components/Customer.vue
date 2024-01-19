@@ -22,11 +22,11 @@
           </svg>
         </div>
         <input
-          type="text"
+          type="search"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Search Customers"
           v-model="this.customers.search"
-          @input="this.customers.pickCustomer()"
+          @input="this.customers.handleSearchInput"
           @click="this.customers.showCustomers = true;this.customers.showAddNewCustomer= true"
           required
         />
