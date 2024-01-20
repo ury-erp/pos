@@ -48,6 +48,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     invoicePrinted: null,
     cancelReason: null,
     call: frappe.call(),
+    draftInvoice:null
   }),
   getters: {
     filteredOrders() {
@@ -154,6 +155,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       let previousOrderdCustomer = "";
       const menu = useMenuStore();
       let items = menu.items;
+      this.draftInvoice = this.invoiceNumber
       items.forEach((item) => {
         item.qty = "";
       });
@@ -161,7 +163,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       cart.splice(0, cart.length);
       const getOrderInvoice = {
         doctype: "POS Invoice",
-        name: this.invoiceNumber,
+        name: this.draftInvoice,
       };
       this.call
         .get("frappe.client.get", getOrderInvoice)
