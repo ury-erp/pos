@@ -1,5 +1,5 @@
 <template>
-  <Search/>
+  <Search />
   <div class="container mx-auto" v-if="this.menu.paginatedItems.length > 0">
     <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
       <div
@@ -7,10 +7,10 @@
         v-for="item in this.menu.paginatedItems"
         :key="item.item"
       >
-        <h2 class="mt-0 mb-2 text-lg font-normal leading-normal">
+        <h2 class="mb-2 mt-0 text-lg font-normal leading-normal">
           {{ item.item_name }}
         </h2>
-        <h2 class="mt-0 mb-2 text-lg font-normal leading-normal">
+        <h2 class="mb-2 mt-0 text-lg font-normal leading-normal">
           ₹ {{ item.rate }}
         </h2>
         <div v-if="!item.qty">
@@ -19,7 +19,7 @@
               item.showInput = true;
               this.menu.addToCart(item);
             "
-            class="rounded border px-10 pt-2.5 pb-2 text-xs font-medium leading-normal"
+            class="rounded border px-10 pb-2 pt-2.5 text-xs font-medium leading-normal"
           >
             ADD +
           </button>
@@ -27,8 +27,20 @@
         <div v-if="item.qty" class="flex rounded-md">
           <button
             type="button"
-            class="-ml-px inline-flex items-center justify-center gap-2 border bg-white py-3 px-4 align-middle text-sm font-medium text-gray-700 shadow-sm transition-all focus:outline-none dark:border-gray-700"
-            @click="this.menu.decrementItemQuantity(item)"
+            class="-ml-px inline-flex items-center justify-center gap-2 border bg-white px-4 py-3 align-middle text-sm font-medium shadow-sm transition-all focus:outline-none dark:border-gray-700"
+            :class="{
+              'text-gray-700':
+                this.recentOrders.editPrintedInvoice === 0 ||
+                this.auth.removeTableOrderItem === 1,
+              'text-gray-300':
+                this.recentOrders.editPrintedInvoice === 1 ||
+                this.auth.removeTableOrderItem === 0,
+            }"
+            @click="
+              (this.recentOrders.editPrintedInvoice === 0 ||
+                this.auth.removeTableOrderItem === 1) &&
+                this.menu.decrementItemQuantity(item)
+            "
           >
             -
           </button>
@@ -44,17 +56,16 @@
           />
           <button
             type="button"
-            class="-ml-px inline-flex items-center justify-center gap-2 border bg-white py-3 px-4 align-middle text-sm font-medium text-gray-700 shadow-sm transition-all focus:outline-none dark:border-gray-700"
+            class="-ml-px inline-flex items-center justify-center gap-2 border bg-white px-4 py-3 align-middle text-sm font-medium text-gray-700 shadow-sm transition-all focus:outline-none dark:border-gray-700"
             @click="this.menu.incrementItemQuantity(item)"
           >
             +
           </button>
         </div>
-       
       </div>
       <div
         v-if="menu.showDialog"
-        class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
+        class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
       >
         <div class="mt-10 flex items-center justify-center">
           <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
@@ -94,6 +105,10 @@
                 id="modeOfPayment"
                 class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
                 v-model="this.menu.quantity"
+                v-bind:readonly="
+                  this.recentOrders.editPrintedInvoice === 1 &&
+                  this.auth.removeTableOrderItem === 0
+                "
               />
               <label
                 for="paidAmount"
@@ -122,13 +137,18 @@
     </div>
   </div>
   <div v-else>
-      <div v-if="this.menu.items.length === 0" class="flex h-screen items-center justify-center">
-        <div class="text-center">No items found. Please select a table or set an active menu.</div>
-      </div>
-      <div v-else class="flex h-screen items-center justify-center">
-        <div class="text-center">No items found.</div>
+    <div
+      v-if="this.menu.items.length === 0"
+      class="flex h-screen items-center justify-center"
+    >
+      <div class="text-center">
+        No items found. Please select a table or set an active menu.
       </div>
     </div>
+    <div v-else class="flex h-screen items-center justify-center">
+      <div class="text-center">No items found.</div>
+    </div>
+  </div>
   <div
     class="mt-4 flex justify-center"
     v-if="this.menu.paginatedItems.length > 0"
@@ -178,11 +198,15 @@
 <script>
 import Search from "./Search.vue";
 import { useMenuStore } from "@/stores/Menu.js";
+import { useAuthStore } from "@/stores/Auth.js";
+import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
   setup() {
     const menu = useMenuStore();
-    return { menu };
+    const auth = useAuthStore();
+    const recentOrders = usetoggleRecentOrder();
+    return { menu, auth, recentOrders };
   },
   name: "Menu",
   components: {

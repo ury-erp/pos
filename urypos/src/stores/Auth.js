@@ -26,8 +26,10 @@ export const useAuthStore = defineStore("auth", {
     userAuth: localStorage.getItem("userAuth"),
     activeDropdown: false,
     userName: "",
+    removeTableOrderItem: null,
     hasAccess: false,
-    isPosOpen:true,
+    isPosOpen: true,
+    viewAllStatus: null,
     userRole: [],
     auth: frappe.auth(),
     db: frappe.db(),
@@ -86,7 +88,7 @@ export const useAuthStore = defineStore("auth", {
             localStorage.removeItem("userAuth", "true");
           } else {
             this.userAuth = true;
-            router.push("/Table")
+            router.push("/Table");
             this.table.fetchTable();
             this.invoiceData.fetchInvoiceDetails().then(() => {
               this.fetchUserRole();
@@ -141,6 +143,9 @@ export const useAuthStore = defineStore("auth", {
               this.restrictTableOrder = restrictOrder.some((role) =>
                 this.userRole.includes(role)
               );
+              this.viewAllStatus = result.message.view_all_status;
+              this.removeTableOrderItem = result.message.remove_items;
+              
             })
             .catch((error) => console.error(error));
         })
@@ -161,10 +166,10 @@ export const useAuthStore = defineStore("auth", {
           //   .then(() => {
           //     router.push("/posOpen")
           //   });
-            
+
           // } else {
-            this.isPosOpen = false;
-            this.alert.createAlert("Message", message, "OK");
+          this.isPosOpen = false;
+          this.alert.createAlert("Message", message, "OK");
           // }
         })
         .catch((error) => {

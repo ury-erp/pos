@@ -31,7 +31,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     modeOfPaymentName: null,
     restaurantTable: null,
     currentPage: 1,
-    perPage: 5,
+    perPage: 10,
     showDialog: false,
     customerNameForBilling: "",
     posProfile: "",
@@ -46,6 +46,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     recentWaiter:null,
     cancelInvoiceFlag: false,
     invoicePrinted: null,
+    editPrintedInvoice:0,
     cancelReason: null,
     call: frappe.call(),
     draftInvoice:null
@@ -156,6 +157,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       const menu = useMenuStore();
       let items = menu.items;
       this.draftInvoice = this.invoiceNumber
+      this.editPrintedInvoice=this.invoicePrinted
       items.forEach((item) => {
         item.qty = "";
       });

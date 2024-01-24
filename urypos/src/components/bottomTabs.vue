@@ -1,9 +1,10 @@
 <template>
   <div
     class="fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700"
-    v-if="!isLoginPage"
+    v-if="!this.tabClick.isLoginPage"
     id="tab"
-  >
+  > 
+  
     <div
       class="mx-auto grid h-full max-w-lg font-medium"
       :class="[
@@ -16,16 +17,16 @@
       <router-link
         to="/Table"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click="activeTab = 'Table'"
+        @click=""
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
-            {
-              'text-gray-500': activeTab !== 'Table',
-              'text-blue-600': activeTab === 'Table',
-            },
-          ]"
+      {
+        'text-gray-500': this.tabClick.currentTab !== '/Table',
+        'text-blue-600': this.tabClick.currentTab === '/Table',
+      },
+    ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -40,8 +41,8 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Table',
-              'text-blue-600': activeTab === 'Table',
+              'text-gray-500': this.tabClick.currentTab !== '/Table',
+              'text-blue-600': this.tabClick.currentTab === '/Table',
             },
           ]"
           >Table</span
@@ -51,14 +52,14 @@
       <router-link
         to="/Menu"
         class="group inline-flex flex-col items-center justify-center border-r border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click="activeTab = 'Menu'"
+        @click=""
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Menu',
-              'text-blue-600': activeTab === 'Menu',
+              'text-gray-500': this.tabClick.currentTab !== '/Menu',
+              'text-blue-600': this.tabClick.currentTab === '/Menu',
             },
           ]"
           fill="currentColor"
@@ -77,8 +78,8 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Menu',
-              'text-blue-600': activeTab === 'Menu',
+              'text-gray-500': this.tabClick.currentTab !== '/Menu',
+              'text-blue-600': this.tabClick.currentTab === '/Menu',
             },
           ]"
           >Menu</span
@@ -87,14 +88,14 @@
       <router-link
         to="/Customer"
         class="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
-        @click="activeTab = 'Customer'"
+        @click=""
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Customer',
-              'text-blue-600': activeTab === 'Customer',
+              'text-gray-500': this.tabClick.currentTab !== '/Customer',
+              'text-blue-600': this.tabClick.currentTab === '/Customer',
             },
           ]"
           fill="currentColor"
@@ -113,8 +114,8 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Customer',
-              'text-blue-600': activeTab === 'Customer',
+              'text-gray-500':this.tabClick.currentTab !== '/Customer',
+              'text-blue-600': this.tabClick.currentTab === '/Customer',
             },
           ]"
           >Customer</span
@@ -123,14 +124,14 @@
       <router-link
         to="/Cart"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click="activeTab = 'Order'"
+        @click=""
       >
         <svg
           aria-hidden="true"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Order',
-              'text-blue-600': activeTab === 'Order',
+              'text-gray-500': this.tabClick.currentTab !== '/Cart',
+              'text-blue-600': this.tabClick.currentTab === '/Cart',
             },
           ]"
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
@@ -147,8 +148,8 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'Order',
-              'text-blue-600': activeTab === 'Order',
+              'text-gray-500': this.tabClick.currentTab !== '/Cart',
+              'text-blue-600': this.tabClick.currentTab === '/Cart',
             },
           ]"
           >Order</span
@@ -158,14 +159,14 @@
         to="/recentOrder"
         v-if="this.auth.cashier"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click="activeTab = 'recentOrder'"
+        @click=""
       >
         <svg
           class="h-5 w-5 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'recentOrder',
-              'text-blue-600': activeTab === 'recentOrder',
+              'text-gray-500': this.tabClick.currentTab !== '/recentOrder',
+              'text-blue-600': this.tabClick.currentTab === '/recentOrder',
             },
           ]"
           fill="currentColor"
@@ -185,8 +186,8 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500': activeTab !== 'recentOrder',
-              'text-blue-600': activeTab === 'recentOrder',
+              'text-gray-500': this.tabClick.currentTab !== '/recentOrder',
+              'text-blue-600': this.tabClick.currentTab === '/recentOrder',
             },
           ]"
           >OrderLog</span
@@ -198,16 +199,14 @@
 
 <script>
 import { useAuthStore } from "@/stores/Auth.js";
+import { tabFunctions } from "@/stores/bottomTabs.js";
 export default {
   name: "Bottom Tabs",
   setup() {
     const auth = useAuthStore();
-    return { auth };
+    const tabClick=tabFunctions();
+    return { auth,tabClick };
   },
-  computed: {
-    isLoginPage() {
-      return this.$route.path === "/login";
-    },
-  },
+  
 };
 </script>

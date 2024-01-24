@@ -17,7 +17,8 @@
       class="rounded px-4 py-2 shadow"
       v-if="
         (this.recentOrders.invoicePrinted === 0 ||
-        this.table.invoicePrinted === 0) && !this.auth.cashier
+          this.table.invoicePrinted === 0) &&
+        !this.auth.cashier
       "
       @click="this.invoiceData.showCancelInvoiceModal()"
     >
@@ -71,13 +72,18 @@
         <button
           class="p-2 text-center"
           type="button"
-          @click="this.menu.removeItemFromCart(index)"
+         
+          @click="
+            (this.recentOrders.editPrintedInvoice === 0 ||
+              this.auth.removeTableOrderItem === 1) &&
+              this.menu.removeItemFromCart(index)
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="25"
-            fill="currentColor border"
+            :style="{ fill: this.menu.setColorForBilledInvoice }"
             class="bi bi-trash"
             viewBox="0 0 16 16"
           >
@@ -212,6 +218,10 @@
             id="modeOfPayment"
             class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
             v-model="this.menu.quantity"
+            v-bind:readonly="
+              this.recentOrders.editPrintedInvoice === 1 &&
+              this.auth.removeTableOrderItem === 0
+            "
           />
           <label
             for="Comments"
@@ -337,7 +347,7 @@ import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
   name: "Cart",
-
+ 
   setup() {
     const menu = useMenuStore();
     const table = useTableStore();

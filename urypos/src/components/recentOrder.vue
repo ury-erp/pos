@@ -39,9 +39,18 @@
         >
           <option value="Draft">Draft</option>
           <option value="Unbilled">Unbilled</option>
-          <option value="Paid">Paid</option>
-          <option value="Consolidated">Consolidated</option>
-          <option value="Return">Return</option>
+          <option value="Paid" v-if="this.auth.viewAllStatus === 1">
+            Paid
+          </option>
+          <option
+            value="Consolidated"
+            v-if="this.auth.viewAllStatus === 1"
+          >
+            Consolidated
+          </option>
+          <option value="Return" v-if="this.auth.viewAllStatus === 1">
+            Return
+          </option>
         </select>
       </div>
       <div class="flow-root">
@@ -362,8 +371,15 @@
         <button
           type="button"
           class="mb-2 mr-2 w-36 rounded-lg border bg-white px-5 py-2.5 text-sm font-medium focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-          :class="{ 'border-gray-200 text-gray-300': this.recentOrders.invoicePrinted === 1 || this.recentOrders.selectedStatus === 'Unbilled', 'border-gray-300 text-gray-700': !(this.recentOrders.invoicePrinted === 1 || this.recentOrders.selectedStatus === 'Unbilled') }"
-          
+          :class="{
+            'border-gray-200 text-gray-300':
+              this.recentOrders.invoicePrinted === 1 ||
+              this.recentOrders.selectedStatus === 'Unbilled',
+            'border-gray-300 text-gray-700': !(
+              this.recentOrders.invoicePrinted === 1 ||
+              this.recentOrders.selectedStatus === 'Unbilled'
+            ),
+          }"
           @click="
             this.recentOrders.invoicePrinted === 0 &&
             this.recentOrders.selectedStatus === 'Draft'

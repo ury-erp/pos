@@ -4,8 +4,9 @@ import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
 import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
-import { useAlert } from "./Alert.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
 
+import { useAlert } from "./Alert.js";
 
 export const useMenuStore = defineStore("menu", {
   state: () => ({
@@ -22,6 +23,7 @@ export const useMenuStore = defineStore("menu", {
     auth: useAuthStore(),
     notification: useNotifications(),
     table: useTableStore(),
+    recentOrders: usetoggleRecentOrder(),
     showDialog: false,
     showDialogCart: false,
     quantity: "",
@@ -68,6 +70,19 @@ export const useMenuStore = defineStore("menu", {
       }
       return pageNumbers;
     },
+    setColorForBilledInvoice() {
+      if (
+        this.recentOrders.editPrintedInvoice === 0 ||
+        this.auth.removeTableOrderItem === 1
+      ) {
+        return "black";
+      } else if (
+        this.recentOrders.editPrintedInvoice === 1 ||
+        this.auth.removeTableOrderItem === 0
+      ) {
+        return "gray";
+      }
+    },
   },
   actions: {
     fetchItems() {
@@ -79,7 +94,7 @@ export const useMenuStore = defineStore("menu", {
         .then((result) => {
           if (!this.auth.cashier && this.table.tableMenu) {
             this.items = this.table.tableMenu;
-            } else {
+          } else {
             this.items = result.message;
           }
           this.items.forEach((menuItem) => {
@@ -95,7 +110,7 @@ export const useMenuStore = defineStore("menu", {
             this.alert.createAlert("Message", message.message, "OK");
           }
         });
-    }, 
+    },
     updateSearchTerm() {
       this.currentPage = 1;
     },
@@ -123,19 +138,24 @@ export const useMenuStore = defineStore("menu", {
 
     addToCartAndUpdateQty() {
       const item = this.item;
-    
-      if (this.quantity !== null && this.quantity !== undefined && this.quantity !== '' && this.quantity > 0) {
+
+      if (
+        this.quantity !== null &&
+        this.quantity !== undefined &&
+        this.quantity !== "" &&
+        this.quantity > 0
+      ) {
         if (!item.qty) {
           this.$set(item, "qty", this.quantity);
         } else {
           item.qty = this.quantity;
           item.comment = this.itemComments;
         }
-      } 
-    
+      }
+
       this.showDialog = false;
     },
-    
+
     getitemQty(item) {
       item.qty = this.cart.qty;
     },

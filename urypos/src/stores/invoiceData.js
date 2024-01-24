@@ -96,10 +96,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const customerName = customers.search;
       const numberOfPax = customers.numberOfPax;
       let invoice =
-        this.recentOrders.draftInvoice ||
-        this.invoiceNumber ||
-        this.table.invoiceNo ||
-        null;
+        this.recentOrders.invoiceNumber || this.table.invoiceNo || null;
 
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
@@ -108,7 +105,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.table.previousWaiter !== null &&
         this.table.previousWaiter !== undefined
           ? this.table.previousWaiter
-          : this.recentOrders.recentWaiter !== null && this.recentOrders.recentWaiter !== undefined
+          : this.recentOrders.recentWaiter !== null &&
+            this.recentOrders.recentWaiter !== undefined
           ? this.recentOrders.recentWaiter
           : this.waiter;
 
@@ -124,6 +122,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         pos_profile: this.posProfile,
         invoice: invoice,
         last_invoice: invoice,
+        comments:this.menu.comments
       };
       if (!this.auth.cashier && !numberOfPax) {
         this.alert.createAlert(
