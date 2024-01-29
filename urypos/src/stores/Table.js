@@ -34,7 +34,7 @@ export const useTableStore = defineStore("table", {
     showModalCaptainTransfer: false,
     showCaptain: false,
     captain: [],
-    previousWaiter:null,
+    previousWaiter: null,
     newCaptain: "",
     invoicePrinted: "",
     auth: useAuthStore(),
@@ -200,21 +200,24 @@ export const useTableStore = defineStore("table", {
           this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
           this.invoiceNo = this.previousOrder.name;
-          this.previousWaiter=this.previousOrder.waiter
+          this.previousWaiter = this.previousOrder.waiter;
           if (this.invoiceNo) {
             if (
-              !this.auth.hasAccess && !this.auth.cashier &&
+              !this.auth.hasAccess &&
+              !this.auth.cashier &&
               this.auth.sessionUser !== this.previousOrder.waiter
             ) {
-             this.alert.createAlert(
-                "Message",
-                "Table is assigned to " + this.previousOrder.waiter,
-                "OK"
-              ).then(() => {
-                router.push("/Table").then(() => {
-                  window.location.reload();
+              this.alert
+                .createAlert(
+                  "Message",
+                  "Table is assigned to " + this.previousOrder.waiter,
+                  "OK"
+                )
+                .then(() => {
+                  router.push("/Table").then(() => {
+                    window.location.reload();
+                  });
                 });
-              });
             } else {
               this.notification.createNotification("Past Order Fetched");
             }
@@ -312,7 +315,14 @@ export const useTableStore = defineStore("table", {
         .then(() => {
           window.location.reload();
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          if (error._server_messages) {
+            this.newTable=""
+            const messages = JSON.parse(error._server_messages);
+            const message = JSON.parse(messages[0]);
+            this.alert.createAlert("Message", message.message, "OK");
+          }
+        });
     },
     captianTransfer: async function () {
       await this.invoiceNumberFetching();
@@ -333,7 +343,13 @@ export const useTableStore = defineStore("table", {
             )
           )
           .then(() => window.location.reload())
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message", message.message, "OK");
+            }
+          });
       }
     },
   },
