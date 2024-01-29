@@ -96,7 +96,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const customerName = customers.search;
       const numberOfPax = customers.numberOfPax;
       let invoice =
-        this.recentOrders.draftInvoice || this.table.invoiceNo || null;
+        this.recentOrders.draftInvoice ||
+        this.table.invoiceNo ||
+        this.invoiceNumber ||
+        null;
       let lastInvoice =
         this.invoiceNumber ||
         this.recentOrders.draftInvoice ||
