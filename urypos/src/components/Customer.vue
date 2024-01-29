@@ -1,7 +1,8 @@
 <template>
+  <orderInfo />
   <div class="container m-auto">
     <div class="mb-6 gap-6 md:grid-cols-2">
-      <div class="relative mt-5" ref="container">
+      <div class="relative mt-2" ref="container">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
         >
@@ -27,7 +28,10 @@
           placeholder="Search Customers"
           v-model="this.customers.search"
           @input="this.customers.handleSearchInput"
-          @click="this.customers.showCustomers = true;this.customers.showAddNewCustomer= true"
+          @click="
+            this.customers.showCustomers = true;
+            this.customers.showAddNewCustomer = true;
+          "
           required
         />
 
@@ -87,7 +91,7 @@
         v-if="this.customers.showModalNewCustomer"
         class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
       >
-        <div class="mt-10 mb-16 flex items-center justify-center">
+        <div class="mb-16 mt-10 flex items-center justify-center">
           <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
             <div class="flex justify-end">
               <span class="sr-only">Close</span>
@@ -223,7 +227,7 @@
           </div>
         </div>
       </div>
-      <div class="relative mb-6 mt-6">
+      <div class="relative mb-6 mt-4">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
         >
@@ -282,16 +286,17 @@
 </template>
 
 <script>
+import orderInfo from "./orderInfo.vue";
 import { useCustomerStore } from "@/stores/Customer.js";
 
 export default {
   name: "Customer",
+  components: {
+    orderInfo,
+  },
   setup() {
     const customers = useCustomerStore();
     return { customers };
   },
 };
-// mounted() {
-//   this.customers.fetchCustomer();
-//   },
 </script>

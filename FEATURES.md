@@ -97,14 +97,15 @@ clicking it will direct to the respective pages
 **Invoice Settlement**
 
 - Click the `Invoice icon` to navigate to the recent order page. Invoices can be settled by selecting individual invoices from the list.
-
+- You need to select the role that you need as a cashier in the POS Profile's "Role Allowed For Billing" field
+- Also can block table order to by selecting particular role in "Role Restricted For Table Order" field
 - Available filters in Recent order 
     - Draft : List POS invoices in draft status that are printed from table orders and those taken from takeaway orders.
     - Unbilled : POS invoices in draft and not billed from the Table Order.
     - Paid : Contains paid POS invoice
     - Consolidated : Shows consolidated POS invoice
     - Return : Shows return POS invoice
-
+- To enables Cashiers to view all statuses (Paid, Consolidated, Return Invoices) in the recent order check "Allow Cashier To View All   Status" field in  POS Profile
 - Available Buttons in Recent order  
     - Edit:To edit draft POS invoice
     - Print Receipt:To print POS invoice

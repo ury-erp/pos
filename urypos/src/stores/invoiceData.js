@@ -96,7 +96,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const customerName = customers.search;
       const numberOfPax = customers.numberOfPax;
       let invoice =
-        this.recentOrders.invoiceNumber || this.table.invoiceNo || null;
+        this.recentOrders.draftInvoice || this.table.invoiceNo || null;
+      let lastInvoice=this.invoiceNumber || this.recentOrders.draftInvoice || this.table.invoiceNo || null
 
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
@@ -121,7 +122,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         last_modified_time: this.table.modifiedTime,
         pos_profile: this.posProfile,
         invoice: invoice,
-        last_invoice: invoice,
+        last_invoice: lastInvoice,
         comments:this.menu.comments
       };
       if (!this.auth.cashier && !numberOfPax) {

@@ -1,7 +1,8 @@
 ## URY POS Installation
 
 **Prerequisite Setup:**
-- Before using URY POS, ensure you have URY installed.
+- Before using URY POS, ensure you have URY  and Doppio installed in your bench.
+- Doppio is used to setup and manage  custom desk pages using Vue 3 on URY POS App.
 - Follow the [URY installation guide](https://github.com/ury-erp/ury/blob/main/INSTALLATION.md) for the installation process.
 
 
@@ -11,6 +12,12 @@
 
 ```sh
 	$ bench new-site sitename
+```
+
+**Install the Doppio app to your bench:**
+
+```sh 
+	$ bench get-app https://github.com/NagariaHussain/doppio
 ```
 
 **Install the URY POS app to your bench:**

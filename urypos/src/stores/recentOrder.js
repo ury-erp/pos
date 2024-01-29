@@ -21,7 +21,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     netTotal: 0,
     grandTotal: 0,
     notification: useNotifications(),
-    useInvoiceDataStore: useInvoiceDataStore(),
+    invoiceData: useInvoiceDataStore(),
     invoiceNumber: null,
     pastOrderdItem: [],
     pastOrder: [],
@@ -35,6 +35,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     showDialog: false,
     customerNameForBilling: "",
     posProfile: "",
+    postingDate:null,
     table: null,
     isLoading: false,
     showPayment: false,
@@ -43,13 +44,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     setBackground: null,
     selectedTable: null,
     billAmount: 0,
-    recentWaiter:null,
+    recentWaiter: null,
     cancelInvoiceFlag: false,
     invoicePrinted: null,
-    editPrintedInvoice:0,
+    editPrintedInvoice: 0,
     cancelReason: null,
     call: frappe.call(),
-    draftInvoice:null
+    draftInvoice: null,
   }),
   getters: {
     filteredOrders() {
@@ -80,6 +81,14 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
     change() {
       return this.billAmount - this.total;
+    },
+    orderNumber() {
+      if (this.draftInvoice || this.invoiceData.invoiceNumber) {
+        let orderNo = this.draftInvoice || this.invoiceData.invoiceNumber;
+        return orderNo;
+      } else {
+        return "New";
+      }
     },
   },
   actions: {
@@ -114,18 +123,22 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         return "red";
       }
     },
-    getFormattedDateTime(postingDate, postingTime) {
-      const dateTimeString = `${postingDate} ${postingTime}`;
-      const dateTime = moment(dateTimeString, "YYYY-MM-DD HH:mm:ss.SSSSSS");
-      const formattedDateTime = dateTime.format("Do MMMM, h:mma");
+    getFormattedTime(postingTime) {
+      const dateTime = moment(postingTime, "HH:mm:ss.SSSSSS");
+      const formattedDateTime = dateTime.format("h:mma");
       return formattedDateTime;
     },
+
     async viewRecentOrder(recentOrder) {
       this.netTotal = recentOrder.net_total;
       this.grandTotal = recentOrder.rounded_total;
       this.invoiceNumber = recentOrder.name;
       this.selectedOrder = recentOrder;
       this.selectedTable = recentOrder.restaurant_table;
+      const dateTimeString = `${recentOrder.posting_date}`;
+      const dateTime = moment(dateTimeString, "YYYY-MM-DD");
+      this.postingDate = dateTime.format("Do MMMM");
+      
       const getPosInvoiceItems = {
         invoice: this.invoiceNumber,
       };
@@ -137,17 +150,17 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         })
         .catch((error) => console.error(error));
 
-        const getOrderInvoice = {
-          doctype: "POS Invoice",
-          name: this.invoiceNumber,
-        };
-        this.call
-          .get("frappe.client.get", getOrderInvoice)
-          .then((result) => {
-            this.invoicePrinted=result.message.invoice_printed
-          })
-          .catch((error) => console.error(error));
-  
+      const getOrderInvoice = {
+        doctype: "POS Invoice",
+        name: this.invoiceNumber,
+      };
+      this.call
+        .get("frappe.client.get", getOrderInvoice)
+        .then((result) => {
+          this.invoicePrinted = result.message.invoice_printed;
+        })
+        .catch((error) => console.error(error));
+
       this.showOrder = true;
     },
     async editOrder() {
@@ -156,8 +169,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       let previousOrderdCustomer = "";
       const menu = useMenuStore();
       let items = menu.items;
-      this.draftInvoice = this.invoiceNumber
-      this.editPrintedInvoice=this.invoicePrinted
+      console.log(this.draftInvoice,"this.draftInvoice")
+      this.draftInvoice = this.invoiceNumber;
+      this.editPrintedInvoice = this.invoicePrinted;
       items.forEach((item) => {
         item.qty = "";
       });
@@ -173,9 +187,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           let pastOrder = result.message;
           this.restaurantTable = pastOrder.restaurant_table;
           this.pastOrderdItem = pastOrder.items;
-          this.recentWaiter=pastOrder.waiter
+          this.recentWaiter = pastOrder.waiter;
           previousOrderdCustomer = pastOrder.customer;
-          
+
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
           const customers = useCustomerStore();
@@ -287,7 +301,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         table: this.selectedTable,
         invoice: this.invoiceNumber,
         customer: this.customerNameForBilling,
-        cashier: this.useInvoiceDataStore.cashier,
+        cashier: this.invoiceData.cashier,
         payments: this.payments,
         pos_profile: this.posProfile,
       };

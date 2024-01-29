@@ -52,7 +52,7 @@
       <router-link
         to="/Menu"
         class="group inline-flex flex-col items-center justify-center border-r border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click=""
+        @click="!this.auth.cashier && this.tabClick.checkActiveTable()"
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
@@ -88,7 +88,7 @@
       <router-link
         to="/Customer"
         class="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
-        @click=""
+        @click="!this.auth.cashier && this.tabClick.checkActiveTable()"
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
@@ -124,7 +124,7 @@
       <router-link
         to="/Cart"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click=""
+        @click="!this.auth.cashier && this.tabClick.checkActiveTable()"
       >
         <svg
           aria-hidden="true"
@@ -159,7 +159,7 @@
         to="/recentOrder"
         v-if="this.auth.cashier"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click=""
+       
       >
         <svg
           class="h-5 w-5 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"

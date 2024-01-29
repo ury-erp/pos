@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-10 flex flex-col md:flex-row">
+  <div class="mt-3 flex flex-col md:flex-row">
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
       v-if="this.invoiceData.isPrinting"
@@ -42,10 +42,7 @@
           <option value="Paid" v-if="this.auth.viewAllStatus === 1">
             Paid
           </option>
-          <option
-            value="Consolidated"
-            v-if="this.auth.viewAllStatus === 1"
-          >
+          <option value="Consolidated" v-if="this.auth.viewAllStatus === 1">
             Consolidated
           </option>
           <option value="Return" v-if="this.auth.viewAllStatus === 1">
@@ -68,34 +65,35 @@
             "
           >
             <div class="flex items-center space-x-4">
-              <div class="min-w-0 flex-1">
+              <div class="flex-1">
                 <p
-                  class="truncate text-base font-semibold text-gray-900 dark:text-white"
+                  class="truncate text-base font-medium text-gray-900 dark:text-white"
                 >
                   {{ recentOrder.name }}
                 </p>
-                <p class="truncate text-sm text-gray-900 dark:text-gray-400">
+                <p class="truncate text-sm text-gray-600 dark:text-gray-400">
                   {{ recentOrder.customer }}
                 </p>
               </div>
-              <div class="flex items-center text-right">
-                <p
-                  class="text-base font-semibold text-gray-900 dark:text-white"
-                >
-                  {{ recentOrder.restaurant_table }}
+              <div class="flex-1 items-center text-center">
+                <p class="text-base font-medium text-gray-900 dark:text-white">
+                  {{
+                    recentOrder.restaurant_table
+                      ? recentOrder.restaurant_table
+                      : "Take Away"
+                  }}
                 </p>
               </div>
-              <div class="items-center space-x-4 text-right">
-                <div class="min-w-0 flex-1">
+              <div class="flex-1 items-center space-x-4 text-right">
+                <div class="flex-1">
                   <p
-                    class="truncate text-base font-semibold text-gray-900 dark:text-white"
+                    class="truncate text-base font-medium text-gray-900 dark:text-white"
                   >
                     ₹ {{ recentOrder.grand_total }}
                   </p>
-                  <p class="truncate text-sm text-gray-900 dark:text-gray-400">
+                  <p class="truncate text-sm text-gray-600 dark:text-gray-400">
                     {{
-                      this.recentOrders.getFormattedDateTime(
-                        recentOrder.posting_date,
+                      this.recentOrders.getFormattedTime(
                         recentOrder.posting_time
                       )
                     }}
@@ -169,14 +167,18 @@
           >
             {{ this.recentOrders.selectedOrder.customer }}
           </p>
-          <div class="mt-9">
-            <p
-              class="truncate text-xs text-gray-500 dark:text-gray-400"
-              v-if="this.recentOrders.selectedOrder.waiter"
-            >
-              Waiter : {{ this.recentOrders.selectedOrder.waiter }}
-            </p>
-          </div>
+          <p
+            class="mr-2 mt-2 truncate text-sm text-gray-500 dark:text-gray-400"
+          >
+            {{ this.recentOrders.postingDate }}
+          </p>
+
+          <p
+            class="mr-2 mt-2 truncate text-sm text-gray-500 dark:text-gray-400"
+            v-if="this.recentOrders.selectedOrder.waiter"
+          >
+            Waiter : {{ this.recentOrders.selectedOrder.waiter }}
+          </p>
         </div>
         <div class="items-center space-x-4 text-right">
           <div class="min-w-0 flex-1">
@@ -317,20 +319,6 @@
         >
           Print Receipt
         </button>
-        <!-- <button
-          type="button"
-          class="mr-2 mb-2 rounded-lg border border-gray-200 bg-white py-2.5 px-5 text-sm font-medium text-gray-600 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-          @click="this.recentOrders.showDialog = true"
-        >
-          Email Receipt
-        </button>
-        <button
-          type="button"
-          class="mr-2 mb-2 rounded-lg border border-gray-200 bg-white py-2.5 px-5 text-sm font-medium text-gray-600 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-          @click="this.recentOrders.return()"
-        >
-          Return
-        </button> -->
       </div>
       <div
         class="mt-2 rounded px-4 py-2 text-center"

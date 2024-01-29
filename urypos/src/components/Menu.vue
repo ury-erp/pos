@@ -1,7 +1,8 @@
 <template>
+  <orderInfo/>
   <Search />
   <div class="container mx-auto" v-if="this.menu.paginatedItems.length > 0">
-    <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+    <div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
       <div
         class="rounded-md border px-2 py-2 text-center shadow"
         v-for="item in this.menu.paginatedItems"
@@ -197,6 +198,7 @@
 
 <script>
 import Search from "./Search.vue";
+import orderInfo from "./orderInfo.vue";
 import { useMenuStore } from "@/stores/Menu.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
@@ -211,6 +213,7 @@ export default {
   name: "Menu",
   components: {
     Search,
+    orderInfo,
   },
   mounted() {
     window.scrollTo(0, 0);

@@ -1,29 +1,34 @@
 <template>
-  <div class="float-right rounded px-4 py-2" v-if="this.menu.cart.length > 0">
-    <button
-      class="mr-4 rounded px-4 py-2 shadow"
-      v-if="this.invoiceData.showUpdateButtton === true"
-      @click="this.invoiceData.invoiceCreation()"
-    >
-      Update
-    </button>
-    <!-- <button
+  <div class="flex">
+    <div class="flex-grow">
+      <orderInfo />
+    </div>
+    <div class="float-right rounded " v-if="this.menu.cart.length > 0">
+      <button
+        class="mr-4 rounded px-4 py-2 shadow"
+        v-if="this.invoiceData.showUpdateButtton === true"
+        @click="this.invoiceData.invoiceCreation()"
+      >
+        Update
+      </button>
+      <!-- <button
       class="mr-4 rounded py-2 px-4 shadow"
       @click="this.invoiceData.kotReprint()"
     >
       KOT Reprint
     </button> -->
-    <button
-      class="rounded px-4 py-2 shadow"
-      v-if="
-        (this.recentOrders.invoicePrinted === 0 ||
-          this.table.invoicePrinted === 0) &&
-        !this.auth.cashier
-      "
-      @click="this.invoiceData.showCancelInvoiceModal()"
-    >
-      Cancel
-    </button>
+      <button
+        class="rounded px-4 py-2 shadow"
+        v-if="
+          (this.recentOrders.invoicePrinted === 0 ||
+            this.table.invoicePrinted === 0) &&
+          !this.auth.cashier
+        "
+        @click="this.invoiceData.showCancelInvoiceModal()"
+      >
+        Cancel
+      </button>
+    </div>
   </div>
   <div
     class="flex h-screen items-center justify-center"
@@ -32,7 +37,7 @@
     <div class="text-center">Nothing to show here</div>
   </div>
 
-  <div class="mt-20 border shadow" v-if="this.menu.cart.length > 0">
+  <div class="mt-5 border shadow" v-if="this.menu.cart.length > 0">
     <div
       class="cart-item-details grid w-full grid-cols-3 gap-4 md:w-full lg:w-full"
     >
@@ -72,7 +77,6 @@
         <button
           class="p-2 text-center"
           type="button"
-         
           @click="
             (this.recentOrders.editPrintedInvoice === 0 ||
               this.auth.removeTableOrderItem === 1) &&
@@ -339,6 +343,7 @@
 </template>
 
 <script>
+import orderInfo from "./orderInfo.vue";
 import { useMenuStore } from "@/stores/Menu.js";
 import { useTableStore } from "@/stores/Table.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
@@ -347,7 +352,9 @@ import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
   name: "Cart",
- 
+  components: {
+    orderInfo,
+  },
   setup() {
     const menu = useMenuStore();
     const table = useTableStore();

@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "./Auth.js";
 
-
 export const useAlert = defineStore("alert", {
   state: () => ({
-    auth : useAuthStore(),okButtonClicked:false
+    auth: useAuthStore(),
+    okButtonClicked: false,
   }),
   actions: {
     createAlert(title, message, buttonText) {
@@ -26,16 +26,21 @@ export const useAlert = defineStore("alert", {
         modal.classList.add(
           "fixed",
           "top-10",
-          "left-1/2",
-          "-translate-x-1/2",
           "z-50",
+          "lg:left-1/2",
           "transform",
+          "lg:-translate-x-1/2",
           "bg-white",
           "p-6",
           "rounded-lg",
-          "shadow-lg"
+          "shadow-lg",
+          "w-100"
         );
-        modal.style.maxWidth = "80%"; // Adjust the maximum width as needed
+        const mediaQuery = window.matchMedia("(max-width: 767px)");
+        if (mediaQuery.matches) {
+          modal.classList.remove("lg:left-1/2", "lg:-translate-x-1/2");
+          modal.classList.add("left-0", "right-0"); 
+        }
         document.body.appendChild(modal);
 
         // Create the modal content
@@ -45,7 +50,7 @@ export const useAlert = defineStore("alert", {
           <hr class="my-6 border-t border-gray-300" />
 
           <p class="mb-4 text-justify text-sm">${message}</p>
-          <button class="bg-blue-700 md:ml-96 ml-28  text-white px-4 py-2 rounded-md">${buttonText}</button>
+          <button class="bg-blue-700 md:ml-96 ml-64 text-white px-4 py-2 rounded-md">${buttonText}</button>
         `;
         modal.appendChild(modalContent);
 
@@ -54,9 +59,9 @@ export const useAlert = defineStore("alert", {
         closeButton.addEventListener("click", () => {
           modal.remove();
           backdrop.remove();
-          resolve(); 
-          if (this.auth.isPosOpen ===false ){
-            this.auth.isPosOpenChecking()
+          resolve();
+          if (this.auth.isPosOpen === false) {
+            this.auth.isPosOpenChecking();
           }
           this.okButtonClicked = true;
         });
