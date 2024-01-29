@@ -2,7 +2,7 @@
   <orderInfo />
   <div class="container m-auto">
     <div class="mb-6 gap-6 md:grid-cols-2">
-      <div class="relative mt-2" ref="container">
+      <div class="relative mt-5 lg:mt-2" ref="container">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
         >

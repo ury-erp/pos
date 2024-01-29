@@ -97,7 +97,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const numberOfPax = customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice || this.table.invoiceNo || null;
-      let lastInvoice=this.invoiceNumber || this.recentOrders.draftInvoice || this.table.invoiceNo || null
+      let lastInvoice =
+        this.invoiceNumber ||
+        this.recentOrders.draftInvoice ||
+        this.table.invoiceNo ||
+        null;
 
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
@@ -123,7 +127,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         pos_profile: this.posProfile,
         invoice: invoice,
         last_invoice: lastInvoice,
-        comments:this.menu.comments
+        comments: this.menu.comments,
       };
       if (!this.auth.cashier && !numberOfPax) {
         this.alert.createAlert(

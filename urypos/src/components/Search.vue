@@ -1,6 +1,6 @@
 <template>
   <!-- Search & Filters -->
-  <div class="flex flex-col md:flex-row mt-2">
+  <div class="flex flex-col md:flex-row mt-5 lg:mt-2">
     <div
       class="relative"
       :class="[

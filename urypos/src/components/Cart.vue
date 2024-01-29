@@ -1,5 +1,5 @@
 <template>
-  <div class="flex">
+  <div class="flex mt-5">
     <div class="flex-grow">
       <orderInfo />
     </div>
