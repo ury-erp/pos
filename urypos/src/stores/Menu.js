@@ -44,7 +44,6 @@ export const useMenuStore = defineStore("menu", {
         }
       } else {
         const searchTerm = state.searchTerm.toLowerCase();
-        console;
         return state.items.filter(
           (item) =>
             typeof item.item_name === "string" &&
@@ -54,7 +53,7 @@ export const useMenuStore = defineStore("menu", {
         );
       }
     },
-
+   
     totalPages() {
       return Math.ceil(this.filteredItems.length / this.perPage);
     },
@@ -111,9 +110,16 @@ export const useMenuStore = defineStore("menu", {
           }
         });
     },
+    itemNameExtract(item_name){
+      return item_name? item_name.split(" ").map((word) => (word ? word[0].toUpperCase() : "")).join("").substring(0, 2): ""
+    },
     updateSearchTerm() {
       this.currentPage = 1;
     },
+    getFullImagePath(relativePath) {
+      return `${frappe.url}${relativePath}`;
+    },
+
     handleSearchInput(event) {
       this.searchTerm = event.target.value;
       this.updateSearchTerm();

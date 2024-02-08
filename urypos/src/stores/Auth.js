@@ -26,6 +26,7 @@ export const useAuthStore = defineStore("auth", {
     userAuth: localStorage.getItem("userAuth"),
     activeDropdown: false,
     userName: "",
+    viewItemImage:null,
     removeTableOrderItem: null,
     hasAccess: false,
     isPosOpen: true,
@@ -145,6 +146,7 @@ export const useAuthStore = defineStore("auth", {
               );
               this.viewAllStatus = result.message.view_all_status;
               this.removeTableOrderItem = result.message.remove_items;
+              this.viewItemImage=result.message.show_image
               
             })
             .catch((error) => console.error(error));

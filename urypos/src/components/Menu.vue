@@ -1,20 +1,57 @@
 <template>
-  <orderInfo/>
+  <orderInfo />
   <Search />
   <div class="container mx-auto" v-if="this.menu.paginatedItems.length > 0">
-    <div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+    <div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
       <div
-        class="rounded-md border px-2 py-2 text-center shadow"
+        class="rounded border px-2 py-2 text-left shadow"
         v-for="item in this.menu.paginatedItems"
         :key="item.item"
       >
-        <h2 class="mb-2 mt-0 text-lg font-normal leading-normal">
+        <div class="w-100" v-if="this.auth.viewItemImage">
+          <div v-if="item.item_imgae">
+            <img
+              :src="this.menu.getFullImagePath(item.item_imgae)"
+              alt="Item Image"
+              class="min-h-36 rounded"
+            />
+          </div>
+          <div v-else class="relative">
+            <img
+              :src="`https://dummyimage.com/640x640/f9fafa/fff&text=+`"
+              alt="Item Image"
+              class="min-h-36 rounded"
+            />
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-3xl text-gray-400">{{
+                this.menu.itemNameExtract(item.item_name)
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <h2
+          class="mt-0"
+          :class="{
+            'text-md overflow-hidden whitespace-nowrap text-gray-600':
+              this.auth.viewItemImage,
+            'mb-2 text-center text-lg font-normal leading-normal':
+              !this.auth.viewItemImage,
+          }"
+        >
           {{ item.item_name }}
         </h2>
-        <h2 class="mb-2 mt-0 text-lg font-normal leading-normal">
+        <h2
+          class="mt-0"
+          :class="{
+            'text-sm font-bold': this.auth.viewItemImage,
+            'mb-2 mt-0 text-center text-lg font-normal leading-normal':
+              !this.auth.viewItemImage,
+          }"
+        >
           ₹ {{ item.rate }}
         </h2>
-        <div v-if="!item.qty">
+        <div v-if="!item.qty" class="text-center">
           <button
             @click="
               item.showInput = true;
@@ -25,10 +62,10 @@
             ADD +
           </button>
         </div>
-        <div v-if="item.qty" class="flex rounded-md">
+        <div v-if="item.qty" class="flex rounded-md text-center">
           <button
             type="button"
-            class="-ml-px inline-flex items-center justify-center gap-2 border bg-white px-4 py-3 align-middle text-sm font-medium shadow-sm transition-all focus:outline-none dark:border-gray-700"
+            class="inline-flex items-center justify-center gap-2 border bg-white px-4 py-3 align-middle text-sm font-medium shadow-sm transition-all focus:outline-none dark:border-gray-700"
             :class="{
               'text-gray-700':
                 this.recentOrders.editPrintedInvoice === 0 ||
@@ -199,11 +236,17 @@
 <script>
 import Search from "./Search.vue";
 import orderInfo from "./orderInfo.vue";
+import frappe from "@/stores/frappeSdk.js";
 import { useMenuStore } from "@/stores/Menu.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
+  data() {
+    return {
+      frappe: frappe,
+    };
+  },
   setup() {
     const menu = useMenuStore();
     const auth = useAuthStore();

@@ -42,6 +42,8 @@ clicking it will direct to the respective pages
 
 - Search bar to quickly locate specific menu items, enhancing speed and accuracy during busy periods.
 
+- Toggle visibility of menu item image based on "View Item Image" checkbox in POS profile.
+
 - Menu filtering with Button All - Display all menu item. Priority - displays only prioritized items.
 
 - Menus are presented in a card format which includes the menu name, selected quantity of the item , and +/- buttons for adjusting quantities.
