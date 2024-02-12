@@ -94,6 +94,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       let cart = this.menu.cart;
       const customers = useCustomerStore();
       const customerName = customers.search;
+      const ordeType = customers.selectedOrderType;
       const numberOfPax = customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice ||
@@ -129,6 +130,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         last_modified_time: this.table.modifiedTime,
         pos_profile: this.posProfile,
         invoice: invoice,
+        order_type: ordeType,
         last_invoice: lastInvoice,
         comments: this.menu.comments,
       };
@@ -141,6 +143,9 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.showUpdateButtton = true;
       } else if (!this.auth.cashier && !selectedTables) {
         this.alert.createAlert("Message", "Please Select a Table", "OK");
+        this.showUpdateButtton = true;
+      } else if (this.auth.cashier && !ordeType) {
+        this.alert.createAlert("Message", "Please Select Order Type", "OK");
         this.showUpdateButtton = true;
       } else {
         this.call

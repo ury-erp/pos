@@ -227,7 +227,7 @@
           </div>
         </div>
       </div>
-      <div class="relative mb-6 mt-4">
+      <div class="relative mb-4 mt-4" v-if="!this.auth.cashier">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
         >
@@ -246,39 +246,86 @@
           </svg>
         </div>
         <input
-          type="text"
-          id="input-group-1"
+          type="number"
+          id="numberOfPax"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Pax"
           required
           v-model="this.customers.numberOfPax"
         />
       </div>
+      <div class="relative mt-5" ref="container" v-if="this.auth.cashier">
+        <div
+          class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+        >
+          <svg
+            aria-hidden="true"
+            class="h-5 w-5 text-gray-500 dark:text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <input
+          type="text"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
+          placeholder="Order Type"
+          v-model="this.customers.selectedOrderType"
+          @click="this.customers.pickOrderType()"
+          required
+        />
+
+        <div
+          v-if="this.customers.showOrderType"
+          class="absolute left-0 top-full z-10 max-h-64 w-full overflow-y-scroll rounded bg-white shadow md:w-3/5 lg:w-2/5"
+          ref="dropdown"
+        >
+          <div
+            class="p-2 hover:bg-gray-100"
+            v-for="(orderType, index) in this.customers.orderType"
+            :key="index"
+            @click="this.customers.selectOrderType(orderType)"
+          >
+            <h1 class="text-base font-normal leading-normal">
+              {{ orderType.name }}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      
       <h1
-        class="tex mt-10 text-xl font-semibold"
+        class="tex mt-5 text-lg font-medium"
         v-if="this.customers.customerFavouriteItems.length > 0"
       >
         Favourite Items
       </h1>
 
       <div
-        class="cart-item-details mt-1 grid grid-cols-4 gap-2 py-2 sm:w-full md:w-full lg:w-full"
+        class="cart-item-details mt-1 grid grid-cols-2 gap-6 py-2 sm:w-full md:w-full lg:w-full lg:grid-cols-4"
         v-if="this.customers.customerFavouriteItems.length > 0"
       >
-        <h3 class="font-semibold">Item Name</h3>
-        <h3 class="font-semibold">Quantity</h3>
+        <h3 class="text-base font-medium">Item Name</h3>
+        <h3 class="text-center text-base font-medium">Quantity</h3>
       </div>
       <div
         v-for="(item, index) in this.customers.customerFavouriteItems"
         :key="index"
       >
-        <img />
         <div
-          class="cart-item-details sm:min-w-none grid w-full min-w-0 grid-cols-4 gap-2 py-2 sm:w-full md:w-full lg:w-full"
+          class="cart-item-details sm:min-w-none grid w-full grid-cols-2 gap-6 py-2 sm:w-full md:w-full lg:w-full lg:grid-cols-4"
         >
-          <h3>{{ item.item_name }}</h3>
+          <span>{{ item.item_name }}</span>
 
-          <h3 class="ml-4">{{ item.qty }}</h3>
+          <span class="text-center">{{ item.qty }}</span>
         </div>
       </div>
     </div>
@@ -288,6 +335,7 @@
 <script>
 import orderInfo from "./orderInfo.vue";
 import { useCustomerStore } from "@/stores/Customer.js";
+import { useAuthStore } from "@/stores/Auth.js";
 
 export default {
   name: "Customer",
@@ -296,7 +344,8 @@ export default {
   },
   setup() {
     const customers = useCustomerStore();
-    return { customers };
+    const auth = useAuthStore();
+    return { customers, auth };
   },
 };
 </script>

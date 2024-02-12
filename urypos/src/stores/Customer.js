@@ -10,12 +10,15 @@ export const useCustomerStore = defineStore("customers", {
     search: "",
     alert: useAlert(),
     showCustomers: false,
+    showOrderType: false,
     numberOfPax: "",
     selectedCustomerName: "",
+    selectedOrderType: "",
     customerFavouriteItems: [],
     showModalNewCustomer: false,
     newCustomerMobileNo: "",
     newCustomer: "",
+    orderType: [],
     showCustomersGroup: false,
     showCustomersTerritory: false,
     showAddNewCustomer: true,
@@ -46,7 +49,7 @@ export const useCustomerStore = defineStore("customers", {
         })
         .catch((error) => console.error(error));
     },
-    handleSearchInput(event){
+    handleSearchInput(event) {
       this.search = event.target.value;
       this.pickCustomer();
     },
@@ -145,6 +148,21 @@ export const useCustomerStore = defineStore("customers", {
       this.search = customer.name;
       this.showCustomers = false;
       this.fectchCustomerFavouriteItem();
+    },
+    pickOrderType() {
+      this.showOrderType = true;
+      this.call
+        .get("ury.ury_pos.api.get_select_field_options")
+        .then((result) => {
+          this.orderType = result.message.filter(
+            (option) => option.name !== ""
+          );
+        })
+        .catch((error) => console.error(error));
+    },
+    selectOrderType(orderType) {
+      this.showOrderType = false;
+      this.selectedOrderType = orderType.name;
     },
     async fectchCustomerFavouriteItem() {
       const table = useTableStore();
