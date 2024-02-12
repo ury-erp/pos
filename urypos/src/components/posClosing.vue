@@ -4,12 +4,20 @@
       <h3 class="mr-3 text-lg font-semibold text-gray-900 dark:text-white">
         POS Closing Entry
       </h3>
-      <Badge
-        :type="this.posClose.getBadgeType()"
-        v-if="this.posClose.isPosClose !== null"
+      <span
+        class="me-2 rounded px-2.5 py-0.5 text-sm font-medium"
+        :class="{
+          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300':
+            this.posClose.getBadgeType() === 'red',
+          'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300':
+            this.posClose.getBadgeType() === 'default',
+
+          'bg-yellow-100 text-yellow-800':
+            this.posClose.getBadgeType() === 'yellow',
+        }"
       >
         <span class="text-xs">{{ this.posClose.getBadgeText() }}</span>
-      </Badge>
+      </span>
     </div>
     <div class="flex space-x-4">
       <button
@@ -28,7 +36,7 @@
       </button>
     </div>
   </div>
-  <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+  <h3 class="text-base font-normal text-gray-900 dark:text-white">
     Period Details
   </h3>
 
@@ -70,7 +78,7 @@
         class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
         >Period End Date</label
       >
-      
+
       <date-picker
         v-model:value="this.posClose.periodEndDate"
         :default-value="new Date()"
@@ -179,93 +187,13 @@
       </div>
     </div>
   </div>
-  <div v-if="this.posClose.invoiceDetails.length > 0">
-    <hr class="my-6 border-t border-gray-300" />
-    <h3 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">
-      Linked Invoices
-    </h3>
-
-    <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
-      POS Transactions
-    </h3>
-
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-      <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-        <thead
-          class="bg-gray-50 text-base font-semibold uppercase text-gray-900 dark:text-white"
-        >
-          <tr>
-            <th scope="col" class="px-6 py-3">POS Invoice</th>
-            <th scope="col" class="px-6 py-3 text-center">Date</th>
-            <th scope="col" class="px-6 py-3 text-center">Amount</th>
-            <th scope="col" class="px-6 py-3"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            class="border-b bg-white dark:border-gray-700 dark:bg-gray-900"
-            v-for="(invoiceDetails, index) in posClose.invoiceDetails"
-            :key="index"
-          >
-            <th
-              scope="row"
-              class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
-            >
-              {{ invoiceDetails.name }}
-            </th>
-            <td
-              class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white"
-            >
-              {{ invoiceDetails.modified.split(" ")[0] }}
-            </td>
-            <td
-              class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white"
-            >
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                v-model="invoiceDetails.grand_total"
-                class="border-none text-center"
-              />
-            </td>
-
-            <td class="px-6 py-4">
-              <button
-                class="p-2 text-center"
-                type="button"
-                @click="this.posClose.deleteRow(index)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="25"
-                  fill="currentColor border"
-                  class="bi bi-trash"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"
-                  ></path>
-                  <path
-                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"
-                  ></path>
-                </svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <div v-if="this.posClose.openingBalance.length > 0">
     <hr class="my-6 border-t border-gray-300" />
     <h3 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">
       Modes of Payment
     </h3>
 
-    <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+    <h3 class="mb-3 text-sm font-normal text-gray-900 dark:text-white">
       Payment Reconciliation
     </h3>
 
@@ -409,7 +337,7 @@
   <hr class="my-6 border-t border-gray-300" />
   <div
     v-if="this.posClose.showSumbitPosclose"
-    class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
+    class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
   >
     <div class="mt-3 flex items-center justify-center">
       <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">

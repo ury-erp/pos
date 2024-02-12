@@ -4,12 +4,18 @@
       <h3 class="mr-3 text-lg font-semibold text-gray-900 dark:text-white">
         POS Opening Entry
       </h3>
-      <Badge
-        :type="this.posOpen.getBadgeType()"
-        v-if="this.posOpen.isPosOpen !== null"
+      <span
+        class="me-2 rounded px-2.5 py-0.5 text-sm font-medium"
+        :class="{
+          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300':
+            this.posOpen.getBadgeType() === 'red',
+
+          'bg-yellow-100 text-yellow-800':
+            this.posOpen.getBadgeType() === 'yellow',
+        }"
       >
         <span class="text-xs">{{ this.posOpen.getBadgeText() }}</span>
-      </Badge>
+      </span>
     </div>
     <div class="flex space-x-4">
       <button
@@ -194,9 +200,9 @@
 
   <div
     v-if="this.posOpen.showSumbitPosOpen"
-    class="fixed inset-0 mt-20 z-10 overflow-y-auto bg-gray-100"
+    class="fixed inset-0 z-10 mt-20 overflow-y-auto bg-gray-100"
   >
-    <div class="mt-3 flex items-center justify-center">
+    <div class="mt-5 flex items-center justify-center">
       <div class="w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
         <div class="flex items-center justify-between">
           <h3 class="text-xl text-gray-900 dark:text-white">Confirm</h3>
@@ -243,7 +249,6 @@
 </template>
 
 <script>
-import { Badge } from "flowbite-vue";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { posOpening } from "@/stores/posOpening.js";
 
@@ -251,7 +256,7 @@ import DatePicker from "vue-datepicker-next";
 import "vue-datepicker-next/index.css";
 export default {
   name: "posOpen",
-  components: { DatePicker, Badge },
+  components: { DatePicker },
   setup() {
     const invoiceData = useInvoiceDataStore();
     const posOpen = posOpening();

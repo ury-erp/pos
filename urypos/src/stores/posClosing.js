@@ -213,8 +213,6 @@ export const posClosing = defineStore("posClose", {
         return "red";
       } else if (this.isPosClose === "Submitted") {
         return "default";
-      } else {
-        return "default"; // Default label for other cases
       }
     },
     getBadgeText() {

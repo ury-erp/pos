@@ -19,7 +19,7 @@
           "
         >
           <h3
-            class="mb-2 mt-2 p-1 text-3xl font-medium text-gray-900 dark:text-white"
+            class="mb-2 mt-2 p-1 text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white"
           >
             {{ this.table.selectedTable }}
           </h3>
@@ -69,7 +69,7 @@
                     {{ this.auth.getLoginAvatar() }}
                   </h1>
                 </li>
-                <!-- <li v-if="this.auth.cashier">
+                <li v-if="this.auth.cashier">
                   <a
                     href="#"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -84,7 +84,7 @@
                     @click="this.posClose.routeToPosClose"
                     >POS Closing</a
                   >
-                </li> -->
+                </li>
 
                 <li>
                   <a
