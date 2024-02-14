@@ -147,7 +147,7 @@ export const useTableStore = defineStore("table", {
         const timeDifference = this.getTimeDifference(table);
         const [hours, minutes] = timeDifference.split(":");
         const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
-        if (totalMinutes > 60) {
+        if (totalMinutes > this.invoiceData.tableAttention) {
           return "red";
         } else {
           return "yellow";
@@ -163,7 +163,7 @@ export const useTableStore = defineStore("table", {
         const timeDifference = this.getTimeDifference(table);
         const [hours, minutes] = timeDifference.split(":");
         const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
-        if (totalMinutes > 60) {
+        if (totalMinutes > this.invoiceData.tableAttention) {
           return "Attention";
         } else {
           return "Occupied";

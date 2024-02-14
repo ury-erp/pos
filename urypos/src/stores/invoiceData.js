@@ -45,7 +45,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     isPrinting: false,
     cancelInvoiceFlag: false,
     previousOrderItem: [],
-
+    tableAttention: null,
     table: useTableStore(),
     call: frappe.call(),
     qz_print: null,
@@ -53,25 +53,24 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
   actions: {
     async fetchInvoiceDetails() {
       try {
-        const invoiceDetailses = await this.call
-          .get("ury.ury_pos.api.getPosProfile")
-          .then((result) => {
-            this.invoiceDetails = result.message;
-            this.warehouse = this.invoiceDetails.warehouse;
-            this.posProfile = this.invoiceDetails.pos_profile;
-            this.waiter = this.invoiceDetails.waiter;
-            this.cashier = this.invoiceDetails.cashier;
-            this.branch = this.invoiceDetails.branch;
-            this.company = this.invoiceDetails.company;
-            this.print_format = this.invoiceDetails.print_format;
-            this.qz_print = this.invoiceDetails.qz_print;
-            this.qz_host = this.invoiceDetails.qz_host;
-            this.print_type = this.invoiceDetails.print_type;
-            this.printer = this.invoiceDetails.printer;
-            if (this.qz_host) {
-              loadQzPrinter(this.qz_host);
-            }
-          });
+        await this.call.get("ury.ury_pos.api.getPosProfile").then((result) => {
+          this.invoiceDetails = result.message;
+          this.tableAttention = this.invoiceDetails.tableAttention;
+          this.warehouse = this.invoiceDetails.warehouse;
+          this.posProfile = this.invoiceDetails.pos_profile;
+          this.waiter = this.invoiceDetails.waiter;
+          this.cashier = this.invoiceDetails.cashier;
+          this.branch = this.invoiceDetails.branch;
+          this.company = this.invoiceDetails.company;
+          this.print_format = this.invoiceDetails.print_format;
+          this.qz_print = this.invoiceDetails.qz_print;
+          this.qz_host = this.invoiceDetails.qz_host;
+          this.print_type = this.invoiceDetails.print_type;
+          this.printer = this.invoiceDetails.printer;
+          if (this.qz_host) {
+            loadQzPrinter(this.qz_host);
+          }
+        });
       } catch (error) {
         console.error(error);
       }
