@@ -259,19 +259,18 @@
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
         >
           <svg
+            class="h-6 w-6 text-gray-800 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
             aria-hidden="true"
-            class="h-5 w-5 text-gray-500 dark:text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
           >
             <path
+              stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
+              d="M15 4h3c.6 0 1 .4 1 1v15c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V5c0-.6.4-1 1-1h3m0 3h6m-3 5h3m-6 0h0m3 4h3m-6 0h0m1-13v4h4V3h-4Z"
+            />
           </svg>
         </div>
         <input
@@ -280,6 +279,7 @@
           placeholder="Order Type"
           v-model="this.customers.selectedOrderType"
           @click="this.customers.pickOrderType()"
+          readonly
           required
         />
 
@@ -301,7 +301,6 @@
         </div>
       </div>
 
-      
       <h1
         class="tex mt-5 text-lg font-medium"
         v-if="this.customers.customerFavouriteItems.length > 0"
