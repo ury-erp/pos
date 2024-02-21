@@ -88,8 +88,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     async invoiceCreation() {
       this.showUpdateButtton = false;
       let selectedTables = "";
-      this.invoiceNo = this.table.invoiceNo;
-
       let cart = this.menu.cart;
       const customers = useCustomerStore();
       const customerName = customers.search;
@@ -143,7 +141,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       } else if (!this.auth.cashier && !selectedTables) {
         this.alert.createAlert("Message", "Please Select a Table", "OK");
         this.showUpdateButtton = true;
-      } else if (this.auth.cashier && !ordeType) {
+      } else if (this.auth.cashier && !ordeType && !selectedTables) {
         this.alert.createAlert("Message", "Please Select Order Type", "OK");
         this.showUpdateButtton = true;
       } else {

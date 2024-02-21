@@ -4,7 +4,6 @@
 - Before using URY POS, ensure you have URY  and Doppio installed in your bench.
 - Doppio is used to setup and manage  custom desk pages using Vue 3 on URY POS App and you don't have to install doppio in your site.
 - Follow the [URY installation guide](https://github.com/ury-erp/ury/blob/main/INSTALLATION.md) for the installation process.
-- URY POS is currently supported on HTTPS sites only.
 
 
 ### To install URY POS , follow these steps:

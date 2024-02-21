@@ -169,7 +169,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       let previousOrderdCustomer = "";
       const menu = useMenuStore();
       let items = menu.items;
-      console.log(this.draftInvoice,"this.draftInvoice")
       this.draftInvoice = this.invoiceNumber;
       this.editPrintedInvoice = this.invoicePrinted;
       items.forEach((item) => {
