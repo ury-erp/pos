@@ -1,9 +1,9 @@
 <template>
-  <div class="flex mt-5">
+  <div class="mt-5 flex">
     <div class="flex-grow">
       <orderInfo />
     </div>
-    <div class="float-right rounded " v-if="this.menu.cart.length > 0">
+    <div class="float-right rounded" v-if="this.menu.cart.length > 0">
       <button
         class="mr-4 rounded px-4 py-2 shadow"
         v-if="this.invoiceData.showUpdateButtton === true"
@@ -104,15 +104,17 @@
   </div>
   <div class="relative mt-8" v-if="this.menu.cart.length > 0">
     <label
-      for="Comments"
+      for="grand_total"
       class="mt-6 block text-left text-gray-900 dark:text-white"
     >
-      Comments
+      Grand Total
     </label>
     <input
-      id="comments"
       class="comments mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
-      v-model="this.menu.comments"
+      :value="
+        this.menu.grand_total || this.table.grandTotal || invoiceData.grandTotal
+      "
+      readonly
     />
   </div>
 
@@ -265,19 +267,6 @@
       </summary>
       <div class="additional-details m-3">
         <label
-          for="grand_total"
-          class="grand_total mt-10 block text-sm font-medium text-gray-900 dark:text-white"
-          v-if="this.table.grandTotal || invoiceData.grandTotal"
-        >
-          Grand Total
-        </label>
-        <input
-          class="block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
-          v-if="this.table.grandTotal || invoiceData.grandTotal"
-          :value="this.table.grandTotal || invoiceData.grandTotal"
-          readonly
-        />
-        <label
           for="invoiceNo"
           class="mt-10 block text-sm font-medium text-gray-900 dark:text-white"
           v-if="this.table.invoiceNo || invoiceData.invoiceNumber"
@@ -336,6 +325,17 @@
           :class="{ hidden: this.invoiceData.cashier === '' }"
           v-model="this.invoiceData.cashier"
           readonly
+        />
+        <label
+          for="Comments"
+          class="mt-10 block text-sm font-medium text-gray-900 dark:text-white"
+        >
+          Comments
+        </label>
+        <input
+          id="comments"
+          class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+          v-model="this.menu.comments"
         />
       </div>
     </details>
