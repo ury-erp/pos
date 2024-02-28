@@ -10,47 +10,48 @@ import frappe from "./frappeSdk.js";
 
 export const usetoggleRecentOrder = defineStore("recentOrders", {
   state: () => ({
-    recentOrderList: [],
-    selectedStatus: "Draft",
-    searchOrder: "",
-    alert: useAlert(),
-    showOrder: false,
-    selectedOrder: null,
-    recentOrderListItems: [],
-    texDetails: [],
-    netTotal: 0,
-    grandTotal: 0,
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
-    invoiceNumber: null,
+    alert: useAlert(),
+    call: frappe.call(),
+    recentOrderList: [],
+    recentOrderListItems: [],
+    texDetails: [],
     pastOrderdItem: [],
     pastOrder: [],
-    paidAmount: 0,
-    paymentMethod: 0,
+    modeOfPaymentList: [],
     payments: [],
-    modeOfPaymentName: null,
-    restaurantTable: null,
-    currentPage: 1,
-    perPage: 10,
-    showDialog: false,
+    selectedStatus: "Draft",
+    searchOrder: "",
     customerNameForBilling: "",
     posProfile: "",
-    postingDate:null,
+    paidAmount: 0,
+    paymentMethod: 0,
+    currentPage: 1,
+    perPage: 10,
+    netTotal: 0,
+    grandTotal: 0,
+    billAmount: 0,
+    editPrintedInvoice: 0,
     table: null,
+    postingDate: null,
+    invoiceNumber: null,
+    selectedOrder: null,
+    restaurantTable: null,
+    modeOfPaymentName: null,
+    invoicePrinted: null,
+    setBackground: null,
+    selectedTable: null,
+    recentWaiter: null,
+    cancelReason: null,
+    draftInvoice: null,
+    pastOrderType: null,
+    showOrder: false,
+    showDialog: false,
     isLoading: false,
     showPayment: false,
     isChecked: false,
-    modeOfPaymentList: [],
-    setBackground: null,
-    selectedTable: null,
-    billAmount: 0,
-    recentWaiter: null,
     cancelInvoiceFlag: false,
-    invoicePrinted: null,
-    editPrintedInvoice: 0,
-    cancelReason: null,
-    call: frappe.call(),
-    draftInvoice: null,
   }),
   getters: {
     filteredOrders() {
@@ -138,7 +139,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       const dateTimeString = `${recentOrder.posting_date}`;
       const dateTime = moment(dateTimeString, "YYYY-MM-DD");
       this.postingDate = dateTime.format("Do MMMM");
-      
+
       const getPosInvoiceItems = {
         invoice: this.invoiceNumber,
       };
@@ -187,8 +188,8 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.restaurantTable = pastOrder.restaurant_table;
           this.pastOrderdItem = pastOrder.items;
           this.recentWaiter = pastOrder.waiter;
+          this.pastOrderType=pastOrder.order_type
           previousOrderdCustomer = pastOrder.customer;
-
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
           const customers = useCustomerStore();

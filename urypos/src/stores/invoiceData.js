@@ -91,7 +91,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       let cart = this.menu.cart;
       const customers = useCustomerStore();
       const customerName = customers.search;
-      const ordeType = customers.selectedOrderType;
+      const ordeType = customers.selectedOrderType || this.recentOrders.pastOrderType ;
       const numberOfPax = customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice ||

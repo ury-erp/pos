@@ -277,7 +277,9 @@
           type="text"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Order Type"
-          v-model="this.customers.selectedOrderType"
+          :value="
+            this.customers.selectedOrderType || this.recentOrders.pastOrderType
+          "
           @click="this.customers.pickOrderType()"
           readonly
           required
@@ -335,6 +337,7 @@
 import orderInfo from "./orderInfo.vue";
 import { useCustomerStore } from "@/stores/Customer.js";
 import { useAuthStore } from "@/stores/Auth.js";
+import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 
 export default {
   name: "Customer",
@@ -344,7 +347,8 @@ export default {
   setup() {
     const customers = useCustomerStore();
     const auth = useAuthStore();
-    return { customers, auth };
+    const recentOrders = usetoggleRecentOrder();
+    return { customers, auth, recentOrders };
   },
 };
 </script>
