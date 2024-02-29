@@ -286,7 +286,7 @@
         />
 
         <div
-          v-if="this.customers.showOrderType"
+          v-if="this.customers.showOrderType && !this.recentOrders.restaurantTable"
           class="absolute left-0 top-full z-10 max-h-64 w-full overflow-y-scroll rounded bg-white shadow md:w-3/5 lg:w-2/5"
           ref="dropdown"
         >
