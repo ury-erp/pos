@@ -356,7 +356,7 @@
           >
             <div
               class="h-16 w-full rounded-lg p-4 hover:bg-gray-100"
-              v-for="(captain, index) in this.table.captain"
+              v-for="(captain, index) in this.table.searchCaptian"
               :key="index"
               @click="this.table.selectcaptain(captain)"
             >

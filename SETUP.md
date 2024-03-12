@@ -5,8 +5,7 @@ URY POS Setup:
 
 - To access URY POS:
    - Navigate to `/urypos/Table`
-   - Login to URY POS.
-
+   
 - Customer Search:
    - frappe.utils.global_search is used for customer searching ,you have to run the following commands for building search index
 

@@ -25,7 +25,6 @@ export const useTableStore = defineStore("table", {
     showModal: false,
     newTable: "",
     showTable: false,
-    searchTable: [],
     menu: useMenuStore(),
     tableMenu: [],
     activeDropdown: null,
@@ -36,6 +35,7 @@ export const useTableStore = defineStore("table", {
     captain: [],
     previousWaiter: null,
     newCaptain: "",
+    transferTable: [],
     invoicePrinted: "",
     auth: useAuthStore(),
     call: frappe.call(),
@@ -50,6 +50,18 @@ export const useTableStore = defineStore("table", {
     },
     takeAway(state) {
       return state.tables.filter((table) => table.is_take_away === 1);
+    },
+    searchTable() {
+      return this.transferTable.filter((table) => {
+        return table.name.toLowerCase().includes(this.newTable.toLowerCase());
+      });
+    },
+    searchCaptian() {
+      return this.captain.filter((ordeTakers) => {
+        return ordeTakers.name
+          .toLowerCase()
+          .includes(this.newCaptain.toLowerCase());
+      });
     },
   },
 
@@ -77,7 +89,7 @@ export const useTableStore = defineStore("table", {
           filters: [["occupied", "like", "0%"]],
         })
         .then((table) => {
-          this.searchTable = table;
+          this.transferTable = table;
         })
         .catch((error) => {
           // console.error(error)
@@ -317,7 +329,7 @@ export const useTableStore = defineStore("table", {
         })
         .catch((error) => {
           if (error._server_messages) {
-            this.newTable=""
+            this.newTable = "";
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);
             this.alert.createAlert("Message", message.message, "OK");

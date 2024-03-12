@@ -23,7 +23,7 @@ clicking it will direct to the respective pages
 - Tables are visually represented as cards, providing flexibility in the selection process
 
 - On the top left side of table have badges that indicated table status:
-    - Attention(Red): Indicates the table occupied for more than one hour.
+    - Attention(Red): Indicates the table occupied for more than Table Attention time in POS Profile.
     - Occupied(Yellow): Indicates occupied tables.
     - Free(Green):Signifies available tables
     - Active(Blue): Highlights the currently selected table.
