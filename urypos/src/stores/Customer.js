@@ -162,7 +162,15 @@ export const useCustomerStore = defineStore("customers", {
     },
     selectOrderType(orderType) {
       this.showOrderType = false;
-      this.selectedOrderType = orderType.name;
+      if (orderType.name === "Dine In") {
+        this.alert.createAlert(
+          "Message",
+          "Dine in is not permitted for takeaway orders.",
+          "OK"
+        );
+      } else {
+        this.selectedOrderType = orderType.name;
+      }
     },
     async fectchCustomerFavouriteItem() {
       const table = useTableStore();
