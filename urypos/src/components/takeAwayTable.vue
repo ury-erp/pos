@@ -2,9 +2,9 @@
   <div class="flow-root">
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
-      v-if="this.invoiceData.isLoading"
+      v-if="this.invoiceData.isPrinting"
     >
-      Payment Being Processing
+      Printing Invoice
     </div>
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
       <div
