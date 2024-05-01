@@ -40,6 +40,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     cancelReason: null,
     tableInvoiceNo: null,
     invoiceNumber: null,
+    currency: null,
     showUpdateButtton: true,
     isChecked: false,
     isPrinting: false,
@@ -48,6 +49,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     tableAttention: null,
     table: useTableStore(),
     call: frappe.call(),
+    db: frappe.db(),
     qz_print: null,
   }),
   actions: {
@@ -70,9 +72,40 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
+          this.db
+            .getDoc("Company", this.company)
+            .then((doc) => {
+              this.db
+                .getDoc("Currency", doc.default_currency)
+                .then((currency) => {
+                  this.currency = currency.symbol;
+                })
+                .catch((error) => {
+                  if (error._server_messages) {
+                    this.alert.createAlert(
+                      "Message",
+                      "You do not have Read or Select Permissions for Currency",
+                      "OK"
+                    );
+                  }
+                });
+            })
+            .catch((error) => {
+              if (error._server_messages) {
+                this.alert.createAlert(
+                  "Message",
+                  "You do not have Read or Select Permissions for Company",
+                  "OK"
+                );
+              }
+            });
         });
       } catch (error) {
-        console.error(error);
+        if (error._server_messages) {
+          const messages = JSON.parse(error._server_messages);
+          const message = JSON.parse(messages[0]);
+          this.alert.createAlert("Message", message.message, "OK");
+        }
       }
       this.call
         .get("ury.ury_pos.api.getModeOfPayment")
@@ -91,7 +124,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       let cart = this.menu.cart;
       const customers = useCustomerStore();
       const customerName = customers.search;
-      const ordeType = customers.selectedOrderType || this.recentOrders.pastOrderType ;
+      const ordeType =
+        customers.selectedOrderType || this.recentOrders.pastOrderType;
       const numberOfPax = customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice ||

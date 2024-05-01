@@ -89,7 +89,7 @@
                   <p
                     class="truncate text-base font-medium text-gray-900 dark:text-white"
                   >
-                    ₹ {{ recentOrder.grand_total }}
+                  {{ this.invoiceData.currency }} {{ recentOrder.grand_total }}
                   </p>
                   <p class="truncate text-sm text-gray-600 dark:text-gray-400">
                     {{
@@ -185,7 +185,7 @@
             <p
               class="mr-2 truncate text-xl font-semibold text-gray-900 dark:text-white"
             >
-              ₹
+            {{ this.invoiceData.currency }}
               {{
                 this.recentOrders.selectedOrder.status === "Draft"
                   ? "0.00"
@@ -247,7 +247,7 @@
             </div>
             <div class="items-center space-x-4 text-right">
               <p class="mr-5 truncate text-base text-gray-800 dark:text-white">
-                ₹ {{ items.amount }}
+                {{ this.invoiceData.currency }} {{ items.amount }}
               </p>
             </div>
           </div>
@@ -268,7 +268,7 @@
 
           <div class="items-center space-x-4 text-right">
             <p class="mr-5 truncate text-base text-gray-800 dark:text-white">
-              ₹ {{ this.recentOrders.netTotal }}
+              {{ this.invoiceData.currency }} {{ this.recentOrders.netTotal }}
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@
 
             <div class="items-center space-x-4 text-right">
               <p class="mr-5 truncate text-base text-gray-800 dark:text-white">
-                ₹ {{ tax.rate }}
+                {{ this.invoiceData.currency }} {{ tax.rate }}
               </p>
             </div>
           </div>
@@ -300,7 +300,7 @@
             <p
               class="mr-5 truncate text-base font-semibold text-gray-800 dark:text-white"
             >
-              ₹ {{ this.recentOrders.grandTotal }}
+            {{ this.invoiceData.currency }} {{ this.recentOrders.grandTotal }}
             </p>
           </div>
         </div>

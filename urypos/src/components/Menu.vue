@@ -49,7 +49,7 @@
               !this.auth.viewItemImage,
           }"
         >
-          ₹ {{ item.rate }}
+          {{ this.invoiceData.currency }} {{ item.rate }}
         </h2>
         <div v-if="!item.qty" class="text-center">
           <button
@@ -240,6 +240,8 @@ import frappe from "@/stores/frappeSdk.js";
 import { useMenuStore } from "@/stores/Menu.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
+import { useInvoiceDataStore } from "@/stores/invoiceData.js";
+
 
 export default {
   data() {
@@ -251,7 +253,8 @@ export default {
     const menu = useMenuStore();
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
-    return { menu, auth, recentOrders };
+    const invoiceData = useInvoiceDataStore();
+    return { menu, auth, recentOrders,invoiceData };
   },
   name: "Menu",
   components: {
