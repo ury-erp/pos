@@ -26,7 +26,7 @@ export const useAuthStore = defineStore("auth", {
     userAuth: localStorage.getItem("userAuth"),
     activeDropdown: false,
     userName: "",
-    viewItemImage:null,
+    viewItemImage: null,
     removeTableOrderItem: null,
     hasAccess: false,
     isPosOpen: true,
@@ -89,9 +89,11 @@ export const useAuthStore = defineStore("auth", {
             localStorage.removeItem("userAuth", "true");
           } else {
             this.userAuth = true;
-            router.push("/Table");
-            this.table.fetchTable();
+            
             this.invoiceData.fetchInvoiceDetails().then(() => {
+              router.push("/Table");
+           
+              this.table.fetchRoom();
               this.fetchUserRole();
             });
             const currentUrl = window.location.href;
@@ -146,8 +148,7 @@ export const useAuthStore = defineStore("auth", {
               );
               this.viewAllStatus = result.message.view_all_status;
               this.removeTableOrderItem = result.message.remove_items;
-              this.viewItemImage=result.message.show_image
-              
+              this.viewItemImage = result.message.show_image;
             })
             .catch((error) => console.error(error));
         })
@@ -164,14 +165,12 @@ export const useAuthStore = defineStore("auth", {
           const message = innerMessage.message;
           if (this.cashier) {
             this.isPosOpen = true;
-            this.alert.createAlert("Message", message, "OK")
-            .then(() => {
-              router.push("/posOpen")
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              router.push("/posOpen");
             });
-
           } else {
-          this.isPosOpen = false;
-          this.alert.createAlert("Message", message, "OK");
+            this.isPosOpen = false;
+            this.alert.createAlert("Message", message, "OK");
           }
         })
         .catch((error) => {

@@ -1,24 +1,41 @@
 <template>
-  <div class="switch-wrapper mt-2">
-    <input
-      id="Table"
-      type="radio"
-      name="switch"
-      v-model="this.table.selectedOption"
-      value="Table"
-    />
-    <input
-      id="take_away"
-      type="radio"
-      name="switch"
-      v-model="this.table.selectedOption"
-      value="take_away"
-    />
-    <label for="Table" class="switch-label text-center">Table</label>
-    <label for="take_away" class="switch-label text-center">Takeaway</label>
-    <span class="highlighter"></span>
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+    <div class="relative">
+      <label for="first" class="absolute z-50 ml-2 mt-0.5 bg-white px-2 text-xs"
+        >Select Room</label
+      >
+      <select
+        class="relative mt-2 w-full rounded border border-gray-300 bg-gray-50"
+        id="room"
+        v-model="table.selectedRoom"
+        @change="table.handleRoomChange"
+      >
+        <option
+          v-for="(room, index) in table.rooms"
+          :key="index"
+          :value="room.name"
+        >
+          {{ room.name }}
+        </option>
+      </select>
+    </div>
+
+    <div
+      @click="this.table.toggleTableTypeSwitch"
+      class="relative mb-3 mt-2 inline-block h-10 w-28 cursor-pointer rounded bg-blue-700"
+    >
+      <span
+        class="absolute w-full py-2 text-base text-white"
+        :class="this.table.tableTypeClass"
+        >{{ this.table.tableTypeLabel }}</span
+      >
+      <div
+        :style="{ transform: this.table.toggleTableType }"
+        class="absolute left-0 h-10 w-9 rounded border bg-white transition-transform duration-300 ease-in-out"
+      ></div>
+    </div>
   </div>
-  <div v-if="this.table.selectedOption === 'Table'" class="m-auto">
+  <div v-if="!this.table.isTakeaeay" class="m-auto">
     <div class="flow-root">
       <div
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
@@ -54,7 +71,7 @@
             </div>
             <div class="relative" v-if="table.occupied === 1">
               <button
-                class="inline-block rounded-lg p-1.5 text-sm text-gray-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                class="inline-block rounded p-1.5 text-sm text-gray-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                 type="button"
                 @click="this.table.toggleDropdown(table.name)"
               >
@@ -71,7 +88,7 @@
                 </svg>
               </button>
               <div
-                class="absolute right-0 z-10 w-36 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                class="absolute right-0 z-10 w-36 divide-y divide-gray-100 rounded bg-white shadow dark:bg-gray-700"
                 v-show="this.table.activeDropdown === table.name"
               >
                 <ul class="py-2">
@@ -206,11 +223,17 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="this.table.tables.length === 0"
+      class="inset-0 mt-72 flex items-center justify-center"
+    >
+      <div class="text-center">
+        Tables not found. Please set tables for the room
+        <span class="font-medium">{{ this.table.selectedRoom }}.</span>
+      </div>
+    </div>
   </div>
-  <div
-    v-if="this.table.selectedOption === 'take_away'"
-    class="container m-auto"
-  >
+  <div v-else>
     <takeAwayTable />
   </div>
 
@@ -219,7 +242,7 @@
     class="fixed inset-0 z-10 overflow-y-auto bg-gray-100"
   >
     <div class="mt-20 flex items-center justify-center">
-      <div class="mt-10 w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
+      <div class="mt-10 w-full rounded bg-white p-6 shadow-lg md:max-w-md">
         <div class="flex justify-end">
           <span class="sr-only">Close</span>
           <svg
@@ -266,7 +289,7 @@
             ref="dropdown"
           >
             <div
-              class="h-16 w-full rounded-lg p-4 hover:bg-gray-100"
+              class="h-16 w-full rounded p-4 hover:bg-gray-100"
               v-for="(tables, index) in this.table.searchTable"
               :key="index"
               @click="this.table.selectTable(tables)"
@@ -296,7 +319,7 @@
               this.table.showModal = false;
               this.table.tableTransfer(table);
             "
-            class="mt-8 rounded bg-blue-500 px-3 py-2 text-white hover:bg-blue-600"
+            class="mt-8 rounded bg-blue-700 px-3 py-2 text-white hover:bg-blue-600"
           >
             Transfer
           </button>
@@ -304,12 +327,13 @@
       </div>
     </div>
   </div>
+
   <div
     v-if="table.showModalCaptainTransfer"
     class="fixed inset-0 z-10 overflow-y-auto bg-gray-100"
   >
     <div class="mt-20 flex items-center justify-center">
-      <div class="mt-10 w-full rounded-lg bg-white p-6 shadow-lg md:max-w-md">
+      <div class="mt-10 w-full rounded bg-white p-6 shadow-lg md:max-w-md">
         <div class="flex justify-end">
           <span class="sr-only">Close</span>
           <svg
@@ -355,7 +379,7 @@
             ref="dropdown"
           >
             <div
-              class="h-16 w-full rounded-lg p-4 hover:bg-gray-100"
+              class="h-16 w-full rounded p-4 hover:bg-gray-100"
               v-for="(captain, index) in this.table.searchCaptian"
               :key="index"
               @click="this.table.selectcaptain(captain)"
@@ -385,7 +409,7 @@
               this.table.showModalCaptainTransfer = false;
               this.table.captianTransfer();
             "
-            class="mt-8 rounded bg-blue-500 px-3 py-2 text-white hover:bg-blue-600"
+            class="mt-8 rounded bg-blue-700 px-3 py-2 text-white hover:bg-blue-600"
           >
             Transfer
           </button>
@@ -413,70 +437,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-.switch-wrapper {
-  display: inline-flex;
-  position: relative;
-  padding: 4px;
-  border: 1px solid lightgray;
-  margin-bottom: 15px;
-  border-radius: 0.5rem;
-  background: white;
-}
-
-.switch-wrapper [type="radio"] {
-  position: absolute;
-  left: -9999px;
-}
-
-.switch-wrapper [type="radio"]:checked#Table ~ label[for="Table"],
-.switch-wrapper [type="radio"]:checked#take_away ~ label[for="take_away"] {
-  color: white;
-}
-
-.switch-wrapper [type="radio"]:checked#Table ~ label[for="Table"]:hover,
-.switch-wrapper
-  [type="radio"]:checked#take_away
-  ~ label[for="take_away"]:hover {
-  background: transparent;
-}
-
-.switch-wrapper
-  [type="radio"]:checked#Table
-  + label[for="take_away"]
-  ~ .highlighter {
-  transform: none;
-}
-
-.switch-wrapper
-  [type="radio"]:checked#take_away
-  + label[for="Table"]
-  ~ .highlighter {
-  transform: translateX(100%);
-}
-
-.switch-wrapper label {
-  font-size: 16px;
-  z-index: 1;
-  min-width: 100px;
-  line-height: 32px;
-  cursor: pointer;
-  border-radius: 30px;
-  transition: color 0.25s ease-in-out;
-}
-
-.switch-wrapper label:hover {
-  background: whitesmoke;
-}
-
-.switch-wrapper .highlighter {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  height: calc(100% - 8px);
-  border-radius: 0.2rem;
-  background: #1b5ed9;
-  transition: transform 0.25s ease-in-out;
-}
-</style>

@@ -23,8 +23,10 @@ export const useTableStore = defineStore("table", {
     selectedOption: "",
     isTakeAway: "",
     showModal: false,
+    isTakeaeay: false,
     newTable: "",
     showTable: false,
+    transferTable: [],
     menu: useMenuStore(),
     tableMenu: [],
     activeDropdown: null,
@@ -35,7 +37,6 @@ export const useTableStore = defineStore("table", {
     captain: [],
     previousWaiter: null,
     newCaptain: "",
-    transferTable: [],
     invoicePrinted: "",
     auth: useAuthStore(),
     call: frappe.call(),
@@ -43,6 +44,8 @@ export const useTableStore = defineStore("table", {
     totalMinutes: null,
     invoiceNumber: null,
     modifiedTime: null,
+    selectedRoom: null,
+    rooms: [],
   }),
   getters: {
     filteredTables(state) {
@@ -63,25 +66,63 @@ export const useTableStore = defineStore("table", {
           .includes(this.newCaptain.toLowerCase());
       });
     },
+    toggleTableType(state) {
+      return state.isTakeaeay ? "translateX(215%)" : "translateX(0)";
+    },
+    tableTypeLabel(state) {
+      return state.isTakeaeay ? "Takeaway" : "Table";
+    },
+    tableTypeClass(state) {
+      return state.isTakeaeay ? "text-left ml-1" : "text-center ml-2";
+    },
   },
-
   actions: {
-    fetchTable() {
+    fetchRoom() {
       this.selectedOption = "Table";
       this.db
-        .getDocList("URY Table", {
-          fields: ["name", "occupied", "latest_invoice_time", "is_take_away"],
+        .getDocList("URY Room", {
+          fields: ["name", "branch"],
+          filters: [["branch", "like", this.invoiceData.branch]],
           limit: "*",
         })
         .then((docs) => {
-          this.tables = docs.sort((a, b) => {
-            return a.name.localeCompare(b.name, undefined, {
-              numeric: true,
-              sensitivity: "base",
-            });
-          });
+          this.rooms = docs;
+          const selectedRoom = localStorage.getItem("selectedRoom");
+          if (selectedRoom) {
+            this.selectedRoom = selectedRoom;
+            this.handleRoomChange();
+          } else {
+            this.db
+              .getDocList("URY Restaurant", {
+                fields: ["branch", "default_room"],
+                filters: [["branch", "like", this.invoiceData.branch]],
+              })
+              .then((docs) => {
+                let room = docs.find((room) => room.default_room);
+                this.selectedRoom = room ? room.default_room : null;
+                this.handleRoomChange();
+              });
+            
+          }
         })
         .catch((error) => console.error(error));
+    },
+    handleRoomChange() {
+      localStorage.setItem("selectedRoom", this.selectedRoom);
+      const getTables = {
+        room: this.selectedRoom,
+      };
+      this.call.get("ury.ury_pos.api.getTable", getTables).then((result) => {
+        this.tables = result.message.sort((a, b) => {
+          return a.name.localeCompare(b.name, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        });
+      });
+    },
+    toggleTableTypeSwitch() {
+      this.isTakeaeay = !this.isTakeaeay;
     },
     tableSearch() {
       this.db
@@ -92,7 +133,7 @@ export const useTableStore = defineStore("table", {
           this.transferTable = table;
         })
         .catch((error) => {
-          // console.error(error)
+          console.error(error);
         });
     },
     fetchCaptain() {
