@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
-import { useAuthStore } from "./Auth.js";
 
 export const useAlert = defineStore("alert", {
   state: () => ({
-    auth: useAuthStore(),
     okButtonClicked: false,
   }),
   actions: {
@@ -39,7 +37,7 @@ export const useAlert = defineStore("alert", {
         const mediaQuery = window.matchMedia("(max-width: 767px)");
         if (mediaQuery.matches) {
           modal.classList.remove("lg:left-1/2", "lg:-translate-x-1/2");
-          modal.classList.add("left-0", "right-0"); 
+          modal.classList.add("left-0", "right-0");
         }
         document.body.appendChild(modal);
 
@@ -60,9 +58,6 @@ export const useAlert = defineStore("alert", {
           modal.remove();
           backdrop.remove();
           resolve();
-          if (this.auth.isPosOpen === false) {
-            this.auth.isPosOpenChecking();
-          }
           this.okButtonClicked = true;
         });
       });

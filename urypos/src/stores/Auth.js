@@ -14,27 +14,28 @@ axios.defaults.baseURL = frappe.url;
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     userId: "",
-    currentPassword: "",
-    showPassword: false,
-    table: useTableStore(),
-    menu: useMenuStore(),
-    invoiceData: useInvoiceDataStore(),
-    cashier: null,
-    restrictTableOrder: null,
-    alert: useAlert(),
-    sessionUser: "",
-    userAuth: localStorage.getItem("userAuth"),
-    activeDropdown: false,
     userName: "",
-    viewItemImage: null,
-    removeTableOrderItem: null,
-    hasAccess: false,
-    isPosOpen: true,
-    viewAllStatus: null,
+    sessionUser: "",
+    currentPassword: "",
     userRole: [],
-    auth: frappe.auth(),
+    isPosOpen: true,
+    hasAccess: false,
+    showPassword: false,
+    activeDropdown: false,
+    cashierisPosOpen: false,
+    cashier: null,
+    viewItemImage: null,
+    viewAllStatus: null,
+    restrictTableOrder: null,
+    removeTableOrderItem: null,
     db: frappe.db(),
     call: frappe.call(),
+    auth: frappe.auth(),
+    alert: useAlert(),
+    menu: useMenuStore(),
+    table: useTableStore(),
+    invoiceData: useInvoiceDataStore(),
+    userAuth: localStorage.getItem("userAuth"),
   }),
   getters: {
     isAuthenticated(state) {
@@ -78,7 +79,6 @@ export const useAuthStore = defineStore("auth", {
       }
       return this.userName;
     },
-
     fetchUserDetails() {
       this.auth
         .getLoggedInUser()
@@ -89,19 +89,11 @@ export const useAuthStore = defineStore("auth", {
             localStorage.removeItem("userAuth", "true");
           } else {
             this.userAuth = true;
-            
             this.invoiceData.fetchInvoiceDetails().then(() => {
               router.push("/Table");
-           
               this.table.fetchRoom();
               this.fetchUserRole();
             });
-            const currentUrl = window.location.href;
-            const urlParts = currentUrl.split("/");
-            const desiredPart = urlParts[urlParts.length - 1];
-            if (desiredPart !== "login") {
-              this.isPosOpenChecking();
-            }
           }
         })
         .catch((error) => {
@@ -133,6 +125,7 @@ export const useAuthStore = defineStore("auth", {
               if (this.cashier) {
                 this.menu.fetchItems();
               }
+              this.isPosOpenChecking();
               var transferRoles = result.message.transfer_role_permissions.map(
                 (role) => role.role
               );
@@ -152,8 +145,9 @@ export const useAuthStore = defineStore("auth", {
             })
             .catch((error) => console.error(error));
         })
-
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error(error);
+        });
     },
     isPosOpenChecking() {
       this.call
@@ -164,13 +158,14 @@ export const useAuthStore = defineStore("auth", {
           const innerMessage = JSON.parse(innerMessageString);
           const message = innerMessage.message;
           if (this.cashier) {
-            this.isPosOpen = true;
             this.alert.createAlert("Message", message, "OK").then(() => {
               router.push("/posOpen");
             });
           } else {
-            this.isPosOpen = false;
-            this.alert.createAlert("Message", message, "OK");
+            var currentDomain = window.location.origin;
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              window.location.href = currentDomain + "/login/";
+            });
           }
         })
         .catch((error) => {
