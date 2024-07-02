@@ -172,6 +172,13 @@ export const useCustomerStore = defineStore("customers", {
         this.selectedOrderType = orderType.name;
       }
     },
+    validateInput(event) {
+      if (event.target.value < 1) {
+        this.numberOfPax = "";
+      } else {
+        this.numberOfPax = event.target.value;
+      }
+    },
     async fectchCustomerFavouriteItem() {
       const table = useTableStore();
       if (table.previousOrderdCustomer) {

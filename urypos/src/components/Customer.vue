@@ -252,6 +252,7 @@
           placeholder="Pax"
           required
           v-model="this.customers.numberOfPax"
+          @input="this.customers.validateInput"
         />
       </div>
       <div class="relative mt-5" ref="container" v-if="this.auth.cashier">
