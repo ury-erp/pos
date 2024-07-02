@@ -88,7 +88,11 @@ export const useTableStore = defineStore("table", {
         .then((docs) => {
           this.rooms = docs;
           const selectedRoom = localStorage.getItem("selectedRoom");
-          if (selectedRoom) {
+          if (
+            selectedRoom !== null &&
+            selectedRoom !== "" &&
+            selectedRoom !== "null"
+          ) {
             this.selectedRoom = selectedRoom;
             this.handleRoomChange();
           } else {
@@ -100,9 +104,9 @@ export const useTableStore = defineStore("table", {
               .then((docs) => {
                 let room = docs.find((room) => room.default_room);
                 this.selectedRoom = room ? room.default_room : null;
+
                 this.handleRoomChange();
               });
-            
           }
         })
         .catch((error) => console.error(error));
@@ -144,6 +148,8 @@ export const useTableStore = defineStore("table", {
         })
         .then((docs) => {
           this.captain = docs;
+          console.log(this.captain,"capain")
+
         })
         .catch((error) => console.error(error));
     },

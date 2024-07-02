@@ -14,7 +14,8 @@ clicking it will direct to the respective pages
     - Select the POS Opening Entry to retrieve all sales registered.
     - On creating a POS Closing Voucher, all the POS invoices fetched for the selected period will be consolidated into one final Sales Invoice. The status of all the POS invoices will change from 'Paid' to 'Consolidated' once they are successfully consolidated into a sales invoice on closing.
 
-
+**Room Selection**
+-  To view tables in each room of the restaurant and select their preferred room.
 
 **Table Selection**
 
@@ -43,6 +44,8 @@ clicking it will direct to the respective pages
 - Search bar to quickly locate specific menu items, enhancing speed and accuracy during busy periods.
 
 - Toggle visibility of menu item image based on "View Item Image" checkbox in POS profile.
+
+- Menu filtering with a select box for selecting courses from the restaurant menu , which displays the available courses.
 
 - Menu filtering with Button All - Display all menu item. Priority - displays only prioritized items.
 

@@ -10,26 +10,31 @@ import { useAlert } from "./Alert.js";
 
 export const useMenuStore = defineStore("menu", {
   state: () => ({
-    items: [],
     cart: [],
-    searchTerm: "",
-    showAll: true,
-    showPriority: false,
-    currentPage: 1,
-    perPage: 20,
-    comments: "",
-    alert: useAlert(),
-    invoiceData: useInvoiceDataStore(),
-    auth: useAuthStore(),
-    notification: useNotifications(),
-    table: useTableStore(),
-    recentOrders: usetoggleRecentOrder(),
-    showDialog: false,
-    showDialogCart: false,
-    quantity: "",
     item: [],
+    items: [],
+    course: [],
+    quantity: "",
+    comments: "",
+    searchTerm: "",
     itemComments: "",
+    perPage: 20,
+    currentPage: 1,
+    selectedCourse: null,
+    showAll: true,
+    displayAll: true,
+    priority: false,
+    showDialog: false,
+    showPriority: false,
+    showDialogCart: false,
+    db: frappe.db(),
     call: frappe.call(),
+    alert: useAlert(),
+    auth: useAuthStore(),
+    table: useTableStore(),
+    notification: useNotifications(),
+    invoiceData: useInvoiceDataStore(),
+    recentOrders: usetoggleRecentOrder(),
   }),
   getters: {
     filteredItems(state) {
@@ -38,9 +43,22 @@ export const useMenuStore = defineStore("menu", {
         state.searchTerm.trim() === ""
       ) {
         if (state.showAll) {
-          return state.items;
+          if (state.selectedCourse) {
+            return state.items.filter(
+              (item) => item.course === state.selectedCourse
+            );
+          } else {
+            return state.items; // Return all items if no course is selected
+          }
         } else {
-          return state.items.filter((item) => item.special_dish === 1);
+          if (state.selectedCourse) {
+            return state.items.filter(
+              (item) =>
+                item.special_dish === 1 && item.course === state.selectedCourse
+            );
+          } else {
+            return state.items.filter((item) => item.special_dish === 1);
+          }
         }
       } else {
         const searchTerm = state.searchTerm.toLowerCase();
@@ -49,7 +67,9 @@ export const useMenuStore = defineStore("menu", {
             typeof item.item_name === "string" &&
             typeof item.item === "string" &&
             (item.item_name.toLowerCase().includes(searchTerm) ||
-              item.item.toLowerCase().includes(searchTerm))
+              item.item.toLowerCase().includes(searchTerm)) &&
+            (!state.selectedCourse || item.course === state.selectedCourse) &&
+            (state.showAll || item.special_dish === 1)
         );
       }
     },
@@ -106,6 +126,8 @@ export const useMenuStore = defineStore("menu", {
           this.items.forEach((menuItem) => {
             if (menuItem.special_dish == 1) {
               this.showPriority = true;
+            } else {
+              this.showAll = true;
             }
           });
         })
@@ -115,6 +137,14 @@ export const useMenuStore = defineStore("menu", {
             const message = JSON.parse(messages[0]);
             this.alert.createAlert("Message", message.message, "OK");
           }
+        });
+      this.db
+        .getDocList("URY Menu Course", {
+          fields: ["name"],
+          limit: "*",
+        })
+        .then((docs) => {
+          this.course = docs;
         });
     },
     itemNameExtract(item_name) {
@@ -140,12 +170,17 @@ export const useMenuStore = defineStore("menu", {
     clearSearch(event) {
       event.target.value = "";
       this.searchTerm = "";
-      this.showAll = true;
     },
     showAllItems() {
       this.showAll = true;
+      this.priority = false;
+      this.displayAll = true;
+      this.searchTerm = "";
+      this.selectedCourse = "";
     },
     showSpecialItems() {
+      this.priority = true;
+      this.displayAll = false;
       this.showAll = false;
     },
     showModal(item) {

@@ -1,15 +1,9 @@
 <template>
   <!-- Search & Filters -->
-  <div class="flex flex-col md:flex-row mt-5 lg:mt-2">
-    <div
-      class="relative"
-      :class="[
-        {
-          'md:w-2/3': this.menu.showPriority == true,
-          'md:w-full': this.menu.showPriority == false,
-        },
-      ]"
-    >
+  <div
+    class="mt-5 flex w-full flex-col justify-between gap-2 md:flex-row lg:mt-2"
+  >
+    <div class="relative w-full md:w-3/4">
       <div
         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
       >
@@ -32,7 +26,7 @@
       <input
         type="search"
         id="default-search"
-        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        class="block w-full rounded border border-gray-300 bg-gray-50 px-10 pb-2 pt-2.5 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
         placeholder="Item Search"
         v-model="this.menu.searchTerm"
         @input="this.menu.handleSearchInput"
@@ -40,20 +34,40 @@
         autocapitalize="none"
       />
     </div>
-    <div
-      class="mt-2 flex flex-row md:ml-2 md:mt-0 md:w-1/3"
-      v-if="this.menu.showPriority == true"
-    >
+    <div class="flex gap-2">
+      <div class="relative w-full">
+        <label
+          for="first"
+          class="absolute z-50 -mt-2 ml-2 bg-white px-2 text-xs"
+          >Select Course</label
+        >
+        <select
+          class="relative w-full rounded border border-gray-300 bg-gray-50 pt-2.5 text-sm"
+          id="course"
+          v-model="menu.selectedCourse"
+          @change="this.menu.displayAll = false"
+        >
+          <option
+            v-for="(course, index) in menu.course"
+            :key="index"
+            :value="course.name"
+          >
+            {{ course.name }}
+          </option>
+        </select>
+      </div>
       <button
-        class="focus:shadow-outline w-1/2 rounded bg-blue-700 px-4 py-2 font-bold text-white hover:bg-blue-900 focus:outline-none"
+        class="focus:shadow-outline w-28 rounded bg-blue-700 p-2 font-bold text-white hover:bg-blue-900 focus:outline-blue-500"
         type="button"
+        :class="{ 'bg-blue-900': this.menu.priority }"
         @click="this.menu.showSpecialItems"
       >
         Priority
       </button>
       <button
-        class="focus:shadow-outline ml-2 w-1/2 rounded bg-blue-700 px-4 py-2 font-bold text-white hover:bg-blue-900 focus:outline-none"
+        class="focus:shadow-outline w-28 rounded bg-blue-700 p-2 font-bold text-white hover:bg-blue-900 focus:outline-blue-500"
         type="button"
+        :class="{ 'bg-blue-900': this.menu.displayAll }"
         @click="this.menu.showAllItems"
       >
         All

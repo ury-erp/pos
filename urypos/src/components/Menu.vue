@@ -140,7 +140,7 @@
               </label>
               <input
                 type="number"
-                id="modeOfPayment"
+                id="quantity"
                 class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
                 v-model="this.menu.quantity"
                 v-bind:readonly="
@@ -149,7 +149,7 @@
                 "
               />
               <label
-                for="paidAmount"
+                for="comments"
                 class="mt-6 block text-left text-gray-900 dark:text-white"
               >
                 Comments
@@ -180,11 +180,11 @@
       class="flex h-screen items-center justify-center"
     >
       <div class="text-center">
-        No items found. Please select a table or set an active menu.
+        Items Not Found. Please select a table or set an active menu.
       </div>
     </div>
     <div v-else class="flex h-screen items-center justify-center">
-      <div class="text-center">No items found.</div>
+      <div class="text-center">Items Not Found.</div>
     </div>
   </div>
   <div
