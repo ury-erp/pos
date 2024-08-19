@@ -61,9 +61,27 @@
             </h2>
           </div>
           <div v-if="this.customers.showAddNewCustomer">
+            <div class="flex justify-end">
+              <span class="sr-only">Close</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="mt-2 mr-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                @click="this.customers.showAddNewCustomer = false"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
             <a
               href="#"
-              class="mt-4 inline-flex items-center text-blue-600 hover:underline"
+              class="mt-1 lg:mt-0 inline-flex items-center text-blue-600 hover:underline"
               @click.prevent="
                 this.customers.newCustomerData(this.customers.search)
               "
@@ -82,7 +100,7 @@
                   d="M12 6v12m6-6H6"
                 ></path>
               </svg>
-              Create a New Customer
+              Create New Customer
             </a>
           </div>
         </div>
@@ -287,7 +305,7 @@
         />
 
         <div
-          v-if="this.customers.showOrderType && !this.recentOrders.restaurantTable"
+          v-if="this.customers.showOrderType === true && !this.recentOrders.restaurantTable"
           class="absolute left-0 top-full z-10 max-h-64 w-full overflow-y-scroll rounded bg-white shadow md:w-3/5 lg:w-2/5"
           ref="dropdown"
         >

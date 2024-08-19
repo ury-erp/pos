@@ -23,7 +23,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     grandTotal: 0,
     billAmount: 0,
     currentPage: 1,
-    paymentMethod: 0,  
+    paymentMethod: 0,
     editPrintedInvoice: 0,
     selectedStatus: "Draft",
     posProfile: "",
@@ -49,6 +49,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     cancelInvoiceFlag: false,
     alert: useAlert(),
     call: frappe.call(),
+    menu: useMenuStore(),
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
   }),
@@ -167,15 +168,14 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       let previousOrderdNumberOfPax = "";
       this.pastOrderdItem = "";
       let previousOrderdCustomer = "";
-      this.pastOrderType =""
-      const menu = useMenuStore();
-      let items = menu.items;
+      this.pastOrderType = "";
+      let items = this.menu.items;
       this.draftInvoice = this.invoiceNumber;
       this.editPrintedInvoice = this.invoicePrinted;
       items.forEach((item) => {
         item.qty = "";
       });
-      let cart = menu.cart;
+      let cart = this.menu.cart;
       cart.splice(0, cart.length);
       const getOrderInvoice = {
         doctype: "POS Invoice",
@@ -188,7 +188,15 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.restaurantTable = pastOrder.restaurant_table;
           this.pastOrderdItem = pastOrder.items;
           this.recentWaiter = pastOrder.waiter;
-          this.pastOrderType=pastOrder.order_type
+          this.pastOrderType = pastOrder.order_type;
+          if (this.pastOrderType) {
+            this.menu.selectedOrderType = pastOrder.order_type;
+            this.menu.pickOrderType()
+            if(this.pastOrderType === "Aggregators"){
+              this.menu.selectedAggregator=pastOrder.customer
+            }
+            this.menu.orderTypeSelection();
+          }
           previousOrderdCustomer = pastOrder.customer;
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
@@ -222,15 +230,26 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         })
         .catch((error) => console.error(error));
     },
+    getModeofPayment(customer) {
+      if (customer) {
+        const aggregator = {
+          aggregator: customer,
+        };
+        this.call
+          .get("ury.ury_pos.api.getAggregatorMOP", aggregator)
+          .then((result) => {
+            this.modeOfPaymentList = result.message;
+          })
+          .catch((error) => {
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message", message.message, "OK");
+            }
+          });
+      }
+    },
     billing: async function () {
-      this.call
-        .get("ury.ury_pos.api.getModeOfPayment")
-        .then((result) => {
-          this.modeOfPaymentList = result.message;
-        })
-        .catch((error) => {
-          // console.error(error)
-        });
       const getOrderInvoice = {
         doctype: "POS Invoice",
         name: this.invoiceNumber,
@@ -241,6 +260,20 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.pastOrder = result.message;
           this.customerNameForBilling = this.pastOrder.customer;
           this.posProfile = this.pastOrder.pos_profile;
+          let orderType = this.pastOrder.order_type;
+          if (orderType === "Aggregators") {
+            this.getModeofPayment(this.pastOrder.customer);
+          } else {
+            this.call
+              .get("ury.ury_pos.api.getModeOfPayment")
+              .then((result) => {
+                this.modeOfPaymentList = result.message;
+              })
+              .catch((error) => {
+                // console.error(error)
+              });
+          }
+
           this.table = this.pastOrder.restaurant_table;
           if (this.invoicePrinted === 0) {
             this.alert.createAlert(
@@ -325,7 +358,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             this.isLoading = false;
           })
           .catch((error) => {
-            console.error(error);
             this.isLoading = false;
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);

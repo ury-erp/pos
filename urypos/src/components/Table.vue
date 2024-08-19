@@ -1,11 +1,20 @@
 <template>
-  <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+  <div
+    class="grid grid-cols-2 md:grid-cols-4"
+    :class="[
+      {
+        'gap-4 lg:grid-cols-6': !this.auth.cashier,
+        'lg:grid-cols-4': this.auth.cashier,
+      },
+    ]"
+  >
     <div class="relative">
       <label for="first" class="absolute z-50 ml-2 mt-0.5 bg-white px-2 text-xs"
         >Select Room</label
       >
       <select
         class="relative mt-2 w-full rounded border border-gray-300 bg-gray-50"
+        :class="{ 'mb-3': this.auth.cashier }"
         id="room"
         v-model="table.selectedRoom"
         @change="table.handleRoomChange"
@@ -19,8 +28,8 @@
         </option>
       </select>
     </div>
-
     <div
+      v-if="!this.auth.cashier"
       @click="this.table.toggleTableTypeSwitch"
       class="relative mb-3 mt-2 inline-block h-10 w-28 cursor-pointer rounded bg-blue-700"
     >
@@ -33,6 +42,56 @@
         :style="{ transform: this.table.toggleTableType }"
         class="absolute left-0 h-10 w-9 rounded border bg-white transition-transform duration-300 ease-in-out"
       ></div>
+    </div>
+    <div class="relative ml-5" v-if="this.auth.cashier">
+      <div class="relative">
+        <label
+          for="first"
+          class="absolute z-50 ml-2 mt-0.5 bg-white px-2 text-xs"
+          >Order Type</label
+        >
+        <select
+          class="relative mt-2 w-full rounded border border-gray-300 bg-gray-50"
+          :class="{ 'mb-3': this.auth.cashier }"
+          id="room"
+          v-model="menu.selectedOrderType"
+          @click="menu.pickOrderType"
+          @change="menu.orderTypeSelection()"
+          :disabled="recentOrders.pastOrderType"
+        >
+          <option
+            v-for="(type, index) in menu.orderType"
+            :key="index"
+            @click="menu.orderTypeSelection(type.name)"
+          >
+            {{ type.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="relative ml-5"
+      v-if="this.menu.selectedOrderType === 'Aggregators' && this.auth.cashier"
+    >
+      <label for="first" class="absolute z-50 ml-2 mt-0.5 bg-white px-2 text-xs"
+        >Aggregators List</label
+      >
+      <select
+        class="relative mt-2 w-full rounded border border-gray-300 bg-gray-50"
+        :class="{ 'mb-3': auth.cashier }"
+        id="room"
+        v-model="menu.selectedAggregator"
+        @change="menu.handleAggregatorChange"
+        :disabled="menu.cartHasValue"
+      >
+        <option
+          v-for="(aggregator, index) in menu.aggregatorList"
+          :key="index"
+          :value="aggregator.customer"
+        >
+          {{ aggregator.customer }}
+        </option>
+      </select>
     </div>
   </div>
   <div v-if="!this.table.isTakeaeay" class="m-auto">
@@ -47,7 +106,9 @@
         <div
           w-full
           class="w-full max-w-sm rounded border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
-          v-for="table in this.table.filteredTables"
+          v-for="table in auth.cashier
+            ? this.table.tables
+            : this.table.filteredTables"
           :key="table.name"
         >
           <div class="flex justify-between">
@@ -421,9 +482,12 @@
 
 <script>
 import { useTableStore } from "@/stores/Table.js";
-import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
+import { useMenuStore } from "@/stores/Menu.js";
 import takeAwayTable from "./takeAwayTable.vue";
+import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
+import { useInvoiceDataStore } from "@/stores/invoiceData.js";
+
 export default {
   name: "Table",
   components: {
@@ -433,7 +497,10 @@ export default {
     const table = useTableStore();
     const invoiceData = useInvoiceDataStore();
     const auth = useAuthStore();
-    return { table, invoiceData, auth };
+    const menu = useMenuStore();
+    const recentOrders = usetoggleRecentOrder();
+    
+    return { table, invoiceData, auth, menu,recentOrders };
   },
 };
 </script>

@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { useInvoiceDataStore } from "./invoiceData.js";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
+import { useCustomerStore } from "./Customer.js";
 import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
 import { usetoggleRecentOrder } from "./recentOrder.js";
-
 import { useAlert } from "./Alert.js";
 
 export const useMenuStore = defineStore("menu", {
@@ -14,15 +14,23 @@ export const useMenuStore = defineStore("menu", {
     item: [],
     items: [],
     course: [],
+    orderType: [],
+    defautlMenu: [],
+    aggregatorList: [],
+    aggregatorItem: [],
     quantity: "",
     comments: "",
     searchTerm: "",
     itemComments: "",
     perPage: 20,
     currentPage: 1,
+    aggregatorId:null,
     selectedCourse: null,
+    selectedOrderType: null,
+    selectedAggregator: null,
     showAll: true,
     displayAll: true,
+    isAggregator: false,
     priority: false,
     showDialog: false,
     showPriority: false,
@@ -32,6 +40,7 @@ export const useMenuStore = defineStore("menu", {
     alert: useAlert(),
     auth: useAuthStore(),
     table: useTableStore(),
+    customer: useCustomerStore(),
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
     recentOrders: usetoggleRecentOrder(),
@@ -73,7 +82,6 @@ export const useMenuStore = defineStore("menu", {
         );
       }
     },
-
     totalPages() {
       return Math.ceil(this.filteredItems.length / this.perPage);
     },
@@ -121,7 +129,8 @@ export const useMenuStore = defineStore("menu", {
           if (!this.auth.cashier && this.table.tableMenu) {
             this.items = this.table.tableMenu;
           } else {
-            this.items = result.message;
+            this.defautlMenu = result.message;
+            this.items = this.defautlMenu;
           }
           this.items.forEach((menuItem) => {
             if (menuItem.special_dish == 1) {
@@ -146,6 +155,93 @@ export const useMenuStore = defineStore("menu", {
         .then((docs) => {
           this.course = docs;
         });
+    },
+    pickOrderType() {
+      this.call
+        .get("ury.ury_pos.api.get_select_field_options")
+        .then((result) => {
+          this.orderType = result.message.filter(
+            (option) => option.name !== ""
+          );
+        })
+        .catch((error) => console.error(error));
+    },
+    orderTypeSelection() {
+      this.customer.selectedOrderType = this.selectedOrderType;
+      if (this.selectedOrderType === "Dine In" && !this.recentOrders.restaurantTable ) {
+        this.selectedOrderType = null;
+        this.alert.createAlert(
+          "Message",
+          "Dine in is not permitted for takeaway orders.",
+          "OK"
+        );
+      }
+
+      if (this.cart.length > 0) {
+        this.alert
+          .createAlert(
+            "Cart Not Empty",
+            "Please empty your cart before selecting an aggregator.",
+            "OK"
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      } else {
+        if (this.selectedOrderType === "Aggregators") {
+          this.call
+            .get("ury.ury_pos.api.getAggregator")
+            .then((result) => {
+              this.aggregatorList = result.message;
+            })
+            .catch((error) => {
+              if (error._server_messages) {
+                const messages = JSON.parse(error._server_messages);
+                const message = JSON.parse(messages[0]);
+                this.alert.createAlert("Message", message.message, "OK");
+              }
+            });
+        } else {
+          this.aggregatorItem = "";
+          this.selectedAggregator = "";
+          this.items = this.defautlMenu;
+        }
+      }
+    },
+    handleAggregatorChange() {
+      if (this.selectedOrderType === "Aggregators" && this.cart.length > 0) {
+        this.alert
+          .createAlert(
+            "Cart Not Empty",
+            "Please empty your cart before selecting an aggregator.",
+            "OK"
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      } else {
+        this.customer.search = this.selectedAggregator;
+        const getMenu = {
+          aggregator: this.selectedAggregator,
+        };
+        this.call
+          .get("ury.ury_pos.api.getAggregatorItem", getMenu)
+          .then((result) => {
+            this.aggregatorItem = this.items = result.message;
+            if (result.message) {
+              this.items = result.message;
+            } else {
+              this.items = defautlMenu;
+            }
+          })
+          .catch((error) => {
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message", message.message, "OK");
+            }
+          });
+      }
     },
     itemNameExtract(item_name) {
       return item_name

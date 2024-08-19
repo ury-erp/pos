@@ -110,11 +110,35 @@
       Grand Total
     </label>
     <input
-      class="comments mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      class="grand_total mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
       :value="
         this.menu.grand_total || this.table.grandTotal || invoiceData.grandTotal
       "
       readonly
+    />
+    <label
+      for="aggregatorId"
+      class="mt-6 block text-left text-gray-900 dark:text-white"
+      v-if="this.menu.selectedOrderType === 'Aggregators'"
+    >
+      Aggregator ID
+    </label>
+    <input
+      v-if="this.menu.selectedOrderType === 'Aggregators'"
+      id="aggregatorId"
+      class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      v-model="this.menu.aggregatorId"
+    />
+    <label
+      for="Comments"
+      class="mt-6 block text-left text-gray-900 dark:text-white"
+    >
+      Comments
+    </label>
+    <input
+      id="comments"
+      class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      v-model="this.menu.comments"
     />
   </div>
 
@@ -325,17 +349,6 @@
           :class="{ hidden: this.invoiceData.cashier === '' }"
           v-model="this.invoiceData.cashier"
           readonly
-        />
-        <label
-          for="Comments"
-          class="mt-10 block text-sm font-medium text-gray-900 dark:text-white"
-        >
-          Comments
-        </label>
-        <input
-          id="comments"
-          class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
-          v-model="this.menu.comments"
         />
       </div>
     </details>

@@ -3,8 +3,7 @@
     class="fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700"
     v-if="!this.tabClick.isLoginPage"
     id="tab"
-  > 
-  
+  >
     <div
       class="mx-auto grid h-full max-w-lg font-medium"
       :class="[
@@ -22,11 +21,11 @@
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
-      {
-        'text-gray-500': this.tabClick.currentTab !== '/Table',
-        'text-blue-600': this.tabClick.currentTab === '/Table',
-      },
-    ]"
+            {
+              'text-gray-500': this.tabClick.currentTab !== '/Table',
+              'text-blue-600': this.tabClick.currentTab === '/Table',
+            },
+          ]"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -52,7 +51,7 @@
       <router-link
         to="/Menu"
         class="group inline-flex flex-col items-center justify-center border-r border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click="!this.auth.cashier && this.tabClick.checkActiveTable()"
+        @click="this.tabClick.clickMenuTab()"
       >
         <svg
           class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
@@ -114,7 +113,7 @@
           class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
           :class="[
             {
-              'text-gray-500':this.tabClick.currentTab !== '/Customer',
+              'text-gray-500': this.tabClick.currentTab !== '/Customer',
               'text-blue-600': this.tabClick.currentTab === '/Customer',
             },
           ]"
@@ -159,7 +158,6 @@
         to="/recentOrder"
         v-if="this.auth.cashier"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-       
       >
         <svg
           class="h-5 w-5 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
@@ -204,9 +202,8 @@ export default {
   name: "Bottom Tabs",
   setup() {
     const auth = useAuthStore();
-    const tabClick=tabFunctions();
-    return { auth,tabClick };
+    const tabClick = tabFunctions();
+    return { auth, tabClick };
   },
-  
 };
 </script>

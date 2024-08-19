@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
+import {useMenuStore} from "./Menu.js"
 import frappe from "./frappeSdk.js";
 import { useAlert } from "./Alert.js";
 export const useCustomerStore = defineStore("customers", {
@@ -12,6 +14,8 @@ export const useCustomerStore = defineStore("customers", {
     showCustomers: false,
     showOrderType: false,
     numberOfPax: "",
+    menu:useMenuStore(),
+    recentOrders: usetoggleRecentOrder(),
     selectedCustomerName: "",
     selectedOrderType: "",
     customerFavouriteItems: [],
@@ -19,6 +23,7 @@ export const useCustomerStore = defineStore("customers", {
     newCustomerMobileNo: "",
     newCustomer: "",
     orderType: [],
+    table: useTableStore(),
     showCustomersGroup: false,
     showCustomersTerritory: false,
     showAddNewCustomer: true,
@@ -150,7 +155,11 @@ export const useCustomerStore = defineStore("customers", {
       this.fectchCustomerFavouriteItem();
     },
     pickOrderType() {
-      this.showOrderType = true;
+      if (this.menu.selectedOrderType || this.recentOrders.pastOrderType) {
+        this.showOrderType = false;
+      } else {
+        this.showOrderType = true;
+      }
       this.call
         .get("ury.ury_pos.api.get_select_field_options")
         .then((result) => {
@@ -180,9 +189,8 @@ export const useCustomerStore = defineStore("customers", {
       }
     },
     async fectchCustomerFavouriteItem() {
-      const table = useTableStore();
-      if (table.previousOrderdCustomer) {
-        this.selectedCustomerName = table.previousOrderdCustomer;
+      if (this.table.previousOrderdCustomer) {
+        this.selectedCustomerName = this.table.previousOrderdCustomer;
       } else {
         this.selectedCustomerName = this.search;
       }

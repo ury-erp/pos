@@ -125,7 +125,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const customers = useCustomerStore();
       const customerName = customers.search;
       const ordeType =
-        customers.selectedOrderType || this.recentOrders.pastOrderType;
+        this.menu.selectedOrderType || this.recentOrders.pastOrderType;
       const numberOfPax = customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice ||
@@ -161,9 +161,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         last_modified_time: this.table.modifiedTime,
         pos_profile: this.posProfile,
         invoice: invoice,
+        aggregator_id: this.menu.aggregatorId,
         order_type: ordeType,
         last_invoice: lastInvoice,
         comments: this.menu.comments,
+        room: this.table.selectedRoom,
       };
       if (!this.auth.cashier && !numberOfPax) {
         this.alert.createAlert(

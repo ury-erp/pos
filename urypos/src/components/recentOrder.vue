@@ -80,7 +80,7 @@
                   {{
                     recentOrder.restaurant_table
                       ? recentOrder.restaurant_table
-                      : "Take Away"
+                      : recentOrder.order_type
                   }}
                 </p>
               </div>
@@ -527,6 +527,7 @@
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
+import { useMenuStore } from "@/stores/Menu.js";
 import { Badge } from "flowbite-vue";
 export default {
   name: "RecentOrder",
@@ -537,7 +538,8 @@ export default {
     const recentOrders = usetoggleRecentOrder();
     const invoiceData = useInvoiceDataStore();
     const auth = useAuthStore();
-    return { recentOrders, invoiceData, auth };
+    const menu =useMenuStore()
+    return { recentOrders, invoiceData, auth,menu };
   },
   mounted() {
     this.recentOrders.handleStatusChange();
