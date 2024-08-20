@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
 import { usetoggleRecentOrder } from "./recentOrder.js";
-import {useMenuStore} from "./Menu.js"
+import { useMenuStore } from "./Menu.js";
 import frappe from "./frappeSdk.js";
 import { useAlert } from "./Alert.js";
 export const useCustomerStore = defineStore("customers", {
@@ -14,7 +14,7 @@ export const useCustomerStore = defineStore("customers", {
     showCustomers: false,
     showOrderType: false,
     numberOfPax: "",
-    menu:useMenuStore(),
+    menu: useMenuStore(),
     recentOrders: usetoggleRecentOrder(),
     selectedCustomerName: "",
     selectedOrderType: "",
@@ -148,6 +148,15 @@ export const useCustomerStore = defineStore("customers", {
         }
       }
       return "";
+    },
+    searchCustomer() {
+      if (this.menu.selectedAggregator) {
+        this.showCustomers = false;
+        this.showAddNewCustomer = false;
+      } else {
+        this.showCustomers = true;
+        this.showAddNewCustomer = true;
+      }
     },
     async selectCustomer(customer) {
       this.search = customer.name;

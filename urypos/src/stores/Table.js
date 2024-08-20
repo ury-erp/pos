@@ -132,6 +132,7 @@ export const useTableStore = defineStore("table", {
       this.db
         .getDocList("URY Table", {
           filters: [["occupied", "like", "0%"]],
+          limit: "*",
         })
         .then((table) => {
           this.transferTable = table;
@@ -148,8 +149,7 @@ export const useTableStore = defineStore("table", {
         })
         .then((docs) => {
           this.captain = docs;
-          console.log(this.captain,"capain")
-
+          console.log(this.captain, "capain");
         })
         .catch((error) => console.error(error));
     },

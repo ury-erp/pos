@@ -30,6 +30,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     searchOrder: "",
     customerNameForBilling: "",
     table: null,
+    orderType:null,
     postingDate: null,
     recentWaiter: null,
     draftInvoice: null,
@@ -131,6 +132,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
 
     async viewRecentOrder(recentOrder) {
+      this.orderType=recentOrder.order_type
       this.netTotal = recentOrder.net_total;
       this.grandTotal = recentOrder.rounded_total;
       this.invoiceNumber = recentOrder.name;

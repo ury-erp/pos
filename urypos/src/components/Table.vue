@@ -55,7 +55,7 @@
           :class="{ 'mb-3': this.auth.cashier }"
           id="room"
           v-model="menu.selectedOrderType"
-          @click="menu.pickOrderType"
+          @click="menu.pickOrderType()"
           @change="menu.orderTypeSelection()"
           :disabled="recentOrders.pastOrderType"
         >

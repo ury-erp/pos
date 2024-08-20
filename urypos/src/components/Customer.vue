@@ -28,10 +28,9 @@
           placeholder="Search Customers"
           v-model="this.customers.search"
           @input="this.customers.handleSearchInput"
-          @click="
-            this.customers.showCustomers = true;
-            this.customers.showAddNewCustomer = true;
+          @click="this.customers.searchCustomer()
           "
+          :disabled="this.menu.selectedAggregator"
           required
         />
 
@@ -357,6 +356,7 @@ import orderInfo from "./orderInfo.vue";
 import { useCustomerStore } from "@/stores/Customer.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
+import { useMenuStore } from "@/stores/Menu.js";
 
 export default {
   name: "Customer",
@@ -367,7 +367,8 @@ export default {
     const customers = useCustomerStore();
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
-    return { customers, auth, recentOrders };
+    const menu = useMenuStore();
+    return { customers, auth, recentOrders,menu };
   },
 };
 </script>

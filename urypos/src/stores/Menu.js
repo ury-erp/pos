@@ -157,6 +157,7 @@ export const useMenuStore = defineStore("menu", {
         });
     },
     pickOrderType() {
+      this.customer.search = ""
       this.call
         .get("ury.ury_pos.api.get_select_field_options")
         .then((result) => {

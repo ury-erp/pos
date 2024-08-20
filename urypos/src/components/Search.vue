@@ -3,7 +3,13 @@
   <div
     class="mt-5 flex w-full flex-col justify-between gap-2 md:flex-row lg:mt-2"
   >
-    <div class="relative w-full md:w-3/4">
+    <div
+      class="relative w-full"
+      :class="{
+        'md:w-full': this.menu.selectedOrderType === 'Aggregators',
+        'md:w-3/4': this.menu.selectedOrderType === 'Aggregators',
+      }"
+    >
       <div
         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
       >
@@ -34,7 +40,10 @@
         autocapitalize="none"
       />
     </div>
-    <div class="flex gap-2">
+    <div
+      class="flex gap-2"
+      v-if="this.menu.selectedOrderType !== 'Aggregators'"
+    >
       <div class="relative w-full">
         <label
           for="first"

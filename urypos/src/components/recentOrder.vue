@@ -89,7 +89,8 @@
                   <p
                     class="truncate text-base font-medium text-gray-900 dark:text-white"
                   >
-                  {{ this.invoiceData.currency }} {{ recentOrder.grand_total }}
+                    {{ this.invoiceData.currency }}
+                    {{ recentOrder.grand_total }}
                   </p>
                   <p class="truncate text-sm text-gray-600 dark:text-gray-400">
                     {{
@@ -185,7 +186,7 @@
             <p
               class="mr-2 truncate text-xl font-semibold text-gray-900 dark:text-white"
             >
-            {{ this.invoiceData.currency }}
+              {{ this.invoiceData.currency }}
               {{
                 this.recentOrders.selectedOrder.status === "Draft"
                   ? "0.00"
@@ -300,7 +301,7 @@
             <p
               class="mr-5 truncate text-base font-semibold text-gray-800 dark:text-white"
             >
-            {{ this.invoiceData.currency }} {{ this.recentOrders.grandTotal }}
+              {{ this.invoiceData.currency }} {{ this.recentOrders.grandTotal }}
             </p>
           </div>
         </div>
@@ -329,8 +330,18 @@
       >
         <button
           type="button"
-          class="mb-2 mr-2 w-36 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-          @click="this.recentOrders.editOrder()"
+          class="mb-2 mr-2 w-36 rounded-lg border bg-white px-5 py-2.5 text-sm font-medium focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+          :class="{
+            'border-gray-200 text-gray-300':
+              this.recentOrders.orderType === 'Aggregators',
+            'border-gray-300 text-gray-700':
+              this.recentOrders.orderType !== 'Aggregators',
+          }"
+          @click="
+            this.recentOrders.orderType !== 'Aggregators'
+              ? this.recentOrders.editOrder()
+              : ''
+          "
         >
           Edit
         </button>
@@ -527,7 +538,6 @@
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
-import { useMenuStore } from "@/stores/Menu.js";
 import { Badge } from "flowbite-vue";
 export default {
   name: "RecentOrder",
@@ -538,8 +548,7 @@ export default {
     const recentOrders = usetoggleRecentOrder();
     const invoiceData = useInvoiceDataStore();
     const auth = useAuthStore();
-    const menu =useMenuStore()
-    return { recentOrders, invoiceData, auth,menu };
+    return { recentOrders, invoiceData, auth };
   },
   mounted() {
     this.recentOrders.handleStatusChange();
