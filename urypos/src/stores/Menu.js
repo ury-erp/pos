@@ -182,8 +182,7 @@ export const useMenuStore = defineStore("menu", {
         this.alert
           .createAlert(
             "Cart Not Empty",
-            "Please empty your cart before selecting an aggregator.",
-            "OK"
+            "Please clear your cart before selecting an order type.","OK"
           )
           .then(() => {
             window.location.reload();
