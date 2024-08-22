@@ -343,7 +343,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             throw {
               alert: this.alert.createAlert(
                 "Message",
-                `Print failed with error ${errorMessage}`,
+                `Message:${errorMessage}`,
                 "OK"
               ),
               custom: (this.isPrinting = false),
@@ -382,7 +382,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             throw {
               alert: this.alert.createAlert(
                 "Message",
-                `Print failed with error ${errorMessage}`,
+                `Message:${errorMessage}`,
                 "OK"
               ),
               custom: (this.isPrinting = false),
