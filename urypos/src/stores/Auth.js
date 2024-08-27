@@ -173,6 +173,26 @@ export const useAuthStore = defineStore("auth", {
           // console.error(error)
         });
     },
+    isPosCloseCheck() {
+      const getPosProfile = {
+        pos_profile: this.invoiceData.posProfile,
+      };
+      this.call
+        .get("ury.ury_pos.api.validate_pos_close", getPosProfile)
+        .then((result) => {
+          if (result.message === "Failed") {
+            var currentDomain = window.location.origin;
+            this.alert
+              .createAlert("Message", "Please close previous POS Entry", "OK")
+              .then(() => {
+                window.location.href = currentDomain;
+              });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     toggleDropdown() {
       if (this.activeDropdown) {
         this.hideDropdown();
