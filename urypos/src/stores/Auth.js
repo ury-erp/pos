@@ -124,6 +124,7 @@ export const useAuthStore = defineStore("auth", {
               );
               if (this.cashier) {
                 this.menu.fetchItems();
+                this.menu.pickOrderType()
               }
               this.isPosOpenChecking();
               var transferRoles = result.message.transfer_role_permissions.map(

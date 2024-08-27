@@ -157,7 +157,6 @@ export const useMenuStore = defineStore("menu", {
         });
     },
     pickOrderType() {
-      this.customer.search = ""
       this.call
         .get("ury.ury_pos.api.get_select_field_options")
         .then((result) => {
@@ -168,6 +167,7 @@ export const useMenuStore = defineStore("menu", {
         .catch((error) => console.error(error));
     },
     orderTypeSelection() {
+      this.customer.search = ""
       this.customer.selectedOrderType = this.selectedOrderType;
       if (this.selectedOrderType === "Dine In" && !this.recentOrders.restaurantTable ) {
         this.selectedOrderType = null;
