@@ -93,6 +93,7 @@ export const useAuthStore = defineStore("auth", {
               router.push("/Table");
               this.table.fetchRoom();
               this.fetchUserRole();
+              this.isPosCloseCheck()
             });
           }
         })
