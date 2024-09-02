@@ -96,7 +96,6 @@ export const useAuthStore = defineStore("auth", {
           this.userAuth = false;
           localStorage.removeItem("userAuth", "true");
           router.push("/login");
-          console.error(error);
         });
     },
     fetchUserRole() {
