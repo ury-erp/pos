@@ -47,23 +47,19 @@ export const useAuthStore = defineStore("auth", {
   },
   actions: {
     //Login
-    login() {
-      this.auth
-        .loginWithUsernamePassword({
+    async login() {
+      try {
+        await this.auth.loginWithUsernamePassword({
           username: this.userId,
           password: this.currentPassword,
           device: "mobile",
-        })
-        .then(() => {
-          this.userAuth = true;
-          localStorage.setItem("userAuth", "true");
-          router.push("/Table").then(() => {
-            window.location.reload();
-          });
-        })
-        .catch((error) =>
-          this.alert.createAlert("Message", error.message, "OK")
-        );
+        });
+        this.userAuth = true;
+        localStorage.setItem("userAuth", "true");
+        await this.fetchUserDetails();
+      } catch (error) {
+        this.alert.createAlert("Message", error.message, "OK");
+      }
     },
     checkAuthState() {
       if (this.userAuth && localStorage.getItem("userAuth")) {
@@ -93,7 +89,6 @@ export const useAuthStore = defineStore("auth", {
               router.push("/Table");
               this.table.fetchRoom();
               this.fetchUserRole();
-              this.isPosCloseCheck()
             });
           }
         })
@@ -125,9 +120,10 @@ export const useAuthStore = defineStore("auth", {
               );
               if (this.cashier) {
                 this.menu.fetchItems();
-                this.menu.pickOrderType()
+                this.menu.pickOrderType();
               }
               this.isPosOpenChecking();
+              this.isPosCloseCheck();
               var transferRoles = result.message.transfer_role_permissions.map(
                 (role) => role.role
               );
