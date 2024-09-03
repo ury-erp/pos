@@ -191,10 +191,16 @@ export const useCustomerStore = defineStore("customers", {
       }
     },
     validateInput(event) {
-      if (event.target.value < 1) {
+      let value = event.target.value;
+      if (value < 1) {
         this.numberOfPax = "";
+        return;
+      }
+
+      if (value.toString().length > 3) {
+        this.numberOfPax = value.toString().slice(0, 3);
       } else {
-        this.numberOfPax = event.target.value;
+        this.numberOfPax = value;
       }
     },
     async fectchCustomerFavouriteItem() {
