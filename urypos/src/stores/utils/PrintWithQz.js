@@ -52,6 +52,7 @@ export function printWithQz(host,htmlToPrint){
         qz.security.setSignaturePromise(function(toSign) {
             return function(resolve) {
                 try {
+                    console.log(privateKey,"privateKey")
                     var pk = KEYUTIL.getKey(privateKey);
                     var sig = new KJUR.crypto.Signature({"alg": "SHA512withRSA"});  // Use "SHA1withRSA" for QZ Tray 2.0 and older
                     sig.init(pk); 
