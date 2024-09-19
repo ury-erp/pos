@@ -49,6 +49,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     auth: useAuthStore(),
     menu: useMenuStore(),
     table: useTableStore(),
+    customers: useCustomerStore(),
     notification: useNotifications(),
     recentOrders: usetoggleRecentOrder(),
   }),
@@ -122,11 +123,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.showUpdateButtton = false;
       let selectedTables = "";
       let cart = this.menu.cart;
-      const customers = useCustomerStore();
-      const customerName = customers.search;
+      const customerName = this.customers.search;
       const ordeType =
         this.menu.selectedOrderType || this.recentOrders.pastOrderType;
-      const numberOfPax = customers.numberOfPax;
+      const numberOfPax = this.customers.numberOfPax;
       let invoice =
         this.recentOrders.draftInvoice ||
         this.table.invoiceNo ||
@@ -216,10 +216,12 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 this.previousOrderItem.length,
                 ...cartCopy
               );
-
               this.table.modifiedTime = response.message.modified;
               if (this.auth.cashier) {
                 this.recentOrders.viewRecentOrder(response.message);
+                router.push("/recentOrder").then(() => {
+                  this.clearDataAfterUpdate();
+                });
               }
             }
           })
@@ -234,6 +236,30 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       }
     },
 
+    clearDataAfterUpdate() {
+      this.menu.items.forEach((item) => {
+        item.comment = "";
+        item.qty = "";
+      });
+      if (this.table.selectedTable){
+        this.table.selectedTable=""
+        this.customers.numberOfPax=""
+      }
+      this.menu.cart = [];
+      this.recentOrders.draftInvoice = "";
+      this.menu.selectedAggregator = "";
+      this.invoiceNumber = "";
+      this.customers.customerFavouriteItems = "";
+      this.customers.search = "";
+      this.recentOrders.pastOrderType = "";
+      this.recentOrders.showOrder=false;
+      this.recentOrders.invoiceNumber=""
+      this.recentOrders.setBackground=""
+      this.recentOrders.recentOrderListItems = [];
+      this.recentOrders.texDetails=[]
+      this.customers.selectedOrderType = "";
+      this.menu.selectedOrderType = "";
+    },
     billing(table) {
       let tables = table.name;
       const getOrderInvoice = {

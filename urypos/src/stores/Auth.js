@@ -76,13 +76,20 @@ export const useAuthStore = defineStore("auth", {
       return this.userName;
     },
     fetchUserDetails() {
+      const user = localStorage.getItem("userAuth");
+      if (user !== "true") {
+        this.userAuth = false;
+        localStorage.removeItem("userAuth");
+        router.push("/login");
+        return
+      }
       this.auth
         .getLoggedInUser()
         .then((user) => {
           this.sessionUser = user;
           if (!this.sessionUser) {
             this.userAuth = false;
-            localStorage.removeItem("userAuth", "true");
+            localStorage.removeItem("userAuth");
           } else {
             this.userAuth = true;
             this.invoiceData.fetchInvoiceDetails().then(() => {

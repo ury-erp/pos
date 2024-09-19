@@ -17,8 +17,8 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     recentOrderList: [],
     modeOfPaymentList: [],
     recentOrderListItems: [],
+    next: false,
     netTotal: 0,
-    perPage: 10,
     paidAmount: 0,
     grandTotal: 0,
     billAmount: 0,
@@ -51,6 +51,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     alert: useAlert(),
     call: frappe.call(),
     menu: useMenuStore(),
+    customers: useCustomerStore(),
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
   }),
@@ -59,21 +60,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       return this.recentOrderList.filter((order) =>
         this.matchesSearchOrder(order)
       );
-    },
-    totalPages() {
-      return Math.ceil(this.filteredOrders.length / this.perPage);
-    },
-    paginatedItems() {
-      const startIndex = (this.currentPage - 1) * this.perPage;
-      const endIndex = startIndex + this.perPage;
-      return this.filteredOrders.slice(startIndex, endIndex);
-    },
-    pageNumbers() {
-      const pageNumbers = [];
-      for (let i = 1; i <= this.totalPages; i++) {
-        pageNumbers.push(i);
-      }
-      return pageNumbers;
     },
     total() {
       return this.modeOfPaymentList.reduce(
@@ -94,18 +80,39 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
   },
   actions: {
-    async handleStatusChange() {
+    async getPosInvoice(selectedStatus, limit, startLimit) {
       const recentOrder = {
-        status: this.selectedStatus,
+        status: selectedStatus,
+        limit: limit,
+        limit_start: startLimit,
       };
       this.call
         .get("ury.ury_pos.api.getPosInvoice", recentOrder)
         .then((result) => {
-          this.recentOrderList = result.message;
+          this.recentOrderList = result.message.data;
+          this.next = result.message.next;
+          return this.recentOrderList, this.next;
         })
         .catch((error) => console.error(error));
     },
-
+    async handleStatusChange() {
+      this.currentPage = 1;
+      const limit = 10;
+      const startLimit = 0;
+      this.getPosInvoice(this.selectedStatus, limit, startLimit);
+    },
+    nextPageClick() {
+      this.currentPage += 1;
+      const limit = 10;
+      const startLimit = (this.currentPage - 1) * limit;
+      this.getPosInvoice(this.selectedStatus, limit, startLimit);
+    },
+    previousPageClick() {
+      this.currentPage -= 1;
+      const limit = 10;
+      const startLimit = (this.currentPage - 1) * limit;
+      this.getPosInvoice(this.selectedStatus, limit, startLimit);
+    },
     matchesSearchOrder(order) {
       const query = this.searchOrder.toLowerCase();
       const name = order.name.toLowerCase();
@@ -132,6 +139,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
 
     async viewRecentOrder(recentOrder) {
+      if (recentOrder.name === this.invoiceNumber ) return;
       this.orderType=recentOrder.order_type
       this.netTotal = recentOrder.net_total;
       this.grandTotal = recentOrder.rounded_total;
@@ -141,7 +149,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       const dateTimeString = `${recentOrder.posting_date}`;
       const dateTime = moment(dateTimeString, "YYYY-MM-DD");
       this.postingDate = dateTime.format("Do MMMM");
-
+      this.invoicePrinted = recentOrder.invoice_printed;
       const getPosInvoiceItems = {
         invoice: this.invoiceNumber,
       };
@@ -152,18 +160,6 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.texDetails = result.message[1];
         })
         .catch((error) => console.error(error));
-
-      const getOrderInvoice = {
-        doctype: "POS Invoice",
-        name: this.invoiceNumber,
-      };
-      this.call
-        .get("frappe.client.get", getOrderInvoice)
-        .then((result) => {
-          this.invoicePrinted = result.message.invoice_printed;
-        })
-        .catch((error) => console.error(error));
-
       this.showOrder = true;
     },
     async editOrder() {
@@ -202,15 +198,14 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           previousOrderdCustomer = pastOrder.customer;
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
-          const customers = useCustomerStore();
           if (previousOrderdCustomer) {
-            customers.search = previousOrderdCustomer;
-            customers.numberOfPax = previousOrderdNumberOfPax;
-            customers.fectchCustomerFavouriteItem();
+            this.customers.search = previousOrderdCustomer;
+            this.customers.numberOfPax = previousOrderdNumberOfPax;
+            this.customers.fectchCustomerFavouriteItem();
           } else {
-            customers.search = "";
-            customers.numberOfPax = "";
-            customers.customerFavouriteItems = "";
+            this.customers.search = "";
+            this.customers.numberOfPax = "";
+            this.customers.customerFavouriteItems = "";
           }
 
           items.forEach((item) => {
@@ -356,20 +351,33 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           )
           .then(() => {
             this.notification.createNotification("Payment Completed");
-            window.location.reload();
+            this.getPosInvoice(this.selectedStatus, 10, 0);
+            this.showOrder = false;
+            this.clearData()  
             this.isLoading = false;
           })
           .catch((error) => {
             this.isLoading = false;
             const messages = JSON.parse(error._server_messages);
             const message = JSON.parse(messages[0]);
-            this.alert
-              .createAlert("Message", message.message, "OK")
-              .then(() => {
-                window.location.reload();
-              });
+            this.alert.createAlert("Message", message.message, "OK");
           });
       }
+    },
+    clearData() {
+      this.menu.selectedOrderType = "";
+      this.pastOrderType=""
+      this.menu.items.forEach((item) => {
+        item.comment = "";
+        item.qty = "";
+      });
+      this.menu.cart = [];
+      this.draftInvoice = "";
+      this.customers.selectedOrderType = "";
+      this.menu.selectedAggregator = "";
+      this.invoiceData.invoiceNumber = "";
+      this.customers.customerFavouriteItems = "";
+      this.customers.search = "";
     },
     showCancelInvoiceModal() {
       this.call

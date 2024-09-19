@@ -163,33 +163,6 @@ export const useCustomerStore = defineStore("customers", {
       this.showCustomers = false;
       this.fectchCustomerFavouriteItem();
     },
-    pickOrderType() {
-      if (this.menu.selectedOrderType || this.recentOrders.pastOrderType) {
-        this.showOrderType = false;
-      } else {
-        this.showOrderType = true;
-      }
-      this.call
-        .get("ury.ury_pos.api.get_select_field_options")
-        .then((result) => {
-          this.orderType = result.message.filter(
-            (option) => option.name !== ""
-          );
-        })
-        .catch((error) => console.error(error));
-    },
-    selectOrderType(orderType) {
-      this.showOrderType = false;
-      if (orderType.name === "Dine In") {
-        this.alert.createAlert(
-          "Message",
-          "Dine in is not permitted for takeaway orders.",
-          "OK"
-        );
-      } else {
-        this.selectedOrderType = orderType.name;
-      }
-    },
     validateInput(event) {
       let value = event.target.value;
       if (value < 1) {

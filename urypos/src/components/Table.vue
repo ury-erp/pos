@@ -56,13 +56,12 @@
           id="room"
           v-model="menu.selectedOrderType"
           @change="menu.orderTypeSelection()"
-          :disabled="recentOrders.pastOrderType"
+          :disabled="recentOrders.pastOrderType !== null && recentOrders.pastOrderType !== ''"
         >
           <option
             v-for="(type, index) in menu.orderType"
             :key="index"
-            @click="menu.orderTypeSelection(type.name)"
-          >
+           >
             {{ type.name }}
           </option>
         </select>
@@ -81,7 +80,7 @@
         id="room"
         v-model="menu.selectedAggregator"
         @change="menu.handleAggregatorChange"
-        :disabled="menu.cartHasValue"
+        :disabled="menu.cartHasValue || recentOrders.pastOrderType !== null && recentOrders.pastOrderType !== ''"
       >
         <option
           v-for="(aggregator, index) in menu.aggregatorList"

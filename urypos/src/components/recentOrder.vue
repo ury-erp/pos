@@ -57,7 +57,7 @@
             :class="{
               'bg-gray-200': this.recentOrders.setBackground === index,
             }"
-            v-for="(recentOrder, index) in this.recentOrders.paginatedItems"
+            v-for="(recentOrder, index) in this.recentOrders.filteredOrders"
             :key="recentOrder.name"
             @click="
               this.recentOrders.viewRecentOrder(recentOrder);
@@ -105,53 +105,21 @@
           </li>
         </ul>
       </div>
-      <div
-        class="mt-4 flex justify-center"
-        v-if="this.recentOrders.paginatedItems.length > 0"
-      >
+      <div class="mt-4 flex justify-center">
         <button
           :class="{ hidden: this.recentOrders.currentPage === 1 }"
-          :disabled="this.recentOrders.currentPage === 1"
-          @click="this.recentOrders.currentPage -= 1"
-          class="mr-2 rounded-md border px-2 py-1"
+          @click="this.recentOrders.previousPageClick()"
+          class="mr-2 w-[80px] rounded-md border px-2 py-1"
         >
           Previous
         </button>
-        <div v-for="pageNumber in this.recentOrders.pageNumbers">
-          <button
-            v-if="
-              pageNumber === this.recentOrders.currentPage ||
-              Math.abs(pageNumber - this.recentOrders.currentPage) <= 2
-            "
-            :key="pageNumber"
-            @click="this.recentOrders.currentPage = pageNumber"
-            :class="{
-              'bg-gray-200': pageNumber === this.recentOrders.currentPage,
-            }"
-            class="mr-2 rounded-md border px-2 py-1"
-          >
-            {{ pageNumber }}
-          </button>
-          <span
-            v-else-if="
-              this.recentOrders.pageNumbers.indexOf(pageNumber) === 0 ||
-              this.recentOrders.pageNumbers.indexOf(pageNumber) ===
-                this.recentOrders.pageNumbers.length - 1
-            "
-          >
-            ...
-          </span>
-        </div>
+        <button class="mr-2 rounded-md border px-2 py-1">
+          {{ this.recentOrders.currentPage }}
+        </button>
         <button
-          :disabled="
-            this.recentOrders.currentPage === this.recentOrders.totalPages
-          "
-          @click="this.recentOrders.currentPage += 1"
-          :class="{
-            hidden:
-              this.recentOrders.currentPage === this.recentOrders.totalPages,
-          }"
-          class="rounded-md border px-2 py-1"
+          @click="this.recentOrders.nextPageClick()"
+          v-if="this.recentOrders.next"
+          class="w-[80px] rounded-md border px-2 py-1"
         >
           Next
         </button>
