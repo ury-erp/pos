@@ -33,6 +33,7 @@ export const useCustomerStore = defineStore("customers", {
     customerGroup: null,
     call: frappe.call(),
     db: frappe.db(),
+    timer:null,
   }),
   getters: {
     isFlagSet() {
@@ -56,7 +57,10 @@ export const useCustomerStore = defineStore("customers", {
     },
     handleSearchInput(event) {
       this.search = event.target.value;
-      this.pickCustomer();
+      clearTimeout(this.timer);
+      this.timer=setTimeout(()=>{
+        this.pickCustomer();
+      },500);
     },
     pickCustomerGroup() {
       this.db

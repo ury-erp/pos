@@ -87,17 +87,17 @@ export const useAuthStore = defineStore("auth", {
         .getLoggedInUser()
         .then((user) => {
           this.sessionUser = user;
-          if (!this.sessionUser) {
-            this.userAuth = false;
-            localStorage.removeItem("userAuth");
-          } else {
+          // if (!this.sessionUser) {
+          //   this.userAuth = false;
+          //   localStorage.removeItem("userAuth");
+          // } else {
             this.userAuth = true;
             this.invoiceData.fetchInvoiceDetails().then(() => {
               router.push("/Table");
               this.table.fetchRoom();
               this.fetchUserRole();
             });
-          }
+          // }
         })
         .catch((error) => {
           this.userAuth = false;
