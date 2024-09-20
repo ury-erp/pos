@@ -154,9 +154,10 @@ export const useAuthStore = defineStore("auth", {
         });
     },
     routeToHome() {
-      var currentDomain = window.location.origin;
-      window.location.href = currentDomain + "/login/";
+      var currentDomain = window.location.protocol + "//" + window.location.hostname;
+      window.location.href = currentDomain + "/app/";
     },
+    
     isPosOpenChecking() {
       this.call
         .get("ury.ury_pos.api.posOpening")
