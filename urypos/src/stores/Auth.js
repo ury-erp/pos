@@ -153,6 +153,10 @@ export const useAuthStore = defineStore("auth", {
           console.error(error);
         });
     },
+    routeToHome() {
+      var currentDomain = window.location.origin;
+      window.location.href = currentDomain + "/app/";
+    },
     isPosOpenChecking() {
       this.call
         .get("ury.ury_pos.api.posOpening")
@@ -161,16 +165,16 @@ export const useAuthStore = defineStore("auth", {
           const innerMessageString = serverMessages[0];
           const innerMessage = JSON.parse(innerMessageString);
           const message = innerMessage.message;
-          if (this.cashier) {
-            this.alert.createAlert("Message", message, "OK").then(() => {
-              router.push("/posOpen");
-            });
-          } else {
-            var currentDomain = window.location.origin;
-            this.alert.createAlert("Message", message, "OK").then(() => {
-              window.location.href = currentDomain + "/login/";
-            });
-          }
+          // if (this.cashier) {
+          //   this.alert.createAlert("Message", message, "OK").then(() => {
+          //     router.push("/posOpen");
+          //   });
+          // } else {
+          var currentDomain = window.location.origin;
+          this.alert.createAlert("Message", message, "OK").then(() => {
+            window.location.href = currentDomain + "/login/";
+          });
+          // }
         })
         .catch((error) => {
           // console.error(error)
