@@ -378,6 +378,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.invoiceData.invoiceNumber = "";
       this.customers.customerFavouriteItems = "";
       this.customers.search = "";
+      this.invoiceData.tableInvoiceNo =""
+      this.pastOrderType = "";
+      this.showOrder=false;
+      this.invoiceNumber=""
+      this.setBackground=""
+      this.recentOrderListItems = [];
+      this.texDetails=[]
     },
     showCancelInvoiceModal() {
       this.call

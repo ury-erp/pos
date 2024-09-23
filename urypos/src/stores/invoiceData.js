@@ -249,6 +249,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.draftInvoice = "";
       this.menu.selectedAggregator = "";
       this.invoiceNumber = "";
+      this.tableInvoiceNo =""
       this.customers.customerFavouriteItems = "";
       this.customers.search = "";
       this.recentOrders.pastOrderType = "";
