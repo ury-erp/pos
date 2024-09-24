@@ -298,27 +298,9 @@
           :value="
             this.customers.selectedOrderType || this.recentOrders.pastOrderType
           "
-          @click="this.customers.pickOrderType()"
           readonly
           required
         />
-
-        <div
-          v-if="this.customers.showOrderType === true && !this.recentOrders.restaurantTable"
-          class="absolute left-0 top-full z-10 max-h-64 w-full overflow-y-scroll rounded bg-white shadow md:w-3/5 lg:w-2/5"
-          ref="dropdown"
-        >
-          <div
-            class="p-2 hover:bg-gray-100"
-            v-for="(orderType, index) in this.customers.orderType"
-            :key="index"
-            @click="this.customers.selectOrderType(orderType)"
-          >
-            <h1 class="text-base font-normal leading-normal">
-              {{ orderType.name }}
-            </h1>
-          </div>
-        </div>
       </div>
 
       <h1
