@@ -39,6 +39,7 @@
         >
           <option value="Draft">Draft</option>
           <option value="Unbilled">Unbilled</option>
+          <option value="Recently Paid" v-if="auth.viewAllStatus === 0 && invoiceData.paidLimit > 0">Recently Paid</option>
           <option value="Paid" v-if="this.auth.viewAllStatus === 1">
             Paid
           </option>

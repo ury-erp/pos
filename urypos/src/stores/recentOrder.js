@@ -97,9 +97,17 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
     async handleStatusChange() {
       this.currentPage = 1;
-      const limit = 10;
-      const startLimit = 0;
-      this.getPosInvoice(this.selectedStatus, limit, startLimit);
+      let limit = 0;
+      let startLimit = 0;
+      if(this.selectedStatus==="Recently Paid"){
+        limit = this.invoiceData.paidLimit
+        this.getPosInvoice(this.selectedStatus, limit, startLimit);
+      }
+      else{
+        limit = 10
+        this.getPosInvoice(this.selectedStatus, limit, startLimit);
+      }
+      
     },
     nextPageClick() {
       this.currentPage += 1;

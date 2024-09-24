@@ -28,6 +28,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     company: null,
     currency: null,
     qz_print: null,
+    paidLimit:null,
     print_type: null,
     grandTotal: null,
     print_format: null,
@@ -70,6 +71,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.qz_host = this.invoiceDetails.qz_host;
           this.print_type = this.invoiceDetails.print_type;
           this.printer = this.invoiceDetails.printer;
+          this.paidLimit=this.invoiceDetails.paid_limit
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
