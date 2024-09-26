@@ -166,8 +166,24 @@ export const useMenuStore = defineStore("menu", {
         })
         .catch((error) => console.error(error));
     },
-    orderTypeSelection() {
+    clearPreviousData(){
+      this.recentOrders.selectedOrder=""
+      this.recentOrders.selectedTable=""
+      this.recentOrders.showOrder="",
+      this.recentOrders.invoiceNumber="",
+      this.recentOrders.recentOrderListItems=[],
+      this.recentOrders.texDetails=[],
+      this.recentOrders.orderType="",
+      this.recentOrders.netTotal="",
+      this.recentOrders.grandTotal="",
+      this.recentOrders.invoiceNumber="",
+      this.recentOrders.selectedOrder=[],
+      this.recentOrders.selectedTable="",
       this.customer.search = ""
+      
+    },
+    orderTypeSelection() {
+      this.clearPreviousData()
       this.customer.selectedOrderType = this.selectedOrderType;
       if (this.selectedOrderType === "Dine In" && !this.recentOrders.restaurantTable ) {
         this.selectedOrderType = null;

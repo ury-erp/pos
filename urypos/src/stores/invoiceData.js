@@ -260,6 +260,12 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.setBackground=""
       this.recentOrders.recentOrderListItems = [];
       this.recentOrders.texDetails=[]
+      this.recentOrders.orderType=""
+      this.recentOrders.netTotal = "";
+      this.recentOrders.grandTotal = "";
+      this.recentOrders.invoiceNumber =  "";
+      this.recentOrders.selectedOrder = [];
+      this.recentOrders.selectedTable = "";
       this.customers.selectedOrderType = "";
       this.menu.selectedOrderType = "";
     },
