@@ -206,8 +206,8 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.previousOrderdCustomer = pastOrder.customer;
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
-          if (previousOrderdCustomer) {
-            this.customers.search = previousOrderdCustomer;
+          if (this.previousOrderdCustomer) {
+            this.customers.search = this.previousOrderdCustomer;
             this.customers.numberOfPax = previousOrderdNumberOfPax;
             this.customers.fectchCustomerFavouriteItem();
           } else {
