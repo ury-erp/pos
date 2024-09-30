@@ -220,9 +220,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               );
               this.table.modifiedTime = response.message.modified;
               if (this.auth.cashier) {
-                this.recentOrders.viewRecentOrder(response.message);
                 router.push("/recentOrder").then(() => {
+                  this.recentOrders.viewRecentOrder(response.message);
                   this.clearDataAfterUpdate();
+                  this.recentOrders.getPosInvoice("Draft", 10, 0);
                 });
               }
             }
@@ -247,6 +248,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.table.selectedTable=""
         this.customers.numberOfPax=""
       }
+      this.recentOrders.selectedStatus = "Draft";
       this.menu.cart = [];
       this.recentOrders.draftInvoice = "";
       this.menu.selectedAggregator = "";
@@ -261,9 +263,12 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.recentOrderListItems = [];
       this.recentOrders.texDetails=[]
       this.recentOrders.orderType=""
-      this.recentOrders.netTotal = "";
-      this.recentOrders.grandTotal = "";
-      this.recentOrders.invoiceNumber =  "";
+      this.recentOrders.netTotal = 0;
+      this.recentOrders.payments = [];
+      this.recentOrders.grandTotal = 0;
+      this.recentOrders.paidAmount = 0;
+      this.recentOrders.billAmount = 0;
+      this.recentOrders.invoiceNumber = "";
       this.recentOrders.selectedOrder = [];
       this.recentOrders.selectedTable = "";
       this.customers.selectedOrderType = "";

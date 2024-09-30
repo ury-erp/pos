@@ -252,6 +252,7 @@
               this.recentOrders.editPrintedInvoice === 1 &&
               this.auth.removeTableOrderItem === 0
             "
+            :disabled="this.recentOrders.restaurantTable"
           />
           <label
             for="Comments"

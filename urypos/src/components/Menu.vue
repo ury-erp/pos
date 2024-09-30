@@ -74,6 +74,7 @@
                 this.recentOrders.editPrintedInvoice === 1 ||
                 this.auth.removeTableOrderItem === 0,
             }"
+            :disabled="this.recentOrders.restaurantTable"
             @click="
               (this.recentOrders.editPrintedInvoice === 0 ||
                 this.auth.removeTableOrderItem === 1) &&
@@ -147,6 +148,7 @@
                   this.recentOrders.editPrintedInvoice === 1 &&
                   this.auth.removeTableOrderItem === 0
                 "
+                :disabled="this.recentOrders.restaurantTable"
               />
               <label
                 for="comments"

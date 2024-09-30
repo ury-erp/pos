@@ -29,6 +29,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     posProfile: "",
     searchOrder: "",
     customerNameForBilling: "",
+    previousOrderdCustomer: "",
     table: null,
     orderType:null,
     postingDate: null,
@@ -107,7 +108,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         limit = 10
         this.getPosInvoice(this.selectedStatus, limit, startLimit);
       }
-      
+
     },
     nextPageClick() {
       this.currentPage += 1;
@@ -173,7 +174,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     async editOrder() {
       let previousOrderdNumberOfPax = "";
       this.pastOrderdItem = "";
-      let previousOrderdCustomer = "";
+      this.previousOrderdCustomer = "";
       this.pastOrderType = "";
       let items = this.menu.items;
       this.draftInvoice = this.invoiceNumber;
@@ -201,9 +202,8 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             if(this.pastOrderType === "Aggregators"){
               this.menu.selectedAggregator=pastOrder.customer
             }
-            this.menu.orderTypeSelection();
           }
-          previousOrderdCustomer = pastOrder.customer;
+          this.previousOrderdCustomer = pastOrder.customer;
           previousOrderdNumberOfPax = pastOrder.no_of_pax;
           router.push("/Menu");
           if (previousOrderdCustomer) {
@@ -361,7 +361,12 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             this.notification.createNotification("Payment Completed");
             this.getPosInvoice(this.selectedStatus, 10, 0);
             this.showOrder = false;
-            this.clearData()  
+            this.netTotal = 0;
+            this.paidAmount = 0;
+            this.grandTotal = 0;
+            this.billAmount = 0;
+            this.payments = [];
+            this.clearData();
             this.isLoading = false;
           })
           .catch((error) => {
@@ -379,6 +384,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         item.comment = "";
         item.qty = "";
       });
+      this.selectedStatus= "Draft"
       this.menu.cart = [];
       this.draftInvoice = "";
       this.customers.selectedOrderType = "";
@@ -388,6 +394,10 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.customers.search = "";
       this.invoiceData.tableInvoiceNo =""
       this.pastOrderType = "";
+      this.netTotal = 0;
+      this.paidAmount = 0;
+      this.grandTotal = 0;
+      this.billAmount = 0;
       this.showOrder=false;
       this.customerNameForBilling=""
       this.payments = []
