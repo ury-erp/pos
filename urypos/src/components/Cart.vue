@@ -77,6 +77,7 @@
         <button
           class="p-2 text-center"
           type="button"
+          :disabled="this.recentOrders.restaurantTable"            
           @click="
             (this.recentOrders.editPrintedInvoice === 0 ||
               this.auth.removeTableOrderItem === 1) &&
