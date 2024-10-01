@@ -185,14 +185,12 @@ export const useMenuStore = defineStore("menu", {
       this.recentOrders.selectedOrder = [];
       this.recentOrders.selectedTable = "";
       this.customer.search = "";
+      this.recentOrders.restaurantTable=""
+      this.recentOrders.restaurantTable=null
+      this.aggregatorItem= []
     },
     orderTypeSelection() {
       this.clearPreviousData();
-      this.table.invoiceNo = "";
-      this.table.selectedTable = "";
-      this.invoiceData.invoiceNumber = "";
-      this.recentOrders.draftInvoice = "";
-      this.recentOrders.invoiceNumber = "";
       this.customer.selectedOrderType = this.selectedOrderType;
       if (
         this.selectedOrderType === "Dine In" &&

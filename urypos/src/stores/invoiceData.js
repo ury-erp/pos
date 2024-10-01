@@ -28,7 +28,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     company: null,
     currency: null,
     qz_print: null,
-    paidLimit:null,
+    paidLimit: null,
     print_type: null,
     grandTotal: null,
     print_format: null,
@@ -71,7 +71,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.qz_host = this.invoiceDetails.qz_host;
           this.print_type = this.invoiceDetails.print_type;
           this.printer = this.invoiceDetails.printer;
-          this.paidLimit=this.invoiceDetails.paid_limit
+          this.paidLimit = this.invoiceDetails.paid_limit;
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
@@ -223,7 +223,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 router.push("/recentOrder").then(() => {
                   this.recentOrders.viewRecentOrder(response.message);
                   this.clearDataAfterUpdate();
-                  this.recentOrders.getPosInvoice("Draft", 10, 0);
                 });
               }
             }
@@ -244,30 +243,29 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         item.comment = "";
         item.qty = "";
       });
-      if (this.table.selectedTable){
-        this.table.selectedTable=""
-        this.customers.numberOfPax=""
-      }
-      this.recentOrders.selectedStatus = "Draft";
+      this.recentOrders.restaurantTable = "";
+      this.table.selectedTable = "";
+      this.customers.numberOfPax = "";
       this.menu.cart = [];
       this.recentOrders.draftInvoice = "";
       this.menu.selectedAggregator = "";
       this.invoiceNumber = "";
-      this.tableInvoiceNo =""
+      this.tableInvoiceNo = "";
       this.customers.customerFavouriteItems = "";
       this.customers.search = "";
       this.recentOrders.pastOrderType = "";
-      this.recentOrders.showOrder=false;
-      this.recentOrders.invoiceNumber=""
-      this.recentOrders.setBackground=""
+      this.recentOrders.showOrder = false;
+      this.recentOrders.invoiceNumber = "";
+      this.recentOrders.setBackground = "";
       this.recentOrders.recentOrderListItems = [];
-      this.recentOrders.texDetails=[]
-      this.recentOrders.orderType=""
+      this.recentOrders.texDetails = [];
+      this.recentOrders.orderType = "";
       this.recentOrders.netTotal = 0;
       this.recentOrders.payments = [];
       this.recentOrders.grandTotal = 0;
       this.recentOrders.paidAmount = 0;
       this.recentOrders.billAmount = 0;
+      this.menu.aggregatorItem= []
       this.recentOrders.invoiceNumber = "";
       this.recentOrders.selectedOrder = [];
       this.recentOrders.selectedTable = "";
