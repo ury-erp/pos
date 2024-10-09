@@ -31,7 +31,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     customerNameForBilling: "",
     previousOrderdCustomer: "",
     table: null,
-    orderType:null,
+    orderType: null,
     postingDate: null,
     recentWaiter: null,
     draftInvoice: null,
@@ -100,15 +100,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.currentPage = 1;
       let limit = 0;
       let startLimit = 0;
-      if(this.selectedStatus==="Recently Paid"){
-        limit = this.invoiceData.paidLimit
+      if (this.selectedStatus === "Recently Paid") {
+        limit = this.invoiceData.paidLimit;
+        this.getPosInvoice(this.selectedStatus, limit, startLimit);
+      } else {
+        limit = 10;
         this.getPosInvoice(this.selectedStatus, limit, startLimit);
       }
-      else{
-        limit = 10
-        this.getPosInvoice(this.selectedStatus, limit, startLimit);
-      }
-
     },
     nextPageClick() {
       this.currentPage += 1;
@@ -148,8 +146,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
 
     async viewRecentOrder(recentOrder) {
-      if (recentOrder.name === this.invoiceNumber ) return;
-      this.orderType=recentOrder.order_type
+      this.payments = [];
+      if (recentOrder.name === this.invoiceNumber) return;
+      this.orderType = recentOrder.order_type;
       this.netTotal = recentOrder.net_total;
       this.grandTotal = recentOrder.rounded_total;
       this.invoiceNumber = recentOrder.name;
@@ -172,6 +171,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.showOrder = true;
     },
     async editOrder() {
+      this.payments = [];
       let previousOrderdNumberOfPax = "";
       this.pastOrderdItem = "";
       this.previousOrderdCustomer = "";
@@ -198,9 +198,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.pastOrderType = pastOrder.order_type;
           if (this.pastOrderType) {
             this.menu.selectedOrderType = pastOrder.order_type;
-            this.menu.pickOrderType()
-            if(this.pastOrderType === "Aggregators"){
-              this.menu.selectedAggregator=pastOrder.customer
+            this.menu.pickOrderType();
+            if (this.pastOrderType === "Aggregators") {
+              this.menu.selectedAggregator = pastOrder.customer;
             }
           }
           this.previousOrderdCustomer = pastOrder.customer;
@@ -296,39 +296,55 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
 
     calculatePaidAmount(paymentMethod) {
       this.billAmount = this.grandTotal;
-      if (this.billAmount - this.total > 0) {
-        paymentMethod.value = this.billAmount - this.total;
+      let balanceAmount = this.billAmount - this.total;
+      if (balanceAmount > 0) {
+        paymentMethod.value = balanceAmount;
         this.paymentMethod = paymentMethod.value;
         let existingEntryIndex = this.payments.findIndex(
           (entry) => entry.mode_of_payment === paymentMethod.mode_of_payment
         );
-        if (existingEntryIndex !== -1) {
-          this.payments[existingEntryIndex].amount = this.paymentMethod;
-        } else {
-          let paidAmount = {
-            mode_of_payment: paymentMethod.mode_of_payment,
-            amount: this.paymentMethod,
-          };
-          this.payments.push(paidAmount);
+
+        if (this.paymentMethod > 0) {
+          // Only proceed if payment is greater than 0
+          if (existingEntryIndex !== -1) {
+            // Update the existing payment entry
+            this.payments[existingEntryIndex].amount = this.paymentMethod;
+          } else {
+            // Add a new payment entry if not found
+            let paidAmount = {
+              mode_of_payment: paymentMethod.mode_of_payment,
+              amount: this.paymentMethod,
+            };
+            this.payments.push(paidAmount);
+          }
         }
       }
     },
+
     changePaidAmount(name, value) {
       this.modeOfPaymentName = name;
-      this.paidAmount = parseFloat(value);
+      this.paidAmount = parseFloat(value) || 0;
+
+      let existingEntryIndex = this.payments.findIndex(
+        (entry) => entry.mode_of_payment === this.modeOfPaymentName
+      );
+
       if (this.paidAmount > 0) {
-        let existingEntryIndex = this.payments.findIndex(
-          (entry) => entry.mode_of_payment === this.modeOfPaymentName
-        );
+        // Only add payment if it's greater than 0
         if (existingEntryIndex !== -1) {
+          // Update the amount for an existing payment method
           this.payments[existingEntryIndex].amount = this.paidAmount;
         } else {
+          // Add a new payment entry if not found
           let paidAmount = {
             mode_of_payment: this.modeOfPaymentName,
             amount: this.paidAmount,
           };
           this.payments.push(paidAmount);
         }
+      } else if (existingEntryIndex !== -1) {
+        // Optionally remove the payment if the amount is 0
+        this.payments.splice(existingEntryIndex, 1);
       }
     },
 
@@ -360,14 +376,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           .then(() => {
             this.notification.createNotification("Payment Completed");
             this.getPosInvoice(this.selectedStatus, 10, 0);
-            this.showOrder = false;
-            this.netTotal = 0;
-            this.paidAmount = 0;
-            this.grandTotal = 0;
-            this.billAmount = 0;
-            this.payments = [];
             this.clearData();
-            this.isLoading = false;
           })
           .catch((error) => {
             this.isLoading = false;
@@ -379,12 +388,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
     clearData() {
       this.menu.selectedOrderType = "";
-      this.pastOrderType=""
+      this.isLoading = false;
+      this.pastOrderType = "";
       this.menu.items.forEach((item) => {
         item.comment = "";
         item.qty = "";
       });
-      this.selectedStatus= "Draft"
+      this.selectedStatus = "Draft";
       this.menu.cart = [];
       this.draftInvoice = "";
       this.customers.selectedOrderType = "";
@@ -392,19 +402,19 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.invoiceData.invoiceNumber = "";
       this.customers.customerFavouriteItems = "";
       this.customers.search = "";
-      this.invoiceData.tableInvoiceNo =""
+      this.invoiceData.tableInvoiceNo = "";
       this.pastOrderType = "";
       this.netTotal = 0;
       this.paidAmount = 0;
       this.grandTotal = 0;
       this.billAmount = 0;
-      this.showOrder=false;
-      this.customerNameForBilling=""
-      this.payments = []
-      this.invoiceNumber=""
-      this.setBackground=""
+      this.payments = [];
+      this.showOrder = false;
+      this.customerNameForBilling = "";
+      this.invoiceNumber = "";
+      this.setBackground = "";
       this.recentOrderListItems = [];
-      this.texDetails=[]
+      this.texDetails = [];
     },
     showCancelInvoiceModal() {
       this.call
