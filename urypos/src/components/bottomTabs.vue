@@ -14,12 +14,11 @@
       ]"
     >
       <router-link
-        to="/Table"
+        :to="invoiceData.invoiceUpdating ? '#' : '/Table'"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-        @click=""
       >
         <svg
-          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Table',
@@ -37,7 +36,7 @@
         </svg>
 
         <span
-          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Table',
@@ -49,12 +48,12 @@
       </router-link>
 
       <router-link
-        to="/Menu"
+        :to="invoiceData.invoiceUpdating ? '#' : '/Menu'"
         class="group inline-flex flex-col items-center justify-center border-r border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
         @click="this.tabClick.clickMenuTab()"
       >
         <svg
-          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Menu',
@@ -74,7 +73,7 @@
         </svg>
 
         <span
-          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Menu',
@@ -85,12 +84,12 @@
         ></router-link
       >
       <router-link
-        to="/Customer"
+        :to="invoiceData.invoiceUpdating ? '#' : '/Customer'"
         class="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
         @click="!this.auth.cashier && this.tabClick.checkActiveTable()"
       >
         <svg
-          class="h-6 w-6 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-6 w-6"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Customer',
@@ -110,7 +109,7 @@
         </svg>
 
         <span
-          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/Customer',
@@ -155,12 +154,12 @@
         >
       </router-link>
       <router-link
-        to="/recentOrder"
+        :to="invoiceData.invoiceUpdating ? '#' : '/recentOrder'"
         v-if="this.auth.cashier"
         class="group inline-flex flex-col items-center justify-center border-x border-gray-200 px-5 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
       >
         <svg
-          class="h-5 w-5 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="h-5 w-5"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/recentOrder',
@@ -181,7 +180,7 @@
         </svg>
 
         <span
-          class="text-sm group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500"
+          class="text-sm"
           :class="[
             {
               'text-gray-500': this.tabClick.currentTab !== '/recentOrder',
@@ -198,12 +197,14 @@
 <script>
 import { useAuthStore } from "@/stores/Auth.js";
 import { tabFunctions } from "@/stores/bottomTabs.js";
+import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 export default {
   name: "Bottom Tabs",
   setup() {
     const auth = useAuthStore();
+    const invoiceData = useInvoiceDataStore();
     const tabClick = tabFunctions();
-    return { auth, tabClick };
+    return { auth, tabClick, invoiceData };
   },
 };
 </script>

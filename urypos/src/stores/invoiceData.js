@@ -41,6 +41,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     isChecked: false,
     isPrinting: false,
     showDialog: false,
+    invoiceUpdating:false,
     cancelInvoiceFlag: false,
     invoiceDetails: [],
     previousOrderItem: [],
@@ -123,6 +124,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     // Method for creating an invoice
     async invoiceCreation() {
       this.showUpdateButtton = false;
+      this.invoiceUpdating =true;
       let selectedTables = "";
       let cart = this.menu.cart;
       const customerName = this.customers.search;
@@ -218,6 +220,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 this.previousOrderItem.length,
                 ...cartCopy
               );
+              this.invoiceUpdating =false;
               this.table.modifiedTime = response.message.modified;
               if (this.auth.cashier) {
                 router.push("/recentOrder").then(() => {
@@ -229,6 +232,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           })
           .catch((error) => {
             this.showUpdateButtton = true;
+            this.invoiceUpdating =false;
             if (error._server_messages) {
               const messages = JSON.parse(error._server_messages);
               const message = JSON.parse(messages[0]);

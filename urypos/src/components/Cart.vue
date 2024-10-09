@@ -1,4 +1,10 @@
 <template>
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
+    v-if="this.invoiceData.invoiceUpdating"
+  >
+    Updating Order...
+  </div>
   <div class="mt-5 flex">
     <div class="flex-grow">
       <orderInfo />
