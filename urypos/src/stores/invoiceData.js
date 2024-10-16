@@ -178,12 +178,15 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           "OK"
         );
         this.showUpdateButtton = true;
+        this.invoiceUpdating =false;
       } else if (!this.auth.cashier && !selectedTables) {
         this.alert.createAlert("Message", "Please Select a Table", "OK");
         this.showUpdateButtton = true;
+        this.invoiceUpdating =false;
       } else if (this.auth.cashier && !ordeType && !selectedTables) {
         this.alert.createAlert("Message", "Please Select Order Type", "OK");
         this.showUpdateButtton = true;
+        this.invoiceUpdating =false;
       } else {
         this.call
           .post(
