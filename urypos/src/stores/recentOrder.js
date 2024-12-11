@@ -31,7 +31,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     customerNameForBilling: "",
     previousOrderdCustomer: "",
     table: null,
+    timer: null,
     orderType: null,
+    percentage: null,
     postingDate: null,
     recentWaiter: null,
     draftInvoice: null,
@@ -40,14 +42,19 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     selectedTable: null,
     invoiceNumber: null,
     selectedOrder: null,
+    totalPercentage: null,
+    discount_amount: null,
     invoicePrinted: null,
     restaurantTable: null,
     modeOfPaymentName: null,
+    additionalPiscountPercentage: null,
     isLoading: false,
     isChecked: false,
     showOrder: false,
+    showInput: false,
     showDialog: false,
     showPayment: false,
+    showDiscount: false,
     cancelInvoiceFlag: false,
     alert: useAlert(),
     call: frappe.call(),
@@ -78,6 +85,10 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       } else {
         return "New";
       }
+    },
+    totalAmount() {
+      this.totalPercentage = this.grandTotal - (this.percentage / 100) * this.grandTotal;
+      return this.totalPercentage.toFixed(3);
     },
   },
   actions: {
@@ -147,6 +158,11 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
 
     async viewRecentOrder(recentOrder) {
       this.payments = [];
+      this.additionalPiscountPercentage = null
+      this.discountAmount = null
+      this.percentage = ""
+      this.showDiscount = false
+      this.showInput= false
       if (recentOrder.name === this.invoiceNumber) return;
       this.orderType = recentOrder.order_type;
       this.netTotal = recentOrder.net_total;
@@ -156,6 +172,8 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         this.grandTotal = recentOrder.rounded_total;
       }
       this.invoiceNumber = recentOrder.name;
+      this.additionalPiscountPercentage = recentOrder.additional_discount_percentage
+      this.discountAmount = recentOrder.discount_amount
       this.selectedOrder = recentOrder;
       this.selectedTable = recentOrder.restaurant_table;
       const dateTimeString = `${recentOrder.posting_date}`;
@@ -239,6 +257,31 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         })
         .catch((error) => console.error(error));
     },
+    showInputBox() {
+      this.showInput = true;
+      this.showDiscount = false;
+    },
+
+    toggleDiscount() {
+      if (this.showInput) {
+        this.showInput = false;
+        this.showDiscount = true;
+      } else {
+        this.showDiscount = false;
+        this.showInput = true;
+      }
+    },
+
+    resetTimer() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+      this.timer = setTimeout(this.hideInputBox, 1000);
+    },
+    hideInputBox() {
+      this.showInput = false;
+      this.showDiscount = true;
+    },
     getModeofPayment(customer) {
       if (customer) {
         const aggregator = {
@@ -299,7 +342,12 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     },
 
     calculatePaidAmount(paymentMethod) {
-      this.billAmount = this.grandTotal;
+      if (this.totalPercentage) {
+        this.billAmount = this.totalPercentage;
+      } else {
+        this.billAmount = this.grandTotal;
+      }
+      // this.billAmount = this.grandTotal;
       let balanceAmount = this.billAmount - this.total;
       if (balanceAmount > 0) {
         paymentMethod.value = balanceAmount;
@@ -354,6 +402,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
 
     //Making Payment
     makePayment: async function () {
+
       this.isLoading = true;
       const invoicePayment = {
         table: this.selectedTable,
@@ -362,13 +411,13 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         cashier: this.invoiceData.cashier,
         payments: this.payments,
         pos_profile: this.posProfile,
+        additionalDiscount: this.percentage
       };
-
       let pay = this.payments;
       let amount = pay.reduce((total, obj) => obj.amount + total, 0);
       let r_total = this.grandTotal;
       let diff = r_total - amount;
-      if (diff > 5) {
+      if (diff > 5 && !this.percentage) {
         this.alert.createAlert("Message", "Round Off Limit Exceeded", "OK");
         this.isLoading = false;
       } else {

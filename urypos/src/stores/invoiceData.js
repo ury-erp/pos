@@ -33,6 +33,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     grandTotal: null,
     print_format: null,
     cancelReason: null,
+    enableDiscount:false,
     invoiceNumber: null,
     tableInvoiceNo: null,
     tableAttention: null,
@@ -74,7 +75,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.print_type = this.invoiceDetails.print_type;
           this.printer = this.invoiceDetails.printer;
           this.paidLimit = this.invoiceDetails.paid_limit;
-          this.disableRoundedTotal =this.invoiceDetails.disable_rounded_total
+          this.disableRoundedTotal =this.invoiceDetails.disable_rounded_total;
+          this.enableDiscount = this.invoiceDetails.enable_discount;
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
