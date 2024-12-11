@@ -234,11 +234,13 @@
           {
             'border-gray-600': !recentOrders.showDiscount,
             'border-green-500': recentOrders.showDiscount,
+            'border-red-500':recentOrders.totalAmount <= 0
           },
         ]"
         v-if="
-           (invoiceData.enableDiscount==1) && !recentOrders.showInput &&
-          (this.recentOrders.selectedStatus === 'Draft')
+          invoiceData.enableDiscount == 1 &&
+          !recentOrders.showInput &&
+          this.recentOrders.selectedStatus === 'Draft'
         "
       >
         <div
@@ -246,9 +248,10 @@
           :class="{
             'flex p-3': !recentOrders.showInput && !recentOrders.showDiscount,
             'flex p-3 text-green-500': recentOrders.showDiscount,
+            'flex p-3 text-red-500':recentOrders.totalAmount <= 0
           }"
         >
-          <svg
+        <svg
             class="discount-icon"
             width="24"
             height="24"
@@ -282,10 +285,19 @@
               stroke-linejoin="round"
             ></path>
           </svg>
-          <span v-if="!recentOrders.showDiscount">Add Discount</span>
-          <span v-else
-            >Additional {{ recentOrders.percentage }}% discount Applied</span
-          >
+
+          <template v-if="!recentOrders.showDiscount">
+            <span>Add Discount</span>
+          </template>
+
+          <template v-else>
+            <span v-if="recentOrders.totalAmount > 0">
+              Additional {{ recentOrders.percentage }}% discount Applied
+            </span>
+            <span v-else class="text-red-500">
+              {{ recentOrders.percentage }}% cannot be Applied
+            </span>
+          </template>
         </div>
       </div>
       <div class="relative mb-6 mt-6" v-if="this.recentOrders.showInput">
