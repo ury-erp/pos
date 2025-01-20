@@ -33,17 +33,17 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     grandTotal: null,
     print_format: null,
     cancelReason: null,
-    enableDiscount:false,
+    enableDiscount: false,
     invoiceNumber: null,
     tableInvoiceNo: null,
     tableAttention: null,
     modeOfPaymentList: null,
-    disableRoundedTotal:null,
+    disableRoundedTotal: null,
     showUpdateButtton: true,
     isChecked: false,
     isPrinting: false,
     showDialog: false,
-    invoiceUpdating:false,
+    invoiceUpdating: false,
     cancelInvoiceFlag: false,
     invoiceDetails: [],
     previousOrderItem: [],
@@ -75,7 +75,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.print_type = this.invoiceDetails.print_type;
           this.printer = this.invoiceDetails.printer;
           this.paidLimit = this.invoiceDetails.paid_limit;
-          this.disableRoundedTotal =this.invoiceDetails.disable_rounded_total;
+          this.disableRoundedTotal = this.invoiceDetails.disable_rounded_total;
           this.enableDiscount = this.invoiceDetails.enable_discount;
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
@@ -128,7 +128,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     // Method for creating an invoice
     async invoiceCreation() {
       this.showUpdateButtton = false;
-      this.invoiceUpdating =true;
+      this.invoiceUpdating = true;
       let selectedTables = "";
       let cart = this.menu.cart;
       const customerName = this.customers.search;
@@ -149,14 +149,18 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
       const cartCopy = JSON.parse(JSON.stringify(cart));
-      let waiter =
-        this.table.previousWaiter !== null &&
-        this.table.previousWaiter !== undefined
+      let waiter = null
+      if (lastInvoice) {
+        waiter = this.table.previousWaiter !== null &&
+          this.table.previousWaiter !== undefined
           ? this.table.previousWaiter
           : this.recentOrders.recentWaiter !== null &&
             this.recentOrders.recentWaiter !== undefined
-          ? this.recentOrders.recentWaiter
-          : this.waiter;
+            ? this.recentOrders.recentWaiter
+            : this.waiter;
+      } else {
+        waiter = this.waiter;
+      }
 
       const creatingInvoice = {
         table: selectedTables,
@@ -182,15 +186,15 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           "OK"
         );
         this.showUpdateButtton = true;
-        this.invoiceUpdating =false;
+        this.invoiceUpdating = false;
       } else if (!this.auth.cashier && !selectedTables) {
         this.alert.createAlert("Message", "Please Select a Table", "OK");
         this.showUpdateButtton = true;
-        this.invoiceUpdating =false;
+        this.invoiceUpdating = false;
       } else if (this.auth.cashier && !ordeType && !selectedTables) {
         this.alert.createAlert("Message", "Please Select Order Type", "OK");
         this.showUpdateButtton = true;
-        this.invoiceUpdating =false;
+        this.invoiceUpdating = false;
       } else {
         this.call
           .post(
@@ -227,7 +231,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 this.previousOrderItem.length,
                 ...cartCopy
               );
-              this.invoiceUpdating =false;
+              this.invoiceUpdating = false;
               this.table.modifiedTime = response.message.modified;
               if (this.auth.cashier) {
                 router.push("/recentOrder").then(() => {
@@ -239,7 +243,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           })
           .catch((error) => {
             this.showUpdateButtton = true;
-            this.invoiceUpdating =false;
+            this.invoiceUpdating = false;
             if (error._server_messages) {
               const messages = JSON.parse(error._server_messages);
               const message = JSON.parse(messages[0]);
@@ -276,7 +280,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.grandTotal = 0;
       this.recentOrders.paidAmount = 0;
       this.recentOrders.billAmount = 0;
-      this.menu.aggregatorItem= []
+      this.menu.aggregatorItem = []
       this.recentOrders.invoiceNumber = "";
       this.recentOrders.selectedOrder = [];
       this.recentOrders.selectedTable = "";
@@ -303,7 +307,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             this.alert.createAlert(
               "Message",
               "Printing is Blocked Table is assigned to " +
-                result.message.waiter,
+              result.message.waiter,
               "OK"
             );
           } else {
