@@ -31,6 +31,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     paidLimit: null,
     print_type: null,
     grandTotal: null,
+    modifiedTime: null,
     print_format: null,
     cancelReason: null,
     enableDiscount: false,
@@ -161,7 +162,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       } else {
         waiter = this.waiter;
       }
-
+      if (this.recentOrders.modifiedTime){
+        this.modifiedTime =this.recentOrders.modifiedTime
+      }
+      else{
+        this.modifiedTime =this.table.modifiedTime
+      }
+      
       const creatingInvoice = {
         table: selectedTables,
         customer: customerName,
@@ -170,7 +177,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         mode_of_payment: this.defaultModeOfPayment,
         cashier: this.cashier,
         waiter: waiter,
-        last_modified_time: this.table.modifiedTime,
+        last_modified_time: this.modifiedTime,
         pos_profile: this.posProfile,
         invoice: invoice,
         aggregator_id: this.menu.aggregatorId,
@@ -233,6 +240,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               );
               this.invoiceUpdating = false;
               this.table.modifiedTime = response.message.modified;
+              this.recentOrders.modifiedTime = response.message.modified;
               if (this.auth.cashier) {
                 router.push("/recentOrder").then(() => {
                   this.recentOrders.viewRecentOrder(response.message);

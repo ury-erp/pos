@@ -35,6 +35,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     orderType: null,
     percentage: null,
     postingDate: null,
+    modifiedTime: null,
     recentWaiter: null,
     draftInvoice: null,
     cancelReason: null,
@@ -198,6 +199,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.pastOrderdItem = "";
       this.previousOrderdCustomer = "";
       this.pastOrderType = "";
+      this.modifiedTime = "";
       let items = this.menu.items;
       this.draftInvoice = this.invoiceNumber;
       this.editPrintedInvoice = this.invoicePrinted;
@@ -218,6 +220,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.pastOrderdItem = pastOrder.items;
           this.recentWaiter = pastOrder.waiter;
           this.pastOrderType = pastOrder.order_type;
+          this.modifiedTime = pastOrder.modified;
           if (this.pastOrderType) {
             this.menu.selectedOrderType = pastOrder.order_type;
             this.menu.pickOrderType();
