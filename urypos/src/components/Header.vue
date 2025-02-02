@@ -1,114 +1,99 @@
 <template>
-  <div
-    class="mb-12 border-2 border-b-gray-200 border-l-white border-r-white border-t-white p-2 lg:mb-16"
-  >
+  <div >
     <nav
       class="fixed left-0 top-0 z-20 w-full border-b border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-900"
     >
       <div
-        class="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between p-4"
+        class="mx-auto flex max-w-screen-2xl items-center justify-between p-4"
       >
-        <div v-if="this.tabClick.currentTab === '/Table' || this.auth.cashier">
-          <a href="/urypos/Table">
-            <img :src="imagePath" alt="Flowbite logo" class="w-32 lg:w-44" />
-          </a>
-        </div>
-        <div
-          v-else-if="
-            this.tabClick.currentTab !== '/Table' || !this.auth.cashier
-          "
-        >
-          <h3
-            class="mb-2 mt-2 p-1 text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white"
+        <!-- Logo/Title Section -->
+        <div class="flex items-center">
+          <template
+            v-if="
+              this.tabClick.currentTab === '/Table' ||
+              this.auth.cashier ||
+              this.tabClick.isLoginPage
+            "
           >
-            {{ this.table.selectedTable }}
-          </h3>
+            <a href="/urypos/Table" class="flex-shrink-0">
+              <img :src="imagePath" alt="URY POS logo" class="w-32 lg:w-44" />
+            </a>
+          </template>
+          <template v-else>
+            <h3
+              class="mb-2 mt-2 p-1 text-2xl font-medium text-gray-900 dark:text-white lg:text-3xl"
+            >
+              {{ this.table.selectedTable }}
+            </h3>
+          </template>
         </div>
-        <div v-if="!this.tabClick.isLoginPage">
+
+        <!-- User Menu Section -->
+        <div
+          v-if="!this.tabClick.isLoginPage"
+          class="relative ml-4 flex-shrink-0"
+        >
           <button
             type="button"
-            class="flex rounded-full bg-gray-400 text-sm focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-400 md:mr-0"
+            class="flex items-center rounded-full bg-gray-100 p-1 text-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
             id="user-menu-button"
             aria-expanded="false"
-            data-dropdown-toggle="user-dropdown"
-            data-dropdown-placement="bottom"
             @click="this.auth.toggleDropdown()"
             ref="dropdownButton"
           >
             <div
-              class="relative inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600 lg:h-11 lg:w-11"
-              v-if="this.auth.sessionUser.includes('_')"
+              class="relative inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-600 sm:h-8 sm:w-8"
             >
-              <span class="font-medium text-gray-900 dark:text-gray-300"
-                >{{ this.auth.sessionUser.charAt(0).toUpperCase()
-                }}{{
-                  this.auth.sessionUser
-                    .charAt(this.auth.sessionUser.indexOf("_") + 1)
-                    .toUpperCase()
-                }}</span
+              <span
+                class="text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-            </div>
-            <div
-              class="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600 lg:h-11 lg:w-11"
-              v-else
-            >
-              <span class="font-medium text-gray-900 dark:text-gray-300">{{
-                this.auth.sessionUser.charAt(0).toUpperCase()
-              }}</span>
-            </div>
-
-            <div
-              class="absolute right-4 mt-11 w-36 divide-y divide-gray-100 rounded-lg bg-white text-left shadow dark:bg-gray-700 lg:right-auto"
-              v-show="this.auth.activeDropdown"
-            >
-              <ul>
-                <li>
-                  <h1
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    {{ this.auth.getLoginAvatar() }}
-                  </h1>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                    @click="this.auth.routeToHome()"
-                    >Switch To Desk</a
-                  >
-                </li>
-                
-                <!-- <li v-if="this.auth.cashier">
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                    @click="this.posOpen.routeToPosOpen"
-                    >POS Opening</a
-                  >
-                </li>
-                <li v-if="this.auth.cashier">
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                    @click="this.posClose.routeToPosClose"
-                    >POS Closing</a
-                  >
-                </li> -->
-
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                    @click="this.auth.logOut"
-                    >Log Out</a
-                  >
-                </li>
-              </ul>
+                {{ this.auth.sessionUser.charAt(0).toUpperCase() }}
+              </span>
             </div>
           </button>
+
+          <!-- New Dropdown Menu Style -->
+          <div
+            v-show="this.auth.activeDropdown"
+            class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+          >
+            <div class="py-1">
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                {{ this.auth.getLoginAvatar() }}
+              </a>
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="reload"
+              >
+                Reload
+              </a>
+
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="this.auth.routeToHome()"
+                >Switch To Desk
+              </a>
+              <div class="border-t border-gray-200"></div>
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="this.auth.logOut"
+              >
+                Log out
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
+
+    <!-- Spacer for Fixed Header -->
+    <div class="h-16 sm:h-20"></div>
   </div>
 </template>
 
@@ -135,6 +120,11 @@ export default {
     return {
       imagePath: uriPosImage,
     };
+  },
+  methods: {
+    reload() {
+      window.location.reload();
+    },
   },
 };
 </script>
