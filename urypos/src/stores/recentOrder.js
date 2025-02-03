@@ -196,7 +196,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     async editOrder() {
       this.payments = [];
       let previousOrderdNumberOfPax = "";
-      this.pastOrderdItem = "";
+      this.pastOrderdItem = [];
       this.previousOrderdCustomer = "";
       this.pastOrderType = "";
       this.modifiedTime = "";

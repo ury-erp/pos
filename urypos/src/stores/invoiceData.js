@@ -6,6 +6,7 @@ import { useCustomerStore } from "./Customer.js";
 import { useNotifications } from "./Notification.js";
 import { usetoggleRecentOrder } from "./recentOrder.js";
 import { useAlert } from "./Alert.js";
+import { useNotificationModal } from './NotificationModal';
 import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
 
@@ -57,6 +58,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     customers: useCustomerStore(),
     notification: useNotifications(),
     recentOrders: usetoggleRecentOrder(),
+    notificationModal: useNotificationModal(),
   }),
   actions: {
     async fetchInvoiceDetails() {
@@ -168,7 +170,82 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       else{
         this.modifiedTime =this.table.modifiedTime
       }
-      
+
+      // Check for modifications in existing invoice
+      if (invoice) {
+        let pastOrderdItem = [];
+        if (this.table.previousOrderdItem?.length) {
+          pastOrderdItem = this.table.previousOrderdItem;
+        } else if (this.recentOrders.pastOrderdItem?.length) {
+          pastOrderdItem = this.recentOrders.pastOrderdItem;
+        }
+        
+        const originalItems = {};
+        pastOrderdItem.forEach(item => {
+          originalItems[item.item_code] = {
+            qty: item.qty,
+            name: item.item_name
+          };
+        });
+        
+        const currentItems = {};
+        this.menu.cart.forEach(item => {
+          currentItems[item.item] = {
+            qty: item.qty,
+            name: item.item_name
+          };
+        });
+        
+        const removedItems = Object.keys(originalItems).filter(
+          itemCode => !currentItems[itemCode]
+        );
+    
+        const reducedQtyItems = [];
+        Object.entries(originalItems).forEach(([itemCode, itemData]) => {
+          if (currentItems[itemCode] && currentItems[itemCode].qty < itemData.qty) {
+            reducedQtyItems.push(
+              `${itemData.name} (qty reduced from ${itemData.qty} to ${currentItems[itemCode].qty})`
+            );
+          }
+        });
+    
+        if (removedItems.length > 0 || reducedQtyItems.length > 0) {
+          this.invoiceUpdating = false;
+                
+          let errorMsg = [];
+          if (removedItems.length > 0) {
+            const removedItemNames = removedItems.map(
+              itemCode => originalItems[itemCode].name
+            );
+            errorMsg.push(`Removed items: ${removedItemNames.join(', ')}\n`);
+          }
+          if (reducedQtyItems.length > 0) {
+            errorMsg.push(`Modified quantities: ${reducedQtyItems.join(',\n')}`);
+          }
+    
+          // Show confirmation modal and wait for user response
+          await new Promise((resolve, reject) => {
+            this.notificationModal.showModal({
+              title: "Are You Sure to remove these items?",
+              message: errorMsg.join('\n'),
+              actionText: "Yes",
+              showCancelButton: true,
+              onConfirm: () => {
+                this.invoiceUpdating = true;
+                this.showUpdateButtton = true;
+                resolve();
+              },
+              onCancel: () => {
+                this.showUpdateButtton = true;
+                this.invoiceUpdating = false;
+                reject('User cancelled the operation');
+              }
+            });
+          });
+        }
+      }
+    
+      // Only proceed with API call if no rejection occurred
       const creatingInvoice = {
         table: selectedTables,
         customer: customerName,
@@ -194,70 +271,76 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         );
         this.showUpdateButtton = true;
         this.invoiceUpdating = false;
-      } else if (!this.auth.cashier && !selectedTables) {
+        return;
+      }
+    
+      if (!this.auth.cashier && !selectedTables) {
         this.alert.createAlert("Message", "Please Select a Table", "OK");
         this.showUpdateButtton = true;
         this.invoiceUpdating = false;
-      } else if (this.auth.cashier && !ordeType && !selectedTables) {
+        return;
+      }
+    
+      if (this.auth.cashier && !ordeType && !selectedTables) {
         this.alert.createAlert("Message", "Please Select Order Type", "OK");
         this.showUpdateButtton = true;
         this.invoiceUpdating = false;
-      } else {
-        this.call
-          .post(
-            "ury.ury.doctype.ury_order.ury_order.sync_order",
-            creatingInvoice
-          )
-          .then((response) => {
-            this.showUpdateButtton = true;
-            if (response.message.status === "Failure") {
-              const alert = response._server_messages;
-              const messages = JSON.parse(alert);
-              const message = JSON.parse(messages[0]);
+        return;
+      }
+    
+      try {
+        const response = await this.call.post(
+          "ury.ury.doctype.ury_order.ury_order.sync_order",
+          creatingInvoice
+        );
+    
+        this.showUpdateButtton = true;
+        if (response.message.status === "Failure") {
+          const alert = response._server_messages;
+          const messages = JSON.parse(alert);
+          const message = JSON.parse(messages[0]);
+    
+          await this.alert.createAlert("Message", message.message, "OK");
+          await router.push("/Table");
+          window.location.reload();
+          return;
+        }
+    
+        // Handle successful response
+        this.invoiceNumber = response.message.name;
+        this.grandTotal = response.message.grand_total;
+        this.notification.createNotification("Order Update");
+        this.table.handleRoomChange();
+        this.menu.comments = "";
 
-              this.alert
-                .createAlert("Message", message.message, "OK")
-                .then(() => {
-                  router.push("/Table").then(() => {
-                    window.location.reload();
-                  });
-                });
-            } else {
-              this.invoiceNumber = response.message.name;
-              this.grandTotal = response.message.grand_total;
-              this.notification.createNotification("Order Update");
-              this.table.handleRoomChange();
-              this.menu.comments = "";
-              let items = this.menu.items;
-              items.forEach((item) => {
-                item.comment = "";
-              });
-              this.previousOrderItem.splice(0, this.previousOrderItem.length);
-              this.previousOrderItem.splice(
-                0,
-                this.previousOrderItem.length,
-                ...cartCopy
-              );
-              this.invoiceUpdating = false;
-              this.table.modifiedTime = response.message.modified;
-              this.recentOrders.modifiedTime = response.message.modified;
-              if (this.auth.cashier) {
-                router.push("/recentOrder").then(() => {
-                  this.recentOrders.viewRecentOrder(response.message);
-                  this.clearDataAfterUpdate();
-                });
-              }
-            }
-          })
-          .catch((error) => {
-            this.showUpdateButtton = true;
-            this.invoiceUpdating = false;
-            if (error._server_messages) {
-              const messages = JSON.parse(error._server_messages);
-              const message = JSON.parse(messages[0]);
-              this.alert.createAlert("Message", message.message, "OK");
-            }
-          });
+        let items = this.menu.items;
+        items.forEach((item) => {
+          item.comment = "";
+        });
+        
+        this.table.previousOrderdItem = response.message.items;
+        this.recentOrders.pastOrderdItem = response.message.items;
+        this.previousOrderItem.splice(0, this.previousOrderItem.length);
+        this.previousOrderItem.splice(0, this.previousOrderItem.length, ...cartCopy);
+        this.invoiceUpdating = false;
+        this.table.modifiedTime = response.message.modified;
+        this.recentOrders.modifiedTime = response.message.modified;
+        if (this.auth.cashier) {
+          await router.push("/recentOrder");
+          this.recentOrders.viewRecentOrder(response.message);
+          this.clearDataAfterUpdate();
+        }
+      } catch (error) {
+        this.showUpdateButtton = true;
+        this.invoiceUpdating = false;
+        if (error === 'User cancelled the operation') {
+          return; // Silently handle cancellation
+        }
+        if (error._server_messages) {
+          const messages = JSON.parse(error._server_messages);
+          const message = JSON.parse(messages[0]);
+          await this.alert.createAlert("Message", message.message, "OK");
+        }
       }
     },
 
@@ -350,22 +433,19 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               "Error while getting the HTML document to print for QZ",
               "OK"
             );
+            return;
           }
 
           const print = await printWithQz(this.qz_host, result?.message?.html);
 
           if (print === "printed") {
-            this.notification.createNotification("Print Successful");
-            const updatePrintTable = {
-              invoice: invoiceNo,
-            };
-            this.call
-              .post("ury.ury.api.ury_print.qz_print_update", updatePrintTable)
-              .then(() => {
-                window.location.reload();
-                return 200;
-              })
-              .catch((error) => console.error(error, "printed"));
+            const updateSuccess = await this.updatePrintTable(invoiceNo);
+            this.isPrinting = false
+            if (!updateSuccess) {
+              this.notification.createNotification(
+                "Print successful but failed to update status"
+              );
+            }
           }
         } else if (this.print_type === "network") {
           if (this.auth.cashier) {
@@ -387,16 +467,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             do {
               const res = await printingCall();
               if (res === "Success") {
-                this.notification.createNotification("Print Successful");
-                const sendObj = {
-                  invoice: invoiceNo,
-                };
-                await this.call
-                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                  .then(() => {
-                    window.location.reload();
-                    return 200;
-                  });
+                const updateSuccess = await this.updatePrintTable(invoiceNo);
+                this.isPrinting = false
+                if (!updateSuccess) {
+                  this.notification.createNotification(
+                    "Print successful but failed to update status"
+                  );
+                }
               }
               errorMessage = res;
               i++;
@@ -426,16 +503,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             do {
               const res = await networkPrintPrintingCall();
               if (res === "Success") {
-                this.notification.createNotification("Print Successful");
-                const sendObj = {
-                  invoice: invoiceNo,
-                };
-                await this.call
-                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                  .then(() => {
-                    window.location.reload();
-                    return 200;
-                  });
+                const updateSuccess = await this.updatePrintTable(invoiceNo);
+                this.isPrinting = false
+                if (!updateSuccess) {
+                  this.notification.createNotification(
+                    "Print successful but failed to update status"
+                  );
+                }
               }
               errorMessage = res;
               i++;
@@ -459,6 +533,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             .post("ury.ury.api.ury_print.print_pos_page", sendObj)
             .then((result) => {
               this.notification.createNotification("Print Successful");
+              this.isPrinting = false
               window.location.reload();
 
               return result.message;
@@ -472,6 +547,52 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           return this.alert.createAlert("Error", e?.title, "OK");
         }
       }
+    },
+    async updatePrintTable(invoiceNo, maxRetries = 3) {
+      let retryCount = 0;
+
+      const tryUpdate = async () => {
+        try {
+          const updatePrintTable = {
+            invoice: invoiceNo,
+          };
+
+          const response = await this.call.post(
+            "ury.ury.api.ury_print.qz_print_update",
+            updatePrintTable
+          );
+          if (response.message.status === "Success") {
+            this.notification.createNotification("Print and Update Successful");
+            window.location.reload();
+            return true;
+          } else {
+            this.isPrinting = false
+            throw new Error(response.message);
+          }
+        } catch (error) {
+          console.error(`Update attempt ${retryCount + 1} failed:`, error);
+          return false;
+        }
+      };
+
+      while (retryCount < maxRetries) {
+        const success = await tryUpdate();
+        if (success) {
+          return true;
+        }
+        retryCount++;
+        if (retryCount < maxRetries) {
+          // Wait for 1 second before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      this.alert.createAlert(
+        "Error",
+        "Failed to update print status after multiple attempts",
+        "OK"
+      );
+      return false;
     },
 
     loadPrinter: async function (qz_host) {

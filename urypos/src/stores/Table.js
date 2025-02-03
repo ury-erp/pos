@@ -237,7 +237,7 @@ export const useTableStore = defineStore("table", {
         this.isTakeAway = "Take Away";
       }
       let previousOrderdNumberOfPax = "";
-      this.previousOrderdItem = "";
+      this.previousOrderdItem = [];
       this.invoiceNo = "";
       let items = this.tableMenu;
       items.forEach((item) => {
