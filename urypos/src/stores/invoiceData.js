@@ -467,13 +467,16 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             do {
               const res = await printingCall();
               if (res === "Success") {
-                const updateSuccess = await this.updatePrintTable(invoiceNo);
-                this.isPrinting = false
-                if (!updateSuccess) {
-                  this.notification.createNotification(
-                    "Print successful but failed to update status"
-                  );
-                }
+                this.notification.createNotification("Print Successful");
+                const sendObj = {
+                  invoice: invoiceNo,
+                };
+                await this.call
+                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .then(() => {
+                    window.location.reload();
+                    return 200;
+                  });
               }
               errorMessage = res;
               i++;
@@ -503,13 +506,16 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             do {
               const res = await networkPrintPrintingCall();
               if (res === "Success") {
-                const updateSuccess = await this.updatePrintTable(invoiceNo);
-                this.isPrinting = false
-                if (!updateSuccess) {
-                  this.notification.createNotification(
-                    "Print successful but failed to update status"
-                  );
-                }
+                this.notification.createNotification("Print Successful");
+                const sendObj = {
+                  invoice: invoiceNo,
+                };
+                await this.call
+                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .then(() => {
+                    window.location.reload();
+                    return 200;
+                  });
               }
               errorMessage = res;
               i++;
