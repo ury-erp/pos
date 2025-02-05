@@ -5,6 +5,7 @@ import { useMenuStore } from "./Menu.js";
 import { useCustomerStore } from "./Customer.js";
 import { useNotifications } from "./Notification.js";
 import { useInvoiceDataStore } from "./invoiceData.js";
+import { useTableStore } from "./Table.js";
 import { useAlert } from "./Alert.js";
 import frappe from "./frappeSdk.js";
 
@@ -60,6 +61,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     alert: useAlert(),
     call: frappe.call(),
     menu: useMenuStore(),
+    table: useTableStore(),
     customers: useCustomerStore(),
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
@@ -159,6 +161,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
 
     async viewRecentOrder(recentOrder) {
       this.payments = [];
+      this.table.previousOrderdItem=[]
       this.additionalPiscountPercentage = null
       this.discountAmount = null
       this.percentage = ""
