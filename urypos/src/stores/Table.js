@@ -7,6 +7,8 @@ import { useCustomerStore } from "./Customer.js";
 import { useNotifications } from "./Notification.js";
 import { useAlert } from "./Alert.js";
 import frappe from "./frappeSdk.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
+
 
 export const useTableStore = defineStore("table", {
   state: () => ({
@@ -46,6 +48,7 @@ export const useTableStore = defineStore("table", {
     modifiedTime: null,
     selectedRoom: null,
     rooms: [],
+    recentOrders: usetoggleRecentOrder()
   }),
   getters: {
     filteredTables(state) {
@@ -238,6 +241,8 @@ export const useTableStore = defineStore("table", {
       }
       let previousOrderdNumberOfPax = "";
       this.previousOrderdItem = [];
+      this.recentOrders.modifiedTime =""     
+      this.recentOrders.pastOrderdItem=[]
       this.invoiceNo = "";
       let items = this.tableMenu;
       items.forEach((item) => {
