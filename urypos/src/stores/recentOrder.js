@@ -61,7 +61,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     alert: useAlert(),
     call: frappe.call(),
     menu: useMenuStore(),
-    table: useTableStore(),
+    tables: useTableStore(),
     customers: useCustomerStore(),
     notification: useNotifications(),
     invoiceData: useInvoiceDataStore(),
@@ -161,7 +161,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
 
     async viewRecentOrder(recentOrder) {
       this.payments = [];
-      this.table.previousOrderdItem=[]
+      this.tables.previousOrderdItem=[]
       this.additionalPiscountPercentage = null
       this.discountAmount = null
       this.percentage = ""
