@@ -7,6 +7,8 @@ import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
 import { usetoggleRecentOrder } from "./recentOrder.js";
 import { useAlert } from "./Alert.js";
+import router from "../router";
+
 
 export const useMenuStore = defineStore("menu", {
   state: () => ({
@@ -24,7 +26,7 @@ export const useMenuStore = defineStore("menu", {
     itemComments: "",
     perPage: 20,
     currentPage: 1,
-    aggregatorId:null,
+    aggregatorId: null,
     selectedCourse: null,
     selectedOrderType: null,
     selectedAggregator: null,
@@ -166,10 +168,10 @@ export const useMenuStore = defineStore("menu", {
         })
         .catch((error) => console.error(error));
     },
-    clearPreviousData(){
+    clearPreviousData() {
       this.recentOrders.selectedTable = "";
-      this.recentOrders.previousOrderdCustomer=""
-      this.recentOrders.selectedStatus= "Draft"
+      this.recentOrders.previousOrderdCustomer = ""
+      this.recentOrders.selectedStatus = "Draft"
       this.table.invoiceNo = "";
       this.table.selectedTable = "";
       this.invoiceData.invoiceNumber = "";
@@ -185,9 +187,9 @@ export const useMenuStore = defineStore("menu", {
       this.recentOrders.selectedOrder = [];
       this.recentOrders.selectedTable = "";
       this.customer.search = "";
-      this.recentOrders.restaurantTable=""
-      this.recentOrders.restaurantTable=null
-      this.aggregatorItem= []
+      this.recentOrders.restaurantTable = ""
+      this.recentOrders.restaurantTable = null
+      this.aggregatorItem = []
     },
     orderTypeSelection() {
       this.clearPreviousData();
@@ -202,6 +204,10 @@ export const useMenuStore = defineStore("menu", {
           "Dine in is not permitted for takeaway orders.",
           "OK"
         );
+      } else {
+        if (this.selectedOrderType !== "Aggregators") {
+          router.push("/Menu");
+        }
       }
 
       if (this.cart.length > 0) {
@@ -255,6 +261,7 @@ export const useMenuStore = defineStore("menu", {
           .get("ury.ury_pos.api.getAggregatorItem", getMenu)
           .then((result) => {
             this.aggregatorItem = this.items = result.message;
+            router.push("/Menu");
             if (result.message) {
               this.items = result.message;
             } else {
@@ -273,10 +280,10 @@ export const useMenuStore = defineStore("menu", {
     itemNameExtract(item_name) {
       return item_name
         ? item_name
-            .split(" ")
-            .map((word) => (word ? word[0].toUpperCase() : ""))
-            .join("")
-            .substring(0, 2)
+          .split(" ")
+          .map((word) => (word ? word[0].toUpperCase() : ""))
+          .join("")
+          .substring(0, 2)
         : "";
     },
     updateSearchTerm() {
