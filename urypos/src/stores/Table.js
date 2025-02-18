@@ -16,6 +16,7 @@ export const useTableStore = defineStore("table", {
     selectedTable: null,
     previousOrderdItem: [],
     invoiceNo: "",
+    takeAwayTable: 0,  
     alert: useAlert(),
     previousOrder: [],
     previousOrderdCustomer: "",
@@ -235,9 +236,11 @@ export const useTableStore = defineStore("table", {
     async addToSelectedTables(table) {
       this.selectedTable = table.name;
       await this.getMenu();
+      this.takeAwayTable = 0;
 
       if (table.is_take_away === 1) {
         this.isTakeAway = "Take Away";
+        this.takeAwayTable = 1;
       }
       let previousOrderdNumberOfPax = "";
       this.previousOrderdItem = [];

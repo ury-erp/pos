@@ -263,7 +263,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         comments: this.menu.comments,
         room: this.table.selectedRoom,
       };
-      if (!this.auth.cashier && !numberOfPax) {
+      if (!this.auth.cashier && !numberOfPax && this.table.takeAwayTable == 0) {
         this.alert.createAlert(
           "Message",
           "Please Select Customer / No of Pax",
@@ -349,6 +349,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         item.comment = "";
         item.qty = "";
       });
+      this.table.takeAwayTable = 0;
       this.recentOrders.restaurantTable = "";
       this.table.selectedTable = "";
       this.customers.numberOfPax = "";
