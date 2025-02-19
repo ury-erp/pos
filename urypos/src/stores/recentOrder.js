@@ -35,6 +35,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     timer: null,
     orderType: null,
     percentage: null,
+    searchTimer: null,
     postingDate: null,
     modifiedTime: null,
     recentWaiter: null,
@@ -122,6 +123,31 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         this.getPosInvoice(this.selectedStatus, limit, startLimit);
       }
     },
+    async searchPosInvoice(query) {
+      if (!query) {
+        // If the search query is empty, fetch the original data
+        this.handleStatusChange();
+        return;
+      }
+      const searchParams = {
+        query: query,
+      };
+      this.call
+        .get("ury.ury_pos.api.searchPosInvoice", searchParams)
+        .then((result) => {
+          this.recentOrderList = result.message.data;
+          this.next = result.message.next;
+          return this.recentOrderList, this.next;
+        })
+        .catch((error) => console.error(error));
+    },
+    handleSearchInput(event) {
+      clearTimeout(this.searchTimer);
+      this.searchTimer=setTimeout(()=>{
+        this.searchPosInvoice(event.target.value);
+      },500);
+    },
+    
     nextPageClick() {
       this.currentPage += 1;
       const limit = 10;
