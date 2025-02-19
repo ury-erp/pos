@@ -143,6 +143,11 @@
             {{ this.recentOrders.selectedOrder.customer }}
           </p>
           <p
+            class="truncate text-xl font-semibold text-gray-900 dark:text-white"
+          >
+            {{ this.recentOrders.selectedOrder.mobile_number }}
+          </p>
+          <p
             class="mr-2 mt-2 truncate text-sm text-gray-500 dark:text-gray-400"
           >
             {{ this.recentOrders.postingDate }}
