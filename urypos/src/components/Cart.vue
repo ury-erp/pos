@@ -5,6 +5,12 @@
   >
     Updating Order...
   </div>
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
+    v-if="this.invoiceData.kotPrinting"
+  >
+    KOT Reprinting...
+  </div>
   <div class="mt-5 flex">
     <div class="flex-grow">
       <orderInfo />
@@ -17,12 +23,13 @@
       >
         Update
       </button>
-      <!-- <button
+      <button
       class="mr-4 rounded py-2 px-4 shadow"
+      v-if="this.invoiceData.enableKotReprint"
       @click="this.invoiceData.kotReprint()"
-    >
-      KOT Reprint
-    </button> -->
+      >
+        KOT Reprint
+      </button>
       <button
         class="rounded px-4 py-2 shadow"
         v-if="

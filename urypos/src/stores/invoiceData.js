@@ -22,6 +22,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     cashier: "",
     warehouse: "",
     posProfile: "",
+    enableKotReprint:0,
     defaultModeOfPayment: "Cash",
     branch: null,
     printer: null,
@@ -45,6 +46,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     isChecked: false,
     isPrinting: false,
     showDialog: false,
+    kotPrinting: false,
     invoiceUpdating: false,
     cancelInvoiceFlag: false,
     invoiceDetails: [],
@@ -80,6 +82,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.paidLimit = this.invoiceDetails.paid_limit;
           this.disableRoundedTotal = this.invoiceDetails.disable_rounded_total;
           this.enableDiscount = this.invoiceDetails.enable_discount;
+          this.enableKotReprint=this.invoiceDetails.enable_kot_reprint;
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
@@ -408,6 +411,37 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           }
         })
         .catch((error) => console.error(error));
+    },
+    kotReprint() {
+      this.kotPrinting=true;
+      let invoice =
+        this.recentOrders.draftInvoice ||
+        this.table.invoiceNo ||
+        this.invoiceNumber ||
+        null;
+      
+      const invoiceData = {
+        invoice_number: invoice,
+      };
+      this.call
+        .get("ury_mosaic.ury_mosaic.api.ury_kot_reprint.reprint_kot", invoiceData)
+        .then((result) => {
+          if (result.message === "Success") {
+            this.kotPrinting=false;
+            this.notification.createNotification("KOT Reprint Successful");
+          }
+        })
+        .catch((error) =>{
+          console.error(error);
+          this.kotPrinting=false;
+          if (error._server_messages) {
+            const messages = JSON.parse(error._server_messages);
+            const message = JSON.parse(messages[0]);
+             this.alert.createAlert("Message", message.message, "OK");
+          }
+        } );
+
+
     },
     printFunction: async function () {
       this.isPrinting = true;
