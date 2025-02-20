@@ -314,12 +314,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.grandTotal = response.message.grand_total;
         this.notification.createNotification("Order Update");
         this.table.handleRoomChange();
-        this.menu.comments = "";
-
+        
         let items = this.menu.items;
-        items.forEach((item) => {
-          item.comment = "";
-        });
+        // items.forEach((item) => {
+        //   item.comment = "";
+        // });
         
         this.table.previousOrderdItem = response.message.items;
         this.recentOrders.pastOrderdItem = response.message.items;

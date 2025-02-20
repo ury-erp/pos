@@ -250,6 +250,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           this.recentWaiter = pastOrder.waiter;
           this.pastOrderType = pastOrder.order_type;
           this.modifiedTime = pastOrder.modified;
+          this.menu.comments= pastOrder.custom_comments;
           if (this.pastOrderType) {
             this.menu.selectedOrderType = pastOrder.order_type;
             this.menu.pickOrderType();
@@ -281,7 +282,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
               const itemIndexExists = itemIndex !== -1;
               if (!itemIndexExists) {
                 item.qty = previousItem.qty;
-                item.comments = "";
+                item.comment = previousItem.comment;
                 cart.push(item);
               }
             }

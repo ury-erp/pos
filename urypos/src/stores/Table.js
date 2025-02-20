@@ -264,6 +264,7 @@ export const useTableStore = defineStore("table", {
         .then((result) => {
           this.previousOrder = result.message;
           this.invoicePrinted = this.previousOrder.invoice_printed;
+          this.menu.comments= this.previousOrder.custom_comments;
           this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
           this.invoiceNo = this.previousOrder.name;
@@ -316,7 +317,7 @@ export const useTableStore = defineStore("table", {
               const itemIndexExists = itemIndex !== -1;
               if (!itemIndexExists) {
                 item.qty = previousItem.qty;
-                item.comment = "";
+                item.comment = previousItem.comment;
                 cart.push(item);
               }
             }
