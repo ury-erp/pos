@@ -25,6 +25,7 @@ export const useTableStore = defineStore("table", {
     notification: useNotifications(),
     selectedOption: "",
     isTakeAway: "",
+    mobileNumber:"",
     showModal: false,
     isTakeaeay: false,
     newTable: "",
@@ -43,6 +44,7 @@ export const useTableStore = defineStore("table", {
     invoicePrinted: "",
     auth: useAuthStore(),
     call: frappe.call(),
+    customers: useCustomerStore(),
     db: frappe.db(),
     totalMinutes: null,
     invoiceNumber: null,
@@ -267,6 +269,7 @@ export const useTableStore = defineStore("table", {
           this.menu.comments= this.previousOrder.custom_comments;
           this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
+          this.mobileNumber = this.previousOrder.mobile_number;
           this.invoiceNo = this.previousOrder.name;
           this.previousWaiter = this.previousOrder.waiter;
           if (this.invoiceNo) {
@@ -295,15 +298,15 @@ export const useTableStore = defineStore("table", {
           this.previousOrderdItem = this.previousOrder.items;
           this.previousOrderdCustomer = this.previousOrder.customer;
           previousOrderdNumberOfPax = this.previousOrder.no_of_pax;
-          const customers = useCustomerStore();
           if (this.previousOrderdCustomer) {
-            customers.search = this.previousOrderdCustomer;
-            customers.numberOfPax = previousOrderdNumberOfPax;
-            customers.fectchCustomerFavouriteItem();
+            this.customers.search = this.previousOrderdCustomer;
+            this.customers.numberOfPax = previousOrderdNumberOfPax;
+            this.customers.fectchCustomerFavouriteItem();
           } else {
-            customers.search = "";
-            customers.numberOfPax = "";
-            customers.customerFavouriteItems = "";
+            this.customers.search = "";
+            this.customers.numberOfPax = "";
+            this.customers.customerFavouriteItems = "";
+            this.customers.newCustomerMobileNo=""
           }
 
           items.forEach((item) => {

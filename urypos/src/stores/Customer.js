@@ -164,6 +164,17 @@ export const useCustomerStore = defineStore("customers", {
     },
     async selectCustomer(customer) {
       this.search = customer.name;
+      const content = customer.content;
+      const mobileStartIndex = content.indexOf("Mobile Number :");
+      if (mobileStartIndex !== -1) {
+        const mobileEndIndex = content.indexOf("|||", mobileStartIndex);
+        if (mobileEndIndex !== -1) {
+          const mobileNumber = content
+            .substring(mobileStartIndex + "Mobile Number :".length, mobileEndIndex)
+            .trim();
+          this.newCustomerMobileNo = mobileNumber;
+        }
+      }
       this.showCustomers = false;
       this.fectchCustomerFavouriteItem();
     },

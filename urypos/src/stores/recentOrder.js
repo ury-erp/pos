@@ -29,6 +29,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     selectedStatus: "Draft",
     posProfile: "",
     searchOrder: "",
+    mobileNumber: "",
     customerNameForBilling: "",
     previousOrderdCustomer: "",
     table: null,
@@ -229,6 +230,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       this.previousOrderdCustomer = "";
       this.pastOrderType = "";
       this.modifiedTime = "";
+      this.customers.newCustomerMobileNo=""
       let items = this.menu.items;
       this.draftInvoice = this.invoiceNumber;
       this.editPrintedInvoice = this.invoicePrinted;
@@ -245,6 +247,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         .get("frappe.client.get", getOrderInvoice)
         .then((result) => {
           let pastOrder = result.message;
+          this.mobileNumber = pastOrder.mobile_number;
           this.restaurantTable = pastOrder.restaurant_table;
           this.pastOrderdItem = pastOrder.items;
           this.recentWaiter = pastOrder.waiter;

@@ -244,6 +244,30 @@
           </div>
         </div>
       </div>
+      <div class="relative mb-4 mt-4">
+        <div
+          class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+        >
+          <svg  
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"      
+          >
+          <path fill-rule="evenodd" d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Zm12 12V5H7v11h10Zm-5 1a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H12Z" clip-rule="evenodd"/>
+          </svg>
+
+        </div>
+        <input
+          type="number"
+          id="mobileNumber"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
+          placeholder="Mobile Number"
+          readonly
+          :value="this.customers.newCustomerMobileNo || this.recentOrders.mobileNumber || this.table.mobileNumber"
+        />
+      </div>
       <div class="relative mb-4 mt-4" v-if="!this.auth.cashier">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
@@ -339,6 +363,7 @@ import { useCustomerStore } from "@/stores/Customer.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useMenuStore } from "@/stores/Menu.js";
+import { useTableStore } from "@/stores/Table.js";
 
 export default {
   name: "Customer",
@@ -350,7 +375,8 @@ export default {
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
     const menu = useMenuStore();
-    return { customers, auth, recentOrders,menu };
+    const table=useTableStore();
+    return { table,customers, auth, recentOrders,menu };
   },
 };
 </script>

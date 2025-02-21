@@ -328,9 +328,9 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.table.modifiedTime = response.message.modified;
         this.recentOrders.modifiedTime = response.message.modified;
         if (this.auth.cashier) {
+          this.clearDataAfterUpdate();
           await router.push("/recentOrder");
           this.recentOrders.viewRecentOrder(response.message);
-          this.clearDataAfterUpdate();
         }
       } catch (error) {
         this.showUpdateButtton = true;
@@ -355,6 +355,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.restaurantTable = "";
       this.table.selectedTable = "";
       this.customers.numberOfPax = "";
+      this.customers.newCustomerMobileNo=""
       this.menu.cart = [];
       this.recentOrders.draftInvoice = "";
       this.menu.selectedAggregator = "";
