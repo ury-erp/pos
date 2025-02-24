@@ -132,6 +132,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       }
       const searchParams = {
         query: query,
+        status:this.selectedStatus
       };
       this.call
         .get("ury.ury_pos.api.searchPosInvoice", searchParams)
