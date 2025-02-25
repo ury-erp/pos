@@ -166,8 +166,9 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       const query = this.searchOrder.toLowerCase();
       const name = order.name.toLowerCase();
       const customer = order.customer.toLowerCase();
+      const mobileNumber = order.mobile_number.toLowerCase();
 
-      return name.includes(query) || customer.includes(query);
+      return name.includes(query) || customer.includes(query) || mobileNumber.includes(query);
     },
     getBadgeType(selectedOrder) {
       if (

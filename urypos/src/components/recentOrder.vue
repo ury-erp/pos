@@ -28,7 +28,7 @@
           type="search"
           id="orderSeach"
           class="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-          placeholder="Search by Invoice Id or Customer Name"
+          placeholder="Search by Invoice Id or Customer Name or Mobile Number"
           v-model="this.recentOrders.searchOrder"
           @input="this.recentOrders.handleSearchInput"
         />
@@ -71,19 +71,19 @@
               this.recentOrders.setBackground = index;
             "
           >
-            <div class="flex items-center space-x-4">
-              <div class="flex-1">
+          <div class="flex w-full">
+              <div class="w-3/5">
                 <p
                   class="truncate text-base font-medium text-gray-900 dark:text-white"
                 >
                   {{ recentOrder.name }}
                 </p>
                 <p class="truncate text-sm text-gray-600 dark:text-gray-400">
-                  {{ recentOrder.customer }}
+                  {{ recentOrder.mobile_number }},{{ recentOrder.customer }}
                 </p>
               </div>
-              <div class="flex-1 items-center text-center">
-                <p class="text-base font-medium text-gray-900 dark:text-white">
+              <div class="w-2/5 flex">
+                <p class="text-base font-medium text-gray-900 dark:text-white overflow-hidden text-ellipsis">
                   {{
                     recentOrder.restaurant_table
                       ? recentOrder.restaurant_table
@@ -91,22 +91,20 @@
                   }}
                 </p>
               </div>
-              <div class="flex-1 items-center space-x-4 text-right">
-                <div class="flex-1">
-                  <p
-                    class="truncate text-base font-medium text-gray-900 dark:text-white"
+              <div class="w-1/5 text-right">
+                <p
+                  class="truncate text-base font-medium text-gray-900 dark:text-white"
                   >
-                    {{ this.invoiceData.currency }}
-                    {{ recentOrder.grand_total }}
-                  </p>
-                  <p class="truncate text-sm text-gray-600 dark:text-gray-400">
-                    {{
-                      this.recentOrders.getFormattedTime(
-                        recentOrder.posting_time
-                      )
-                    }}
-                  </p>
-                </div>
+                  {{ this.invoiceData.currency }}
+                  {{ recentOrder.grand_total }}
+                </p>
+                <p class="truncate text-sm text-gray-600 dark:text-gray-400">
+                  {{
+                    this.recentOrders.getFormattedTime(
+                      recentOrder.posting_time
+                    )
+                  }}
+                </p>
               </div>
             </div>
           </li>
