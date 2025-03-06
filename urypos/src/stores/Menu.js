@@ -122,8 +122,15 @@ export const useMenuStore = defineStore("menu", {
   },
   actions: {
     fetchItems() {
+      let order_type = null
+      if (this.auth.cashier) {
+        order_type = this.selectedOrderType;
+      }else{
+        order_type = null
+      }
       const getMenu = {
         pos_profile: this.invoiceData.posProfile,
+        order_type:order_type
       };
       this.call
         .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
@@ -131,7 +138,7 @@ export const useMenuStore = defineStore("menu", {
           if (!this.auth.cashier && this.table.tableMenu) {
             this.items = this.table.tableMenu;
           } else {
-            this.defautlMenu = result.message;
+            this.defautlMenu = result.message.items;
             this.items = this.defautlMenu;
           }
           this.items.forEach((menuItem) => {
@@ -206,6 +213,7 @@ export const useMenuStore = defineStore("menu", {
         );
       } else {
         if (this.selectedOrderType !== "Aggregators") {
+          this.fetchItems()
           router.push("/Menu");
         }
       }

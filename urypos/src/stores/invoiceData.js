@@ -313,7 +313,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.invoiceNumber = response.message.name;
         this.grandTotal = response.message.grand_total;
         this.notification.createNotification("Order Update");
-        this.table.handleRoomChange();
+        this.table.fetchTable();
         
         let items = this.menu.items;
         // items.forEach((item) => {

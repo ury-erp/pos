@@ -50,6 +50,8 @@ export const useTableStore = defineStore("table", {
     invoiceNumber: null,
     modifiedTime: null,
     selectedRoom: null,
+    orderModified:null,
+    menuName:null,
     rooms: [],
     recentOrders: usetoggleRecentOrder()
   }),
@@ -117,8 +119,12 @@ export const useTableStore = defineStore("table", {
         })
         .catch((error) => console.error(error));
     },
-    handleRoomChange() {
+    async handleRoomChange() {
       localStorage.setItem("selectedRoom", this.selectedRoom);
+      await this.fetchTable();
+      await this.getMenu();
+    },
+    fetchTable() {
       const getTables = {
         room: this.selectedRoom,
       };
@@ -130,6 +136,28 @@ export const useTableStore = defineStore("table", {
           });
         });
       });
+    },
+    async getMenu() {
+      const getMenuIem = {
+        room: this.selectedRoom,
+        pos_profile: this.invoiceData.posProfile,
+      };
+      try {
+        await this.call
+          .get("ury.ury_pos.api.getRestaurantMenu", getMenuIem)
+          .then((result) => {
+            this.tableMenu = result.message.items;
+            this.menuName = result.message.name;
+            this.orderModified = result.message.modified;
+            this.menu.fetchItems();
+          });
+      } catch (error) {
+        if (error._server_messages) {
+          const messages = JSON.parse(error._server_messages);
+          const message = JSON.parse(messages[0])
+          this.alert.createAlert("Message", message.message, "OK");
+        }
+      }
     },
     toggleTableTypeSwitch() {
       this.isTakeaeay = !this.isTakeaeay;
@@ -237,7 +265,6 @@ export const useTableStore = defineStore("table", {
     },
     async addToSelectedTables(table) {
       this.selectedTable = table.name;
-      await this.getMenu();
       this.takeAwayTable = 0;
 
       if (table.is_take_away === 1) {
@@ -335,26 +362,6 @@ export const useTableStore = defineStore("table", {
     routeToMenu(table) {
       this.addToSelectedTables(table);
       router.push("/Menu");
-    },
-    async getMenu() {
-      const getMenuIem = {
-        table: this.selectedTable,
-        pos_profile: this.invoiceData.posProfile,
-      };
-      try {
-        await this.call
-          .get("ury.ury_pos.api.getRestaurantMenu", getMenuIem)
-          .then((result) => {
-            this.tableMenu = result.message;
-            this.menu.fetchItems();
-          });
-      } catch (error) {
-        if (error._server_messages) {
-          const messages = JSON.parse(error._server_messages);
-          const message = JSON.parse(messages[0]);
-          this.alert.createAlert("Message", message.message, "OK");
-        }
-      }
     },
     async invoiceNumberFetching() {
       const tableInvoiceNumber = {

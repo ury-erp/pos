@@ -125,8 +125,8 @@ export const useAuthStore = defineStore("auth", {
                 this.userRole.includes(role)
               );
               if (this.cashier) {
-                this.menu.fetchItems();
                 this.menu.pickOrderType();
+                // this.menu.fetchItems();
               }
               this.isPosOpenChecking();
               this.isPosCloseCheck();
