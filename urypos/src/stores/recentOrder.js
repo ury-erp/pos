@@ -280,7 +280,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
             const previousItem =
               this.pastOrderdItem &&
               this.pastOrderdItem.find(
-                (previousItem) => previousItem.item_name === item.item_name
+                (previousItem) => previousItem.item_code === item.item
               );
             if (previousItem && !item.qty) {
               const itemIndex = cart.findIndex((obj) => obj.item === item.item);
@@ -292,6 +292,23 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
               }
             }
           });
+          if (this.pastOrderdItem && this.pastOrderdItem.length > 0) {
+            this.pastOrderdItem.forEach((previousItem) => {
+              const existsInMenu = items.some(item => item.item === previousItem.item_code);
+              const existsInCart = cart.some(item => item.item === previousItem.item_code);
+              
+              if (!existsInMenu && !existsInCart) {
+                // Item no longer in menu but was in previous order - add it to cart
+                cart.push({
+                  item: previousItem.item_code,
+                  item_name: previousItem.item_name,
+                  rate: previousItem.rate,
+                  qty: previousItem.qty,
+                  comment: previousItem.comment
+                });
+              }
+            });
+          }
         })
         .catch((error) => console.error(error));
     },
