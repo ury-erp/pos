@@ -83,6 +83,10 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
     change() {
       return this.billAmount - this.total;
     },
+    changeAmount() {
+      const totalPaid = this.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      return Math.max(0, totalPaid - this.grandTotal);
+    },
     orderNumber() {
       if (this.draftInvoice || this.invoiceData.invoiceNumber) {
         let orderNo = this.draftInvoice || this.invoiceData.invoiceNumber;
@@ -150,6 +154,20 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       },500);
     },
     
+    openPaymentModal() {
+      // Reset payment-related data
+      this.payments = [];
+      this.changeToReturn = 0;
+      this.paidAmount = 0;
+      
+      // Reset values in payment method inputs
+      this.modeOfPaymentList.forEach(method => {
+        method.value = 0;
+      });
+      
+      // Show the payment modal
+      this.showPayment = true;
+    },
     nextPageClick() {
       this.currentPage += 1;
       const limit = 10;
@@ -357,6 +375,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       }
     },
     billing: async function () {
+      this.openPaymentModal()
       const getOrderInvoice = {
         doctype: "POS Invoice",
         name: this.invoiceNumber,
