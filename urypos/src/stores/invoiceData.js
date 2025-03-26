@@ -24,6 +24,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     posProfile: "",
     enableKotReprint:0,
     defaultModeOfPayment: "Cash",
+    owner:null,
     branch: null,
     printer: null,
     qz_host: null,
@@ -36,8 +37,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     modifiedTime: null,
     print_format: null,
     cancelReason: null,
-    enableDiscount: false,
     invoiceNumber: null,
+    multipleCashier:null,
     tableInvoiceNo: null,
     tableAttention: null,
     modeOfPaymentList: null,
@@ -47,6 +48,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     isPrinting: false,
     showDialog: false,
     kotPrinting: false,
+    enableDiscount: false,
     invoiceUpdating: false,
     cancelInvoiceFlag: false,
     invoiceDetails: [],
@@ -72,6 +74,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.posProfile = this.invoiceDetails.pos_profile;
           this.waiter = this.invoiceDetails.waiter;
           this.cashier = this.invoiceDetails.cashier;
+          this.owner = this.invoiceDetails.owner
           this.branch = this.invoiceDetails.branch;
           this.company = this.invoiceDetails.company;
           this.print_format = this.invoiceDetails.print_format;
@@ -83,6 +86,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.disableRoundedTotal = this.invoiceDetails.disable_rounded_total;
           this.enableDiscount = this.invoiceDetails.enable_discount;
           this.enableKotReprint=this.invoiceDetails.enable_kot_reprint;
+          this.multipleCashier=this.invoiceDetails.multiple_cashier
+          
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
@@ -151,6 +156,9 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.recentOrders.draftInvoice ||
         this.table.invoiceNo ||
         null;
+      let cashier= this.table.cashier ||
+        this.cashier ||
+        this.cashier;
 
       selectedTables =
         this.table.selectedTable || this.recentOrders.restaurantTable;
@@ -255,7 +263,8 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         items: cart,
         no_of_pax: numberOfPax,
         mode_of_payment: this.defaultModeOfPayment,
-        cashier: this.cashier,
+        cashier: cashier,
+        owner:this.owner,
         waiter: waiter,
         last_modified_time: this.modifiedTime,
         pos_profile: this.posProfile,
@@ -351,6 +360,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         item.comment = "";
         item.qty = "";
       });
+      this.table.cashier=""
       this.table.takeAwayTable = 0;
       this.recentOrders.restaurantTable = "";
       this.table.selectedTable = "";

@@ -38,6 +38,7 @@ export const useTableStore = defineStore("table", {
     tableName: "",
     showModalCaptainTransfer: false,
     showCaptain: false,
+    cashier:null,
     captain: [],
     previousWaiter: null,
     newCaptain: "",
@@ -87,14 +88,9 @@ export const useTableStore = defineStore("table", {
   actions: {
     fetchRoom() {
       this.selectedOption = "Table";
-      this.db
-        .getDocList("URY Room", {
-          fields: ["name", "branch"],
-          filters: [["branch", "like", this.invoiceData.branch]],
-          limit: "*",
-        })
-        .then((docs) => {
-          this.rooms = docs;
+      if (this.invoiceData.multipleCashier) {
+        this.call.get("ury.ury_pos.api.getRoom").then((result) => {
+          this.rooms = result.message;
           const selectedRoom = localStorage.getItem("selectedRoom");
           if (
             selectedRoom !== null &&
@@ -103,26 +99,59 @@ export const useTableStore = defineStore("table", {
           ) {
             this.selectedRoom = selectedRoom;
             this.handleRoomChange();
-          } else {
-            this.db
-              .getDocList("URY Restaurant", {
-                fields: ["branch", "default_room"],
-                filters: [["branch", "like", this.invoiceData.branch]],
-              })
-              .then((docs) => {
-                let room = docs.find((room) => room.default_room);
-                this.selectedRoom = room ? room.default_room : null;
-
-                this.handleRoomChange();
-              });
           }
-        })
-        .catch((error) => console.error(error));
+
+        });
+      } else {
+        this.db
+          .getDocList("URY Room", {
+            fields: ["name", "branch"],
+            filters: [["branch", "like", this.invoiceData.branch]],
+            limit: "*",
+          })
+          .then((docs) => {
+            this.rooms = docs;
+            const selectedRoom = localStorage.getItem("selectedRoom");
+            if (
+              selectedRoom !== null &&
+              selectedRoom !== "" &&
+              selectedRoom !== "null"
+            ) {
+              this.selectedRoom = selectedRoom;
+              this.handleRoomChange();
+            } else {
+              this.db
+                .getDocList("URY Restaurant", {
+                  fields: ["branch", "default_room"],
+                  filters: [["branch", "like", this.invoiceData.branch]],
+                })
+                .then((docs) => {
+                  let room = docs.find((room) => room.default_room);
+                  this.selectedRoom = room ? room.default_room : null;
+
+                  this.handleRoomChange();
+                });
+            }
+
+          })
+          .catch((error) => console.error(error));
+      }
     },
     async handleRoomChange() {
       localStorage.setItem("selectedRoom", this.selectedRoom);
       await this.fetchTable();
       await this.getMenu();
+      if (this.invoiceData.multipleCashier) {
+        this.getCashier()
+      }
+    },
+    getCashier(){
+      const getCashier = {
+        room: this.selectedRoom,
+      };
+      this.call.get("ury.ury_pos.api.getCashier", getCashier).then((result) => {
+        this.cashier=result.message
+      });
     },
     fetchTable() {
       const getTables = {
@@ -183,7 +212,6 @@ export const useTableStore = defineStore("table", {
         })
         .then((docs) => {
           this.captain = docs;
-          console.log(this.captain, "capain");
         })
         .catch((error) => console.error(error));
     },

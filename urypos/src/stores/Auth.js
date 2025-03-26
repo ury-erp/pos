@@ -157,29 +157,55 @@ export const useAuthStore = defineStore("auth", {
       var currentDomain = window.location.protocol + "//" + window.location.hostname;
       window.location.href = currentDomain + "/app/";
     },
-    
+
     isPosOpenChecking() {
-      this.call
-        .get("ury.ury_pos.api.posOpening")
-        .then((result) => {
-          const serverMessages = JSON.parse(result._server_messages);
-          const innerMessageString = serverMessages[0];
-          const innerMessage = JSON.parse(innerMessageString);
-          const message = innerMessage.message;
-          // if (this.cashier) {
-          //   this.alert.createAlert("Message", message, "OK").then(() => {
-          //     router.push("/posOpen");
-          //   });
-          // } else {
-          var currentDomain = window.location.origin;
-          this.alert.createAlert("Message", message, "OK").then(() => {
-            window.location.href = currentDomain + "/app/";
+      if (this.invoiceData.multipleCashier) {
+        this.call
+          .get("ury.ury.doctype.ury_order.ury_order.pos_opening_check")
+          .then((result) => {
+            var currentDomain = window.location.origin;
+            if (!result.message.opening_exists) {
+              this.alert.createAlert("Message", "POS Opening Entry is not created", "OK").then(() => {
+                window.location.href = currentDomain + "/app/";
+              });
+            }
+
+          })
+          .catch((error) => {
+            var currentDomain = window.location.origin;
+            const serverMessages = JSON.parse(error._server_messages);
+            const innerMessageString = serverMessages[0];
+            const innerMessage = JSON.parse(innerMessageString);
+            const message = innerMessage.message;
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              window.location.href = currentDomain + "/app/";
+            });
+
           });
-          // }
-        })
-        .catch((error) => {
-          // console.error(error)
-        });
+      } 
+      else {
+        this.call
+          .get("ury.ury_pos.api.posOpening")
+          .then((result) => {
+            const serverMessages = JSON.parse(result._server_messages);
+            const innerMessageString = serverMessages[0];
+            const innerMessage = JSON.parse(innerMessageString);
+            const message = innerMessage.message;
+            // if (this.cashier) {
+            //   this.alert.createAlert("Message", message, "OK").then(() => {
+            //     router.push("/posOpen");
+            //   });
+            // } else {
+            var currentDomain = window.location.origin;
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              window.location.href = currentDomain + "/app/";
+            });
+            // }
+          })
+          .catch((error) => {
+            // console.error(error)
+          });
+      }
     },
     isPosCloseCheck() {
       const getPosProfile = {

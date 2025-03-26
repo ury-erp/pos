@@ -102,6 +102,24 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
   },
   actions: {
     async getPosInvoice(selectedStatus, limit, startLimit) {
+      if(this.invoiceData.multipleCashier){
+        const recentOrder = {
+          status: selectedStatus,
+          limit: limit,
+          limit_start: startLimit,
+          cashier:this.invoiceData.cashier
+        };
+        this.call
+          .get("ury.ury_pos.api.getInvoiceForCashier", recentOrder)
+          .then((result) => {
+            console.log(result.message.data,"result.message.data")
+            this.recentOrderList = result.message.data;
+            this.next = result.message.next;
+            return this.recentOrderList, this.next;
+          })
+          .catch((error) => console.error(error));
+      }
+      else{
       const recentOrder = {
         status: selectedStatus,
         limit: limit,
@@ -115,6 +133,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           return this.recentOrderList, this.next;
         })
         .catch((error) => console.error(error));
+      }
     },
     async handleStatusChange() {
       this.currentPage = 1;
@@ -482,6 +501,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         table: this.selectedTable,
         invoice: this.invoiceNumber,
         customer: this.customerNameForBilling,
+        owner:this.invoiceData.owner,
         cashier: this.invoiceData.cashier,
         payments: this.payments,
         pos_profile: this.posProfile,
