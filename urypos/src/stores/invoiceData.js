@@ -493,7 +493,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             }
           }
         } else if (this.print_type === "network") {
-          if (this.auth.cashier) {
+          if (this.auth.cashier && !this.multipleCashier) {
             const sendObj = {
               doctype: "POS Invoice",
               name: invoiceNo,
