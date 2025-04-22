@@ -48,6 +48,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     isPrinting: false,
     showDialog: false,
     kotPrinting: false,
+    editOrderType:false,
     enableDiscount: false,
     invoiceUpdating: false,
     cancelInvoiceFlag: false,
@@ -87,7 +88,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.enableDiscount = this.invoiceDetails.enable_discount;
           this.enableKotReprint=this.invoiceDetails.enable_kot_reprint;
           this.multipleCashier=this.invoiceDetails.multiple_cashier
-          
+          this.editOrderType=this.invoiceDetails.edit_order_type
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }

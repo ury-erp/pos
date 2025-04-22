@@ -320,11 +320,32 @@
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Order Type"
           :value="
-            this.customers.selectedOrderType || this.recentOrders.pastOrderType
+            this.menu.selectedOrderType || this.recentOrders.pastOrderType
           "
-          readonly
+          @click="
+                this.invoiceData.editOrderType && (this.recentOrders.pastOrderType === 'Take Away' || this.recentOrders.pastOrderType === 'Delivery')
+                  ? this.customers.editOrderType(this.recentOrders.pastOrderType)
+                  : ''
+              "
+          :readonly="!(this.recentOrders.pastOrderType === 'Take Away' || this.recentOrders.pastOrderType === 'Delivery')"        
           required
         />
+        <div
+          v-if="
+             this.invoiceData.editOrderType && this.customers.showEditOrderType
+          "
+          class="absolute left-0 top-full z-10 max-h-64 w-full rounded bg-white shadow md:w-3/5 lg:w-2/5"
+          ref="dropdown"
+        >
+          <div
+            class="h-10 mb-4 rounded-lg p-4 hover:bg-gray-100"
+            @click="this.customers.selecetOrderType(customers.newOrderType)"
+          >
+            <h2 class="text-sm leading-normal">
+               {{ customers.newOrderType }}
+            </h2>
+          </div>
+        </div>
       </div>
 
       <h1
@@ -364,6 +385,8 @@ import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useMenuStore } from "@/stores/Menu.js";
 import { useTableStore } from "@/stores/Table.js";
+import { useInvoiceDataStore } from "@/stores/invoiceData.js";
+
 
 export default {
   name: "Customer",
@@ -375,8 +398,9 @@ export default {
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
     const menu = useMenuStore();
+    const invoiceData = useInvoiceDataStore();
     const table=useTableStore();
-    return { table,customers, auth, recentOrders,menu };
+    return { table,customers, auth, recentOrders,menu,invoiceData };
   },
 };
 </script>

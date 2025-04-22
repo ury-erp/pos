@@ -13,11 +13,12 @@ export const useCustomerStore = defineStore("customers", {
     alert: useAlert(),
     showCustomers: false,
     showOrderType: false,
+    showEditOrderType:false,
+    newOrderType:null,
     numberOfPax: "",
     menu: useMenuStore(),
     recentOrders: usetoggleRecentOrder(),
     selectedCustomerName: "",
-    selectedOrderType: "",
     customerFavouriteItems: [],
     showModalNewCustomer: false,
     newCustomerMobileNo: "",
@@ -96,7 +97,23 @@ export const useCustomerStore = defineStore("customers", {
         this.alert.createAlert("Message", "Invalid Customer", "OK");
       }
     },
-
+    editOrderType(orderType){
+      this.showEditOrderType=true
+      if(orderType == "Take Away"){
+        this.newOrderType="Delivery"
+      }else if(orderType == "Delivery"){
+        this.newOrderType="Take Away"
+      }else{
+        return
+      }
+      
+    },
+    selecetOrderType(order_type){
+      this.showEditOrderType=false
+      this.menu.selectedOrderType = order_type
+      this.recentOrders.pastOrderType = order_type
+    },
+    
     addNewCustomer: async function () {
       if (!this.newCustomer || !this.newCustomerMobileNo) {
         let missingFields = [];
