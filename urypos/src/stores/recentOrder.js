@@ -394,6 +394,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
       }
     },
     billing: async function () {
+      this.modeOfPaymentList=[]
       this.openPaymentModal()
       const getOrderInvoice = {
         doctype: "POS Invoice",
