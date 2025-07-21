@@ -428,6 +428,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
               "OK"
             );
             this.isLoading = false;
+            this.showPayment = false;
           } else {
             this.showPayment = true;
           }
