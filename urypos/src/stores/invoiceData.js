@@ -517,7 +517,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                   invoice: invoiceNo,
                 };
                 await this.call
-                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .post("ury.ury.api.ury_print.qz_print_updat", sendObj)
                   .then(() => {
                     window.location.reload();
                     return 200;
@@ -525,7 +525,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               }
               errorMessage = res;
               i++;
-            } while (i < 1);
+            } while (i < 5);
             throw {
               alert: this.alert.createAlert(
                 "Message",
@@ -556,7 +556,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                   invoice: invoiceNo,
                 };
                 await this.call
-                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  .post("ury.ury.api.ury_print.qz_print_updat", sendObj)
                   .then(() => {
                     window.location.reload();
                     return 200;
@@ -564,7 +564,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               }
               errorMessage = res;
               i++;
-            } while (i < 1);
+            } while (i < 5);
             throw {
               alert: this.alert.createAlert(
                 "Message",
