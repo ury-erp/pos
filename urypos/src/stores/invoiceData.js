@@ -490,6 +490,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               this.notification.createNotification(
                 "Print successful but failed to update status"
               );
+            }else{
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
             }
           }
         } else if (this.print_type === "network") {
@@ -516,12 +520,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 const sendObj = {
                   invoice: invoiceNo,
                 };
-                await this.call
-                  .post("ury.ury.api.ury_print.qz_print_updat", sendObj)
-                  .then(() => {
+                  await this.call.post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  setTimeout(() => {
                     window.location.reload();
-                    return 200;
-                  });
+                  }, 1000);
               }
               errorMessage = res;
               i++;
@@ -586,7 +588,6 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               this.notification.createNotification("Print Successful");
               this.isPrinting = false
               window.location.reload();
-
               return result.message;
             })
             .catch((error) => console.error(error));
@@ -604,17 +605,14 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
 
       const tryUpdate = async () => {
         try {
-          const updatePrintTable = {
-            invoice: invoiceNo,
-          };
-
           const response = await this.call.post(
-            "ury.ury.api.ury_print.qz_print_update",
-            updatePrintTable
+            "ury.ury.api.ury_print.qz_print_updat",
+            {
+              invoice: invoiceNo,
+            }
           );
           if (response.message.status === "Success") {
             this.notification.createNotification("Print and Update Successful");
-            window.location.reload();
             return true;
           } else {
             this.isPrinting = false
