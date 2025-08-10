@@ -494,6 +494,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
               setTimeout(() => {
                 window.location.reload();
               }, 1000);
+              return "Success"
             }
           }
         } else if (this.print_type === "network") {
@@ -524,6 +525,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                   setTimeout(() => {
                     window.location.reload();
                   }, 1000);
+                  return "Success"
               }
               errorMessage = res;
               i++;
@@ -558,7 +560,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                   invoice: invoiceNo,
                 };
                 await this.call
-                  .post("ury.ury.api.ury_print.qz_print_updat", sendObj)
+                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
                   .then(() => {
                     window.location.reload();
                     return 200;
