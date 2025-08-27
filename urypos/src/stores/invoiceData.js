@@ -565,6 +565,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                     window.location.reload();
                     return 200;
                   });
+                  return;
               }
               errorMessage = res;
               i++;
