@@ -559,13 +559,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
                 const sendObj = {
                   invoice: invoiceNo,
                 };
-                await this.call
-                  .post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                  .then(() => {
+                  await this.call.post("ury.ury.api.ury_print.qz_print_update", sendObj)
+                  setTimeout(() => {
                     window.location.reload();
-                    return 200;
-                  });
-                  return;
+                  }, 1000);
+                  return "Success"
               }
               errorMessage = res;
               i++;
