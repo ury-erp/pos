@@ -607,7 +607,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       const tryUpdate = async () => {
         try {
           const response = await this.call.post(
-            "ury.ury.api.ury_print.qz_print_updat",
+            "ury.ury.api.ury_print.qz_print_update",
             {
               invoice: invoiceNo,
             }
