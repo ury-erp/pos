@@ -387,20 +387,61 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             };
           }
         } else {
-          const sendObj = {
-            doctype: "POS Invoice",
-            name: invoiceNo,
-            print_format: this.print_format,
-          };
-          this.call
-            .post("ury.ury.api.ury_print.print_pos_page", sendObj)
-            .then((result) => {
-              this.notification.createNotification("Print Successful");
-              window.location.reload();
+          // Socket printing using iframe technique
+          try {
+            const printHTML = {
+              doc: "POS Invoice",
+              name: invoiceNo,
+              print_format: this.print_format,
+              _lang: "en",
+            };
+            const result = await this.call.get(
+              "frappe.www.printview.get_html_and_style",
+              printHTML
+            );
+            
+            if (!result?.message?.html) {
+              this.isPrinting = false;
+              this.alert.createAlert(
+                "Message",
+                "Error while getting the HTML document to print",
+                "OK"
+              );
+              return;
+            }
 
-              return result.message;
-            })
-            .catch((error) => console.error(error));
+            // Create iframe for printing
+            const iframe = document.createElement('iframe');
+            iframe.id = 'print_content';
+            document.body.appendChild(iframe);
+            
+            // Write HTML to iframe and print
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(result.message.html);
+            iframe.contentWindow.document.close();
+            
+            // Trigger print dialog
+            iframe.contentWindow.print();
+            
+            // Clean up: remove iframe after a short delay to allow print dialog to open
+            setTimeout(() => {
+              if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+              }
+            }, 100);
+            
+            this.notification.createNotification("Print Successful");
+            this.isPrinting = false;
+            window.location.reload();
+          } catch (error) {
+            console.error(error);
+            this.isPrinting = false;
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message", message.message, "OK");
+            }
+          }
         }
       } catch (e) {
         if (e?.custom) {
