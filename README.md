@@ -1,4 +1,5 @@
-# URY POS - Open Source Restaurant Management System
+# ⚠️ This repository is no longer actively maintained. Please find the new location at [URY](https://github.com/ury-erp/ury)
+## URY POS - Open Source Restaurant Management System
 
 URY POS is a light weight and easy to use web-based application designed for streamlined order management. It serves as an efficient tool for both cashiers and captains, facilitating order processing at the cash counter and tables.It supports various order types, including dine-in, delivery, and takeout. URY POS is compatibile with a wide range of devices, including desktops, tablets, and smartphones.
 
