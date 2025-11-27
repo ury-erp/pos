@@ -2,34 +2,50 @@ import { defineStore } from "pinia";
 import { useInvoiceDataStore } from "./invoiceData.js";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
+import { useCustomerStore } from "./Customer.js";
 import { useAuthStore } from "./Auth.js";
 import frappe from "./frappeSdk.js";
 import { usetoggleRecentOrder } from "./recentOrder.js";
-
 import { useAlert } from "./Alert.js";
+import router from "../router";
+
 
 export const useMenuStore = defineStore("menu", {
   state: () => ({
-    items: [],
     cart: [],
-    searchTerm: "",
-    showAll: true,
-    showPriority: false,
-    currentPage: 1,
-    perPage: 20,
-    comments: "",
-    alert: useAlert(),
-    invoiceData: useInvoiceDataStore(),
-    auth: useAuthStore(),
-    notification: useNotifications(),
-    table: useTableStore(),
-    recentOrders: usetoggleRecentOrder(),
-    showDialog: false,
-    showDialogCart: false,
-    quantity: "",
     item: [],
+    items: [],
+    course: [],
+    orderType: [],
+    defautlMenu: [],
+    aggregatorList: [],
+    aggregatorItem: [],
+    quantity: "",
+    comments: "",
+    searchTerm: "",
     itemComments: "",
+    perPage: 20,
+    currentPage: 1,
+    aggregatorId: null,
+    selectedCourse: null,
+    selectedOrderType: null,
+    selectedAggregator: null,
+    showAll: true,
+    displayAll: true,
+    isAggregator: false,
+    priority: false,
+    showDialog: false,
+    showPriority: false,
+    showDialogCart: false,
+    db: frappe.db(),
     call: frappe.call(),
+    alert: useAlert(),
+    auth: useAuthStore(),
+    table: useTableStore(),
+    customer: useCustomerStore(),
+    notification: useNotifications(),
+    invoiceData: useInvoiceDataStore(),
+    recentOrders: usetoggleRecentOrder(),
   }),
   getters: {
     filteredItems(state) {
@@ -38,9 +54,22 @@ export const useMenuStore = defineStore("menu", {
         state.searchTerm.trim() === ""
       ) {
         if (state.showAll) {
-          return state.items;
+          if (state.selectedCourse) {
+            return state.items.filter(
+              (item) => item.course === state.selectedCourse
+            );
+          } else {
+            return state.items; // Return all items if no course is selected
+          }
         } else {
-          return state.items.filter((item) => item.special_dish === 1);
+          if (state.selectedCourse) {
+            return state.items.filter(
+              (item) =>
+                item.special_dish === 1 && item.course === state.selectedCourse
+            );
+          } else {
+            return state.items.filter((item) => item.special_dish === 1);
+          }
         }
       } else {
         const searchTerm = state.searchTerm.toLowerCase();
@@ -49,11 +78,12 @@ export const useMenuStore = defineStore("menu", {
             typeof item.item_name === "string" &&
             typeof item.item === "string" &&
             (item.item_name.toLowerCase().includes(searchTerm) ||
-              item.item.toLowerCase().includes(searchTerm))
+              item.item.toLowerCase().includes(searchTerm)) &&
+            (!state.selectedCourse || item.course === state.selectedCourse) &&
+            (state.showAll || item.special_dish === 1)
         );
       }
     },
-
     totalPages() {
       return Math.ceil(this.filteredItems.length / this.perPage);
     },
@@ -92,8 +122,15 @@ export const useMenuStore = defineStore("menu", {
   },
   actions: {
     fetchItems() {
+      let order_type = null
+      if (this.auth.cashier) {
+        order_type = this.selectedOrderType;
+      }else{
+        order_type = null
+      }
       const getMenu = {
         pos_profile: this.invoiceData.posProfile,
+        order_type:order_type
       };
       this.call
         .get("ury.ury_pos.api.getRestaurantMenu", getMenu)
@@ -101,11 +138,14 @@ export const useMenuStore = defineStore("menu", {
           if (!this.auth.cashier && this.table.tableMenu) {
             this.items = this.table.tableMenu;
           } else {
-            this.items = result.message;
+            this.defautlMenu = result.message.items;
+            this.items = this.defautlMenu;
           }
           this.items.forEach((menuItem) => {
             if (menuItem.special_dish == 1) {
               this.showPriority = true;
+            } else {
+              this.showAll = true;
             }
           });
         })
@@ -116,14 +156,142 @@ export const useMenuStore = defineStore("menu", {
             this.alert.createAlert("Message", message.message, "OK");
           }
         });
+      this.db
+        .getDocList("URY Menu Course", {
+          fields: ["name"],
+          limit: "*",
+        })
+        .then((docs) => {
+          this.course = docs;
+        });
+    },
+    pickOrderType() {
+      this.call
+        .get("ury.ury_pos.api.get_select_field_options")
+        .then((result) => {
+          this.orderType = result.message.filter(
+            (option) => option.name !== ""
+          );
+        })
+        .catch((error) => console.error(error));
+    },
+    clearPreviousData() {
+      this.recentOrders.selectedTable = "";
+      this.recentOrders.previousOrderdCustomer = ""
+      this.recentOrders.selectedStatus = "Draft"
+      this.table.invoiceNo = "";
+      this.table.selectedTable = "";
+      this.invoiceData.invoiceNumber = "";
+      this.recentOrders.showOrder = "";
+      this.recentOrders.invoiceNumber = "";
+      this.recentOrders.recentOrderListItems = [];
+      this.recentOrders.texDetails = [];
+      this.recentOrders.orderType = "";
+      this.recentOrders.draftInvoice = "";
+      this.recentOrders.netTotal = 0;
+      this.recentOrders.grandTotal = 0;
+      this.recentOrders.invoiceNumber = "";
+      this.recentOrders.selectedOrder = [];
+      this.recentOrders.selectedTable = "";
+      this.customer.search = "";
+      this.recentOrders.restaurantTable = ""
+      this.recentOrders.restaurantTable = null
+      this.aggregatorItem = []
+    },
+    orderTypeSelection() {
+      this.clearPreviousData();
+      this.customer.selectedOrderType = this.selectedOrderType;
+      if (
+        this.selectedOrderType === "Dine In" &&
+        !this.recentOrders.restaurantTable
+      ) {
+        this.selectedOrderType = null;
+        this.alert.createAlert(
+          "Message",
+          "Dine in is not permitted for takeaway orders.",
+          "OK"
+        );
+      } else {
+        if (this.selectedOrderType !== "Aggregators") {
+          this.fetchItems()
+          router.push("/Menu");
+        }
+      }
+
+      if (this.cart.length > 0) {
+        this.alert
+          .createAlert(
+            "Cart Not Empty",
+            "Please clear your cart before selecting an order type.",
+            "OK"
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      } else {
+        if (this.selectedOrderType === "Aggregators") {
+          this.call
+            .get("ury.ury_pos.api.getAggregator")
+            .then((result) => {
+              this.aggregatorList = result.message;
+            })
+            .catch((error) => {
+              if (error._server_messages) {
+                const messages = JSON.parse(error._server_messages);
+                const message = JSON.parse(messages[0]);
+                this.alert.createAlert("Message", message.message, "OK");
+              }
+            });
+        } else {
+          this.aggregatorItem = "";
+          this.selectedAggregator = "";
+          this.items = this.defautlMenu;
+        }
+      }
+    },
+    handleAggregatorChange() {
+      if (this.selectedOrderType === "Aggregators" && this.cart.length > 0) {
+        this.alert
+          .createAlert(
+            "Cart Not Empty",
+            "Please empty your cart before selecting an aggregator.",
+            "OK"
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      } else {
+        this.customer.search = this.selectedAggregator;
+        const getMenu = {
+          aggregator: this.selectedAggregator,
+        };
+        this.call
+          .get("ury.ury_pos.api.getAggregatorItem", getMenu)
+          .then((result) => {
+            this.aggregatorItem = this.items = result.message;
+            router.push("/Menu");
+            if (result.message) {
+              this.items = result.message;
+            } else {
+              this.items = defautlMenu;
+            }
+          })
+          .catch((error) => {
+            if (error._server_messages) {
+              const messages = JSON.parse(error._server_messages);
+              const message = JSON.parse(messages[0]);
+              this.alert.createAlert("Message", message.message, "OK");
+            }
+          });
+      }
     },
     itemNameExtract(item_name) {
       return item_name
         ? item_name
-            .split(" ")
-            .map((word) => (word ? word[0].toUpperCase() : ""))
-            .join("")
-            .substring(0, 2)
+          .split(" ")
+          .map((word) => (word ? word[0].toUpperCase() : ""))
+          .join("")
+          .substring(0, 2)
         : "";
     },
     updateSearchTerm() {
@@ -140,12 +308,17 @@ export const useMenuStore = defineStore("menu", {
     clearSearch(event) {
       event.target.value = "";
       this.searchTerm = "";
-      this.showAll = true;
     },
     showAllItems() {
       this.showAll = true;
+      this.priority = false;
+      this.displayAll = true;
+      this.searchTerm = "";
+      this.selectedCourse = "";
     },
     showSpecialItems() {
+      this.priority = true;
+      this.displayAll = false;
       this.showAll = false;
     },
     showModal(item) {

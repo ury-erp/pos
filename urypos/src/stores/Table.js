@@ -7,6 +7,8 @@ import { useCustomerStore } from "./Customer.js";
 import { useNotifications } from "./Notification.js";
 import { useAlert } from "./Alert.js";
 import frappe from "./frappeSdk.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
+
 
 export const useTableStore = defineStore("table", {
   state: () => ({
@@ -14,6 +16,7 @@ export const useTableStore = defineStore("table", {
     selectedTable: null,
     previousOrderdItem: [],
     invoiceNo: "",
+    takeAwayTable: 0,  
     alert: useAlert(),
     previousOrder: [],
     previousOrderdCustomer: "",
@@ -22,9 +25,12 @@ export const useTableStore = defineStore("table", {
     notification: useNotifications(),
     selectedOption: "",
     isTakeAway: "",
+    mobileNumber:"",
     showModal: false,
+    isTakeaeay: false,
     newTable: "",
     showTable: false,
+    transferTable: [],
     menu: useMenuStore(),
     tableMenu: [],
     activeDropdown: null,
@@ -32,17 +38,23 @@ export const useTableStore = defineStore("table", {
     tableName: "",
     showModalCaptainTransfer: false,
     showCaptain: false,
+    cashier:null,
     captain: [],
     previousWaiter: null,
     newCaptain: "",
-    transferTable: [],
     invoicePrinted: "",
     auth: useAuthStore(),
     call: frappe.call(),
+    customers: useCustomerStore(),
     db: frappe.db(),
     totalMinutes: null,
     invoiceNumber: null,
     modifiedTime: null,
+    selectedRoom: null,
+    orderModified:null,
+    menuName:null,
+    rooms: [],
+    recentOrders: usetoggleRecentOrder()
   }),
   getters: {
     filteredTables(state) {
@@ -63,36 +75,133 @@ export const useTableStore = defineStore("table", {
           .includes(this.newCaptain.toLowerCase());
       });
     },
+    toggleTableType(state) {
+      return state.isTakeaeay ? "translateX(215%)" : "translateX(0)";
+    },
+    tableTypeLabel(state) {
+      return state.isTakeaeay ? "Takeaway" : "Table";
+    },
+    tableTypeClass(state) {
+      return state.isTakeaeay ? "text-left ml-1" : "text-center ml-2";
+    },
   },
-
   actions: {
-    fetchTable() {
+    fetchRoom() {
       this.selectedOption = "Table";
-      this.db
-        .getDocList("URY Table", {
-          fields: ["name", "occupied", "latest_invoice_time", "is_take_away"],
-          limit: "*",
-        })
-        .then((docs) => {
-          this.tables = docs.sort((a, b) => {
-            return a.name.localeCompare(b.name, undefined, {
-              numeric: true,
-              sensitivity: "base",
-            });
+      if (this.invoiceData.multipleCashier) {
+        this.call.get("ury.ury_pos.api.getRoom").then((result) => {
+          this.rooms = result.message;
+          const selectedRoom = localStorage.getItem("selectedRoom");
+          if (
+            selectedRoom !== null &&
+            selectedRoom !== "" &&
+            selectedRoom !== "null"
+          ) {
+            this.selectedRoom = selectedRoom;
+            this.handleRoomChange();
+          }
+
+        });
+      } else {
+        this.db
+          .getDocList("URY Room", {
+            fields: ["name", "branch"],
+            filters: [["branch", "like", this.invoiceData.branch]],
+            limit: "*",
+          })
+          .then((docs) => {
+            this.rooms = docs;
+            const selectedRoom = localStorage.getItem("selectedRoom");
+            if (
+              selectedRoom !== null &&
+              selectedRoom !== "" &&
+              selectedRoom !== "null"
+            ) {
+              this.selectedRoom = selectedRoom;
+              this.handleRoomChange();
+            } else {
+              this.db
+                .getDocList("URY Restaurant", {
+                  fields: ["branch", "default_room"],
+                  filters: [["branch", "like", this.invoiceData.branch]],
+                })
+                .then((docs) => {
+                  let room = docs.find((room) => room.default_room);
+                  this.selectedRoom = room ? room.default_room : null;
+
+                  this.handleRoomChange();
+                });
+            }
+
+          })
+          .catch((error) => console.error(error));
+      }
+    },
+    async handleRoomChange() {
+      localStorage.setItem("selectedRoom", this.selectedRoom);
+      await this.fetchTable();
+      await this.getMenu();
+      if (this.invoiceData.multipleCashier) {
+        this.getCashier()
+      }
+    },
+    getCashier(){
+      const getCashier = {
+        room: this.selectedRoom,
+      };
+      this.call.get("ury.ury_pos.api.getCashier", getCashier).then((result) => {
+        this.cashier=result.message
+      });
+    },
+    fetchTable() {
+      const getTables = {
+        room: this.selectedRoom,
+      };
+      this.call.get("ury.ury_pos.api.getTable", getTables).then((result) => {
+        this.tables = result.message.sort((a, b) => {
+          return a.name.localeCompare(b.name, undefined, {
+            numeric: true,
+            sensitivity: "base",
           });
-        })
-        .catch((error) => console.error(error));
+        });
+      });
+    },
+    async getMenu() {
+      const getMenuIem = {
+        room: this.selectedRoom,
+        pos_profile: this.invoiceData.posProfile,
+      };
+      try {
+        await this.call
+          .get("ury.ury_pos.api.getRestaurantMenu", getMenuIem)
+          .then((result) => {
+            this.tableMenu = result.message.items;
+            this.menuName = result.message.name;
+            this.orderModified = result.message.modified;
+            this.menu.fetchItems();
+          });
+      } catch (error) {
+        if (error._server_messages) {
+          const messages = JSON.parse(error._server_messages);
+          const message = JSON.parse(messages[0])
+          this.alert.createAlert("Message", message.message, "OK");
+        }
+      }
+    },
+    toggleTableTypeSwitch() {
+      this.isTakeaeay = !this.isTakeaeay;
     },
     tableSearch() {
       this.db
         .getDocList("URY Table", {
           filters: [["occupied", "like", "0%"]],
+          limit: "*",
         })
         .then((table) => {
           this.transferTable = table;
         })
         .catch((error) => {
-          // console.error(error)
+          console.error(error);
         });
     },
     fetchCaptain() {
@@ -184,13 +293,16 @@ export const useTableStore = defineStore("table", {
     },
     async addToSelectedTables(table) {
       this.selectedTable = table.name;
-      await this.getMenu();
+      this.takeAwayTable = 0;
 
       if (table.is_take_away === 1) {
         this.isTakeAway = "Take Away";
+        this.takeAwayTable = 1;
       }
       let previousOrderdNumberOfPax = "";
-      this.previousOrderdItem = "";
+      this.previousOrderdItem = [];
+      this.recentOrders.modifiedTime =""     
+      this.recentOrders.pastOrderdItem=[]
       this.invoiceNo = "";
       let items = this.tableMenu;
       items.forEach((item) => {
@@ -209,8 +321,10 @@ export const useTableStore = defineStore("table", {
         .then((result) => {
           this.previousOrder = result.message;
           this.invoicePrinted = this.previousOrder.invoice_printed;
+          this.menu.comments= this.previousOrder.custom_comments;
           this.modifiedTime = this.previousOrder.modified;
           this.grandTotal = this.previousOrder.grand_total;
+          this.mobileNumber = this.previousOrder.mobile_number;
           this.invoiceNo = this.previousOrder.name;
           this.previousWaiter = this.previousOrder.waiter;
           if (this.invoiceNo) {
@@ -239,33 +353,50 @@ export const useTableStore = defineStore("table", {
           this.previousOrderdItem = this.previousOrder.items;
           this.previousOrderdCustomer = this.previousOrder.customer;
           previousOrderdNumberOfPax = this.previousOrder.no_of_pax;
-          const customers = useCustomerStore();
           if (this.previousOrderdCustomer) {
-            customers.search = this.previousOrderdCustomer;
-            customers.numberOfPax = previousOrderdNumberOfPax;
-            customers.fectchCustomerFavouriteItem();
+            this.customers.search = this.previousOrderdCustomer;
+            this.customers.numberOfPax = previousOrderdNumberOfPax;
+            this.customers.fectchCustomerFavouriteItem();
           } else {
-            customers.search = "";
-            customers.numberOfPax = "";
-            customers.customerFavouriteItems = "";
+            this.customers.search = "";
+            this.customers.numberOfPax = "";
+            this.customers.customerFavouriteItems = "";
+            this.customers.newCustomerMobileNo=""
           }
 
           items.forEach((item) => {
             const previousItem =
               this.previousOrderdItem &&
               this.previousOrderdItem.find(
-                (previousItem) => previousItem.item_name === item.item_name
+                (previousItem) => previousItem.item_code === item.item
               );
             if (previousItem && !item.qty) {
               const itemIndex = cart.findIndex((obj) => obj.item === item.item);
               const itemIndexExists = itemIndex !== -1;
               if (!itemIndexExists) {
                 item.qty = previousItem.qty;
-                item.comment = "";
+                item.comment = previousItem.comment;
                 cart.push(item);
               }
             }
           });
+          if (this.previousOrderdItem && this.previousOrderdItem.length > 0) {
+            this.previousOrderdItem.forEach((previousItem) => {
+              const existsInMenu = items.some(item => item.item === previousItem.item_code);
+              const existsInCart = cart.some(item => item.item === previousItem.item_code);
+              
+              if (!existsInMenu && !existsInCart) {
+                // Item no longer in menu but was in previous order - add it to cart
+                cart.push({
+                  item: previousItem.item_code,
+                  item_name: previousItem.item_name,
+                  rate: previousItem.rate,
+                  qty: previousItem.qty,
+                  comment: previousItem.comment
+                });
+              }
+            });
+          }
         })
         .catch((error) => console.error(error));
     },
@@ -276,26 +407,6 @@ export const useTableStore = defineStore("table", {
     routeToMenu(table) {
       this.addToSelectedTables(table);
       router.push("/Menu");
-    },
-    async getMenu() {
-      const getMenuIem = {
-        table: this.selectedTable,
-        pos_profile: this.invoiceData.posProfile,
-      };
-      try {
-        await this.call
-          .get("ury.ury_pos.api.getRestaurantMenu", getMenuIem)
-          .then((result) => {
-            this.tableMenu = result.message;
-            this.menu.fetchItems();
-          });
-      } catch (error) {
-        if (error._server_messages) {
-          const messages = JSON.parse(error._server_messages);
-          const message = JSON.parse(messages[0]);
-          this.alert.createAlert("Message", message.message, "OK");
-        }
-      }
     },
     async invoiceNumberFetching() {
       const tableInvoiceNumber = {

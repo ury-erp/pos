@@ -9,7 +9,7 @@
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
       <div
         w-full
-        class="w-full max-w-sm rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
+        class="w-full max-w-sm rounded border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
         v-for="table in this.table.takeAway"
         :key="table.name"
       >
@@ -33,7 +33,7 @@
           </div>
           <div class="relative" v-if="table.occupied === 1">
             <button
-              class="inline-block rounded-lg p-1.5 text-sm text-gray-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+              class="inline-block rounded p-1.5 text-sm text-gray-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
               type="button"
               @click="this.table.toggleDropdown(table.name)"
             >
@@ -50,7 +50,7 @@
               </svg>
             </button>
             <div
-              class="absolute right-0 z-10 w-36 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+              class="absolute right-0 z-10 w-36 divide-y divide-gray-100 rounded bg-white shadow dark:bg-gray-700"
               v-show="this.table.activeDropdown === table.name"
             >
               <ul class="py-2">
@@ -177,6 +177,15 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div
+    v-if="this.table.takeAway.length === 0"
+    class="inset-0 mt-72 flex items-center justify-center"
+  >
+    <div class="text-center">
+      Tables not found. Please set takeaway tables for the room
+      <span class="font-medium">{{ this.table.selectedRoom }}.</span>
     </div>
   </div>
 </template>

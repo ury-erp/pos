@@ -8,19 +8,21 @@
         v-for="item in this.menu.paginatedItems"
         :key="item.item"
       >
-        <div class="w-100" v-if="this.auth.viewItemImage">
-          <div v-if="item.item_imgae">
+        <div class="w-full" v-if="this.auth.viewItemImage">
+          <div v-if="item.item_imgae"
+            class="aspect-square w-full overflow-hidden"
+          >
             <img
               :src="this.menu.getFullImagePath(item.item_imgae)"
               alt="Item Image"
-              class="min-h-36 rounded"
+              class="h-full w-full rounded object-cover"
             />
           </div>
-          <div v-else class="relative">
+          <div v-else class="relative aspect-square w-full">
             <img
               :src="`https://dummyimage.com/640x640/f9fafa/fff&text=+`"
               alt="Item Image"
-              class="min-h-36 rounded"
+              class="h-full w-full rounded object-cover"
             />
             <div class="absolute inset-0 flex items-center justify-center">
               <span class="text-3xl text-gray-400">{{
@@ -31,7 +33,7 @@
         </div>
 
         <h2
-          class="mt-0"
+          class="mt-2"
           :class="{
             'text-md overflow-hidden whitespace-nowrap text-gray-600':
               this.auth.viewItemImage,
@@ -42,7 +44,7 @@
           {{ item.item_name }}
         </h2>
         <h2
-          class="mt-0"
+          class="mt-1"
           :class="{
             'text-sm font-bold': this.auth.viewItemImage,
             'mb-2 mt-0 text-center text-lg font-normal leading-normal':
@@ -57,12 +59,12 @@
               item.showInput = true;
               this.menu.addToCart(item);
             "
-            class="rounded border px-10 pb-2 pt-2.5 text-xs font-medium leading-normal"
+            class="mt-2 rounded border px-10 pb-2 pt-2.5 text-xs font-medium leading-normal"
           >
             ADD +
           </button>
         </div>
-        <div v-if="item.qty" class="flex rounded-md text-center">
+        <div v-if="item.qty" class="mt-2 flex rounded-md text-center">
           <button
             type="button"
             class="inline-flex items-center justify-center gap-2 border bg-white px-4 py-3 align-middle text-sm font-medium shadow-sm transition-all focus:outline-none dark:border-gray-700"
@@ -74,6 +76,7 @@
                 this.recentOrders.editPrintedInvoice === 1 ||
                 this.auth.removeTableOrderItem === 0,
             }"
+            :disabled="this.recentOrders.restaurantTable"
             @click="
               (this.recentOrders.editPrintedInvoice === 0 ||
                 this.auth.removeTableOrderItem === 1) &&
@@ -140,16 +143,17 @@
               </label>
               <input
                 type="number"
-                id="modeOfPayment"
+                id="quantity"
                 class="mt-4 w-full appearance-none rounded border p-2 leading-tight text-gray-900 shadow focus:outline-none"
                 v-model="this.menu.quantity"
                 v-bind:readonly="
                   this.recentOrders.editPrintedInvoice === 1 &&
                   this.auth.removeTableOrderItem === 0
                 "
+                :disabled="this.recentOrders.restaurantTable"
               />
               <label
-                for="paidAmount"
+                for="comments"
                 class="mt-6 block text-left text-gray-900 dark:text-white"
               >
                 Comments
@@ -180,11 +184,11 @@
       class="flex h-screen items-center justify-center"
     >
       <div class="text-center">
-        No items found. Please select a table or set an active menu.
+        Items Not Found. Please select a table or set an active menu.
       </div>
     </div>
     <div v-else class="flex h-screen items-center justify-center">
-      <div class="text-center">No items found.</div>
+      <div class="text-center">Items Not Found.</div>
     </div>
   </div>
   <div
@@ -242,7 +246,6 @@ import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 
-
 export default {
   data() {
     return {
@@ -254,7 +257,7 @@ export default {
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
     const invoiceData = useInvoiceDataStore();
-    return { menu, auth, recentOrders,invoiceData };
+    return { menu, auth, recentOrders, invoiceData };
   },
   name: "Menu",
   components: {

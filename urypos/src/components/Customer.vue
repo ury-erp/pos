@@ -28,10 +28,9 @@
           placeholder="Search Customers"
           v-model="this.customers.search"
           @input="this.customers.handleSearchInput"
-          @click="
-            this.customers.showCustomers = true;
-            this.customers.showAddNewCustomer = true;
+          @click="this.customers.searchCustomer()
           "
+          :disabled="this.menu.selectedOrderType === 'Aggregators' || this.recentOrders.previousOrderdCustomer !== ''"
           required
         />
 
@@ -61,9 +60,27 @@
             </h2>
           </div>
           <div v-if="this.customers.showAddNewCustomer">
+            <div class="flex justify-end">
+              <span class="sr-only">Close</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="mt-2 mr-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                @click="this.customers.showAddNewCustomer = false"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
             <a
               href="#"
-              class="mt-4 inline-flex items-center text-blue-600 hover:underline"
+              class="mt-1 lg:mt-0 inline-flex items-center text-blue-600 hover:underline"
               @click.prevent="
                 this.customers.newCustomerData(this.customers.search)
               "
@@ -82,7 +99,7 @@
                   d="M12 6v12m6-6H6"
                 ></path>
               </svg>
-              Create a New Customer
+              Create New Customer
             </a>
           </div>
         </div>
@@ -227,6 +244,30 @@
           </div>
         </div>
       </div>
+      <div class="relative mb-4 mt-4">
+        <div
+          class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+        >
+          <svg  
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"      
+          >
+          <path fill-rule="evenodd" d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Zm12 12V5H7v11h10Zm-5 1a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H12Z" clip-rule="evenodd"/>
+          </svg>
+
+        </div>
+        <input
+          type="number"
+          id="mobileNumber"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
+          placeholder="Mobile Number"
+          readonly
+          :value="this.customers.newCustomerMobileNo || this.recentOrders.mobileNumber || this.table.mobileNumber"
+        />
+      </div>
       <div class="relative mb-4 mt-4" v-if="!this.auth.cashier">
         <div
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
@@ -252,6 +293,7 @@
           placeholder="Pax"
           required
           v-model="this.customers.numberOfPax"
+          @input="this.customers.validateInput"
         />
       </div>
       <div class="relative mt-5" ref="container" v-if="this.auth.cashier">
@@ -278,27 +320,30 @@
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 md:w-3/5 lg:w-2/5"
           placeholder="Order Type"
           :value="
-            this.customers.selectedOrderType || this.recentOrders.pastOrderType
+            this.menu.selectedOrderType || this.recentOrders.pastOrderType
           "
-          @click="this.customers.pickOrderType()"
-          readonly
+          @click="
+                this.invoiceData.editOrderType && (this.recentOrders.pastOrderType === 'Take Away' || this.recentOrders.pastOrderType === 'Delivery')
+                  ? this.customers.editOrderType(this.recentOrders.pastOrderType)
+                  : ''
+              "
+          :readonly="!(this.recentOrders.pastOrderType === 'Take Away' || this.recentOrders.pastOrderType === 'Delivery')"        
           required
         />
-
         <div
-          v-if="this.customers.showOrderType && !this.recentOrders.restaurantTable"
-          class="absolute left-0 top-full z-10 max-h-64 w-full overflow-y-scroll rounded bg-white shadow md:w-3/5 lg:w-2/5"
+          v-if="
+             this.invoiceData.editOrderType && this.customers.showEditOrderType
+          "
+          class="absolute left-0 top-full z-10 max-h-64 w-full rounded bg-white shadow md:w-3/5 lg:w-2/5"
           ref="dropdown"
         >
           <div
-            class="p-2 hover:bg-gray-100"
-            v-for="(orderType, index) in this.customers.orderType"
-            :key="index"
-            @click="this.customers.selectOrderType(orderType)"
+            class="h-10 mb-4 rounded-lg p-4 hover:bg-gray-100"
+            @click="this.customers.selecetOrderType(customers.newOrderType)"
           >
-            <h1 class="text-base font-normal leading-normal">
-              {{ orderType.name }}
-            </h1>
+            <h2 class="text-sm leading-normal">
+               {{ customers.newOrderType }}
+            </h2>
           </div>
         </div>
       </div>
@@ -338,6 +383,10 @@ import orderInfo from "./orderInfo.vue";
 import { useCustomerStore } from "@/stores/Customer.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
+import { useMenuStore } from "@/stores/Menu.js";
+import { useTableStore } from "@/stores/Table.js";
+import { useInvoiceDataStore } from "@/stores/invoiceData.js";
+
 
 export default {
   name: "Customer",
@@ -348,7 +397,10 @@ export default {
     const customers = useCustomerStore();
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
-    return { customers, auth, recentOrders };
+    const menu = useMenuStore();
+    const invoiceData = useInvoiceDataStore();
+    const table=useTableStore();
+    return { table,customers, auth, recentOrders,menu,invoiceData };
   },
 };
 </script>

@@ -1,4 +1,16 @@
 <template>
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
+    v-if="this.invoiceData.invoiceUpdating"
+  >
+    Updating Order...
+  </div>
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-300 bg-opacity-50 text-lg"
+    v-if="this.invoiceData.kotPrinting"
+  >
+    KOT Reprinting...
+  </div>
   <div class="mt-5 flex">
     <div class="flex-grow">
       <orderInfo />
@@ -11,12 +23,13 @@
       >
         Update
       </button>
-      <!-- <button
+      <button
       class="mr-4 rounded py-2 px-4 shadow"
+      v-if="this.invoiceData.enableKotReprint"
       @click="this.invoiceData.kotReprint()"
-    >
-      KOT Reprint
-    </button> -->
+      >
+        KOT Reprint
+      </button>
       <button
         class="rounded px-4 py-2 shadow"
         v-if="
@@ -77,6 +90,7 @@
         <button
           class="p-2 text-center"
           type="button"
+          :disabled="this.recentOrders.restaurantTable"            
           @click="
             (this.recentOrders.editPrintedInvoice === 0 ||
               this.auth.removeTableOrderItem === 1) &&
@@ -110,11 +124,35 @@
       Grand Total
     </label>
     <input
-      class="comments mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      class="grand_total mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
       :value="
         this.menu.grand_total || this.table.grandTotal || invoiceData.grandTotal
       "
       readonly
+    />
+    <label
+      for="aggregatorId"
+      class="mt-6 block text-left text-gray-900 dark:text-white"
+      v-if="this.menu.selectedOrderType === 'Aggregators'"
+    >
+      Aggregator ID
+    </label>
+    <input
+      v-if="this.menu.selectedOrderType === 'Aggregators'"
+      id="aggregatorId"
+      class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      v-model="this.menu.aggregatorId"
+    />
+    <label
+      for="Comments"
+      class="mt-6 block text-left text-gray-900 dark:text-white"
+    >
+      Comments
+    </label>
+    <input
+      id="comments"
+      class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
+      v-model="this.menu.comments"
     />
   </div>
 
@@ -169,10 +207,7 @@
             No
           </button>
           <button
-            @click="
-              this.invoiceData.cancelInvoice();
-              this.invoiceData.cancelInvoiceFlag = false;
-            "
+            @click="handleConfirmCancellation()"
             class="mt-6 rounded bg-blue-500 px-3 py-2 text-white hover:bg-blue-600"
           >
             Yes
@@ -228,6 +263,7 @@
               this.recentOrders.editPrintedInvoice === 1 &&
               this.auth.removeTableOrderItem === 0
             "
+            :disabled="this.recentOrders.restaurantTable"
           />
           <label
             for="Comments"
@@ -326,17 +362,6 @@
           v-model="this.invoiceData.cashier"
           readonly
         />
-        <label
-          for="Comments"
-          class="mt-10 block text-sm font-medium text-gray-900 dark:text-white"
-        >
-          Comments
-        </label>
-        <input
-          id="comments"
-          class="mt-3 block w-full rounded-md border bg-gray-50 p-2.5 text-sm text-gray-900 md:w-3/5 lg:w-2/5"
-          v-model="this.menu.comments"
-        />
       </div>
     </details>
   </div>
@@ -349,11 +374,24 @@ import { useTableStore } from "@/stores/Table.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
+import { useNotifications } from "@/stores/Notification.js";
 
 export default {
   name: "Cart",
   components: {
     orderInfo,
+  },
+  methods: {
+    handleConfirmCancellation() {
+      console.log(this.invoiceData.cancelReason);
+      console.log(!this.invoiceData.cancelReason || this.invoiceData.cancelReason.trim() === '');
+      if (!this.invoiceData.cancelReason || this.invoiceData.cancelReason.trim() === '') {
+        this.notification.createNotification('Please enter a reason for cancellation');
+        return;
+      }
+      this.invoiceData.cancelInvoice();
+      this.invoiceData.cancelInvoiceFlag = false;
+    },
   },
   setup() {
     const menu = useMenuStore();
@@ -361,7 +399,9 @@ export default {
     const auth = useAuthStore();
     const recentOrders = usetoggleRecentOrder();
     const invoiceData = useInvoiceDataStore();
-    return { menu, table, invoiceData, auth, recentOrders };
+    const notification = useNotifications();
+
+    return { menu, table, invoiceData, auth, recentOrders, notification };
   },
   mounted() {
     window.scrollTo(0, 0);

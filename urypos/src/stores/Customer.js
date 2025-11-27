@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { useTableStore } from "./Table.js";
 import { useNotifications } from "./Notification.js";
+import { usetoggleRecentOrder } from "./recentOrder.js";
+import { useMenuStore } from "./Menu.js";
 import frappe from "./frappeSdk.js";
 import { useAlert } from "./Alert.js";
 export const useCustomerStore = defineStore("customers", {
@@ -11,14 +13,18 @@ export const useCustomerStore = defineStore("customers", {
     alert: useAlert(),
     showCustomers: false,
     showOrderType: false,
+    showEditOrderType:false,
+    newOrderType:null,
     numberOfPax: "",
+    menu: useMenuStore(),
+    recentOrders: usetoggleRecentOrder(),
     selectedCustomerName: "",
-    selectedOrderType: "",
     customerFavouriteItems: [],
     showModalNewCustomer: false,
     newCustomerMobileNo: "",
     newCustomer: "",
     orderType: [],
+    table: useTableStore(),
     showCustomersGroup: false,
     showCustomersTerritory: false,
     showAddNewCustomer: true,
@@ -28,6 +34,7 @@ export const useCustomerStore = defineStore("customers", {
     customerGroup: null,
     call: frappe.call(),
     db: frappe.db(),
+    timer:null,
   }),
   getters: {
     isFlagSet() {
@@ -51,7 +58,10 @@ export const useCustomerStore = defineStore("customers", {
     },
     handleSearchInput(event) {
       this.search = event.target.value;
-      this.pickCustomer();
+      clearTimeout(this.timer);
+      this.timer=setTimeout(()=>{
+        this.pickCustomer();
+      },500);
     },
     pickCustomerGroup() {
       this.db
@@ -87,7 +97,23 @@ export const useCustomerStore = defineStore("customers", {
         this.alert.createAlert("Message", "Invalid Customer", "OK");
       }
     },
-
+    editOrderType(orderType){
+      this.showEditOrderType=true
+      if(orderType == "Take Away"){
+        this.newOrderType="Delivery"
+      }else if(orderType == "Delivery"){
+        this.newOrderType="Take Away"
+      }else{
+        return
+      }
+      
+    },
+    selecetOrderType(order_type){
+      this.showEditOrderType=false
+      this.menu.selectedOrderType = order_type
+      this.recentOrders.pastOrderType = order_type
+    },
+    
     addNewCustomer: async function () {
       if (!this.newCustomer || !this.newCustomerMobileNo) {
         let missingFields = [];
@@ -144,38 +170,47 @@ export const useCustomerStore = defineStore("customers", {
       }
       return "";
     },
+    searchCustomer() {
+      if (this.menu.selectedAggregator) {
+        this.showCustomers = false;
+        this.showAddNewCustomer = false;
+      } else {
+        this.showCustomers = true;
+        this.showAddNewCustomer = true;
+      }
+    },
     async selectCustomer(customer) {
       this.search = customer.name;
+      const content = customer.content;
+      const mobileStartIndex = content.indexOf("Mobile Number :");
+      if (mobileStartIndex !== -1) {
+        const mobileEndIndex = content.indexOf("|||", mobileStartIndex);
+        if (mobileEndIndex !== -1) {
+          const mobileNumber = content
+            .substring(mobileStartIndex + "Mobile Number :".length, mobileEndIndex)
+            .trim();
+          this.newCustomerMobileNo = mobileNumber;
+        }
+      }
       this.showCustomers = false;
       this.fectchCustomerFavouriteItem();
     },
-    pickOrderType() {
-      this.showOrderType = true;
-      this.call
-        .get("ury.ury_pos.api.get_select_field_options")
-        .then((result) => {
-          this.orderType = result.message.filter(
-            (option) => option.name !== ""
-          );
-        })
-        .catch((error) => console.error(error));
-    },
-    selectOrderType(orderType) {
-      this.showOrderType = false;
-      if (orderType.name === "Dine In") {
-        this.alert.createAlert(
-          "Message",
-          "Dine in is not permitted for takeaway orders.",
-          "OK"
-        );
+    validateInput(event) {
+      let value = event.target.value;
+      if (value < 1) {
+        this.numberOfPax = "";
+        return;
+      }
+
+      if (value.toString().length > 3) {
+        this.numberOfPax = value.toString().slice(0, 3);
       } else {
-        this.selectedOrderType = orderType.name;
+        this.numberOfPax = value;
       }
     },
     async fectchCustomerFavouriteItem() {
-      const table = useTableStore();
-      if (table.previousOrderdCustomer) {
-        this.selectedCustomerName = table.previousOrderdCustomer;
+      if (this.table.previousOrderdCustomer) {
+        this.selectedCustomerName = this.table.previousOrderdCustomer;
       } else {
         this.selectedCustomerName = this.search;
       }

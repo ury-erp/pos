@@ -14,27 +14,28 @@ axios.defaults.baseURL = frappe.url;
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     userId: "",
-    currentPassword: "",
-    showPassword: false,
-    table: useTableStore(),
-    menu: useMenuStore(),
-    invoiceData: useInvoiceDataStore(),
-    cashier: null,
-    restrictTableOrder: null,
-    alert: useAlert(),
-    sessionUser: "",
-    userAuth: localStorage.getItem("userAuth"),
-    activeDropdown: false,
     userName: "",
-    viewItemImage:null,
-    removeTableOrderItem: null,
-    hasAccess: false,
-    isPosOpen: true,
-    viewAllStatus: null,
+    sessionUser: "",
+    currentPassword: "",
     userRole: [],
-    auth: frappe.auth(),
+    isPosOpen: true,
+    hasAccess: false,
+    showPassword: false,
+    activeDropdown: false,
+    cashierisPosOpen: false,
+    cashier: null,
+    viewItemImage: null,
+    viewAllStatus: null,
+    restrictTableOrder: null,
+    removeTableOrderItem: null,
     db: frappe.db(),
     call: frappe.call(),
+    auth: frappe.auth(),
+    alert: useAlert(),
+    menu: useMenuStore(),
+    table: useTableStore(),
+    invoiceData: useInvoiceDataStore(),
+    userAuth: localStorage.getItem("userAuth"),
   }),
   getters: {
     isAuthenticated(state) {
@@ -46,23 +47,19 @@ export const useAuthStore = defineStore("auth", {
   },
   actions: {
     //Login
-    login() {
-      this.auth
-        .loginWithUsernamePassword({
+    async login() {
+      try {
+        await this.auth.loginWithUsernamePassword({
           username: this.userId,
           password: this.currentPassword,
           device: "mobile",
-        })
-        .then(() => {
-          this.userAuth = true;
-          localStorage.setItem("userAuth", "true");
-          router.push("/Table").then(() => {
-            window.location.reload();
-          });
-        })
-        .catch((error) =>
-          this.alert.createAlert("Message", error.message, "OK")
-        );
+        });
+        this.userAuth = true;
+        localStorage.setItem("userAuth", "true");
+        await this.fetchUserDetails();
+      } catch (error) {
+        this.alert.createAlert("Message", error.message, "OK");
+      }
     },
     checkAuthState() {
       if (this.userAuth && localStorage.getItem("userAuth")) {
@@ -78,35 +75,34 @@ export const useAuthStore = defineStore("auth", {
       }
       return this.userName;
     },
-
     fetchUserDetails() {
+      const user = localStorage.getItem("userAuth");
+      // if (user !== "true") {
+      //   this.userAuth = false;
+      //   localStorage.removeItem("userAuth");
+      //   router.push("/login");
+      //   return
+      // }
       this.auth
         .getLoggedInUser()
         .then((user) => {
           this.sessionUser = user;
           if (!this.sessionUser) {
             this.userAuth = false;
-            localStorage.removeItem("userAuth", "true");
+            localStorage.removeItem("userAuth");
           } else {
             this.userAuth = true;
-            router.push("/Table");
-            this.table.fetchTable();
             this.invoiceData.fetchInvoiceDetails().then(() => {
+              router.push("/Table");
+              this.table.fetchRoom();
               this.fetchUserRole();
             });
-            const currentUrl = window.location.href;
-            const urlParts = currentUrl.split("/");
-            const desiredPart = urlParts[urlParts.length - 1];
-            if (desiredPart !== "login") {
-              this.isPosOpenChecking();
-            }
           }
         })
         .catch((error) => {
           this.userAuth = false;
           localStorage.removeItem("userAuth", "true");
           router.push("/login");
-          console.error(error);
         });
     },
     fetchUserRole() {
@@ -129,8 +125,11 @@ export const useAuthStore = defineStore("auth", {
                 this.userRole.includes(role)
               );
               if (this.cashier) {
-                this.menu.fetchItems();
+                this.menu.pickOrderType();
+                // this.menu.fetchItems();
               }
+              this.isPosOpenChecking();
+              this.isPosCloseCheck();
               var transferRoles = result.message.transfer_role_permissions.map(
                 (role) => role.role
               );
@@ -146,36 +145,86 @@ export const useAuthStore = defineStore("auth", {
               );
               this.viewAllStatus = result.message.view_all_status;
               this.removeTableOrderItem = result.message.remove_items;
-              this.viewItemImage=result.message.show_image
-              
+              this.viewItemImage = result.message.show_image;
             })
             .catch((error) => console.error(error));
         })
-
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error(error);
+        });
     },
+    routeToHome() {
+      var currentDomain = window.location.protocol + "//" + window.location.hostname;
+      window.location.href = currentDomain + "/app/";
+    },
+
     isPosOpenChecking() {
-      this.call
-        .get("ury.ury_pos.api.posOpening")
-        .then((result) => {
-          const serverMessages = JSON.parse(result._server_messages);
-          const innerMessageString = serverMessages[0];
-          const innerMessage = JSON.parse(innerMessageString);
-          const message = innerMessage.message;
-          if (this.cashier) {
-            this.isPosOpen = true;
-            this.alert.createAlert("Message", message, "OK")
-            .then(() => {
-              router.push("/posOpen")
+      if (this.invoiceData.multipleCashier) {
+        this.call
+          .get("ury.ury.doctype.ury_order.ury_order.pos_opening_check")
+          .then((result) => {
+            var currentDomain = window.location.origin;
+            if (!result.message.opening_exists) {
+              this.alert.createAlert("Message", "POS Opening Entry is not created", "OK").then(() => {
+                window.location.href = currentDomain + "/app/";
+              });
+            }
+
+          })
+          .catch((error) => {
+            var currentDomain = window.location.origin;
+            const serverMessages = JSON.parse(error._server_messages);
+            const innerMessageString = serverMessages[0];
+            const innerMessage = JSON.parse(innerMessageString);
+            const message = innerMessage.message;
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              window.location.href = currentDomain + "/app/";
             });
 
-          } else {
-          this.isPosOpen = false;
-          this.alert.createAlert("Message", message, "OK");
+          });
+      } 
+      else {
+        this.call
+          .get("ury.ury_pos.api.posOpening")
+          .then((result) => {
+            const serverMessages = JSON.parse(result._server_messages);
+            const innerMessageString = serverMessages[0];
+            const innerMessage = JSON.parse(innerMessageString);
+            const message = innerMessage.message;
+            // if (this.cashier) {
+            //   this.alert.createAlert("Message", message, "OK").then(() => {
+            //     router.push("/posOpen");
+            //   });
+            // } else {
+            var currentDomain = window.location.origin;
+            this.alert.createAlert("Message", message, "OK").then(() => {
+              window.location.href = currentDomain + "/app/";
+            });
+            // }
+          })
+          .catch((error) => {
+            // console.error(error)
+          });
+      }
+    },
+    isPosCloseCheck() {
+      const getPosProfile = {
+        pos_profile: this.invoiceData.posProfile,
+      };
+      this.call
+        .get("ury.ury_pos.api.validate_pos_close", getPosProfile)
+        .then((result) => {
+          if (result.message === "Failed") {
+            var currentDomain = window.location.origin;
+            this.alert
+              .createAlert("Message", "Please close previous POS Entry", "OK")
+              .then(() => {
+                window.location.href = currentDomain + "/app/";
+              });
           }
         })
         .catch((error) => {
-          // console.error(error)
+          console.error(error);
         });
     },
     toggleDropdown() {
