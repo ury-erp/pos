@@ -618,7 +618,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         } else {
           // Socket printing using printview redirection
           const url = `/printview?doctype=POS Invoice&name=${invoiceNo}&format=${this.print_format}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;
-          window.open(url, "_blank", "noopener,noreferrer");
+          // window.open(url, "_blank", "noopener,noreferrer");
           try {
             await this.call.post("ury.ury.api.ury_print.qz_print_update", {
               invoice: invoiceNo,
