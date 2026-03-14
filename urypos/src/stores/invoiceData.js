@@ -332,11 +332,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           );
 
           if (kot.message) {
-            const url =
-              `/printview?doctype=URY KOT` +
-              `&name=${kot.message}` +
-              `&no_letterhead=1` +
-              `&trigger_print=1`;
+            const url = `/printview?doctype=URY KOT&name=${kot.message}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;
 
             const iframe = document.createElement("iframe");
             iframe.style.position = "fixed";
