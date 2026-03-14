@@ -324,6 +324,43 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         this.grandTotal = response.message.grand_total;
         this.notification.createNotification("Order Update");
         this.table.fetchTable();
+
+        try {
+          const kot = await this.call.get(
+            "ury_pos.ury_pos.api.kot_print.get_latest_kot",
+            { invoice: response.message.name }
+          );
+
+          if (kot.message) {
+            const url =
+              `/printview?doctype=URY KOT` +
+              `&name=${kot.message}` +
+              `&no_letterhead=1` +
+              `&trigger_print=1`;
+
+            const iframe = document.createElement("iframe");
+            iframe.style.position = "fixed";
+            iframe.style.right = "0";
+            iframe.style.bottom = "0";
+            iframe.style.width = "0";
+            iframe.style.height = "0";
+            iframe.style.border = "0";
+
+            iframe.src = url;
+            document.body.appendChild(iframe);
+
+            setTimeout(() => {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+            }, 500);
+
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+            }, 3000);
+          }
+        } catch (err) {
+          console.error("KOT print failed", err);
+        }
         
         let items = this.menu.items;
         // items.forEach((item) => {
@@ -586,11 +623,17 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             await this.call.post("ury.ury.api.ury_print.qz_print_update", {
               invoice: invoiceNo,
             });
+            this.notification.createNotification("Print triggered");
+            this.isPrinting = false;
+            // Reload so table/invoice list shows updated print status (same as QZ/network print)
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+            return "Success";
           } catch (err) {
             console.error("Failed to update print status for socket print", err);
+            this.isPrinting = false;
           }
-          this.notification.createNotification("Print triggered");
-          this.isPrinting = false;
         }
       } catch (e) {
         if (e?.custom) {
