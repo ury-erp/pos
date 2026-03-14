@@ -335,13 +335,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             const url = `/printview?doctype=URY KOT&name=${kot.message}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;
 
             const iframe = document.createElement("iframe");
-            iframe.style.position = "fixed";
-            iframe.style.right = "0";
-            iframe.style.bottom = "0";
-            iframe.style.width = "0";
-            iframe.style.height = "0";
-            iframe.style.border = "0";
-
+            iframe.style.display = "none";
             iframe.src = url;
             document.body.appendChild(iframe);
 
