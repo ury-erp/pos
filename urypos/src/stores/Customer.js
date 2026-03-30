@@ -96,6 +96,7 @@ export const useCustomerStore = defineStore("customers", {
       } else {
         this.alert.createAlert("Message", "Invalid Customer", "OK");
       }
+      this.fetchCustomerDefaults();
     },
     editOrderType(orderType){
       this.showEditOrderType=true
@@ -112,6 +113,21 @@ export const useCustomerStore = defineStore("customers", {
       this.showEditOrderType=false
       this.menu.selectedOrderType = order_type
       this.recentOrders.pastOrderType = order_type
+    },
+    fetchCustomerDefaults() {
+      this.call
+        .get("ury.ury.doctype.ury_order.ury_order.get_customer_defaults")
+        .then((result) => {
+          if (result && result.message) {
+            if (result.message.customer_group) {
+              this.customerGroup = result.message.customer_group;
+            }
+            if (result.message.territory) {
+              this.customerTerritory = result.message.territory;
+            }
+          }
+        })
+        .catch((error) => console.error(error));
     },
     
     addNewCustomer: async function () {
