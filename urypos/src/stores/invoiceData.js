@@ -22,6 +22,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     cashier: "",
     warehouse: "",
     posProfile: "",
+    defaultCustomer: "",
     enableKotReprint:0,
     defaultModeOfPayment: "Cash",
     owner:null,
@@ -73,6 +74,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.tableAttention = this.invoiceDetails.tableAttention;
           this.warehouse = this.invoiceDetails.warehouse;
           this.posProfile = this.invoiceDetails.pos_profile;
+          this.defaultCustomer = this.invoiceDetails.customer;
           this.waiter = this.invoiceDetails.waiter;
           this.cashier = this.invoiceDetails.cashier;
           this.owner = this.invoiceDetails.owner
