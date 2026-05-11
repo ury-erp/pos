@@ -195,6 +195,24 @@ export const useCustomerStore = defineStore("customers", {
         this.showAddNewCustomer = true;
       }
     },
+    fetchDefaultCustomer(defaultCustomerName) {
+      if (!defaultCustomerName) {
+        this.alert.createAlert("Message", "No Default Customer found in POS Profile", "OK");
+        return;
+      }
+      this.call
+        .get("frappe.client.get", { doctype: "Customer", name: defaultCustomerName })
+        .then((result) => {
+           this.search = result.message.name;
+           this.newCustomerMobileNo = result.message.mobile_number || result.message.mobile_no || result.message.custom_mobile_number || "";
+           this.showCustomers = false;
+           this.fectchCustomerFavouriteItem();
+        })
+        .catch((error) => {
+           this.alert.createAlert("Message", "Failed to fetch Default Customer", "OK");
+           console.error(error);
+        });
+    },
     async selectCustomer(customer) {
       this.search = customer.name;
       const content = customer.content;

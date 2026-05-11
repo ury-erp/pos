@@ -78,29 +78,52 @@
                 />
               </svg>
             </div>
-            <a
-              href="#"
-              class="mt-1 lg:mt-0 inline-flex items-center text-blue-600 hover:underline"
-              @click.prevent="
-                this.customers.newCustomerData(this.customers.search)
-              "
-            >
-              <svg
-                fill="none"
-                stroke="currentColor"
-                class="h-8 w-8 font-extrabold"
-                viewBox="0 0 25 25"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+            <div class="flex flex-col px-2 pb-2">
+              <a
+                href="#"
+                class="mt-1 lg:mt-0 inline-flex items-center text-blue-600 hover:underline"
+                @click.prevent="
+                  this.customers.newCustomerData(this.customers.search)
+                "
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 6v12m6-6H6"
-                ></path>
-              </svg>
-              Create New Customer
-            </a>
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  class="h-8 w-8 font-extrabold"
+                  viewBox="0 0 25 25"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v12m6-6H6"
+                  ></path>
+                </svg>
+                Create New Customer
+              </a>
+              <a
+                href="#"
+                class="mt-2 inline-flex items-center text-blue-600 hover:underline"
+                @click.prevent="this.customers.fetchDefaultCustomer(this.invoiceData.defaultCustomer)"
+              >
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  class="h-8 w-8 font-extrabold mr-1"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+                Default Customer
+              </a>
+            </div>
           </div>
         </div>
       </div>
