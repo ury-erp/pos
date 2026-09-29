@@ -78,6 +78,13 @@
                 >
                   {{ recentOrder.name }}
                 </p>
+                <span
+                  v-if="printJobs.hasInvoiceFailed(recentOrder.name)"
+                  @click.stop="printJobs.openJobsModal(recentOrder.name)"
+                  class="mt-1 inline-block cursor-pointer rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
+                >
+                  Print failed
+                </span>
                 <p class="truncate text-sm text-gray-600 dark:text-gray-400">
                   {{ recentOrder.mobile_number }},{{ recentOrder.customer }}
                 </p>
@@ -176,6 +183,13 @@
             >
               {{ this.recentOrders.selectedOrder.name }}
             </p>
+            <span
+              v-if="printJobs.hasInvoiceFailed(recentOrders.selectedOrder.name)"
+              @click="printJobs.openJobsModal(recentOrders.selectedOrder.name)"
+              class="mt-1 inline-block cursor-pointer rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
+            >
+              Print failed
+            </span>
 
             <div class="ml-5 mt-2">
               <Badge
@@ -619,6 +633,7 @@
         </div>
       </div>
     </div>
+    <PrintJobsModal />
   </div>
 </template>
 
@@ -628,11 +643,14 @@ import { useInvoiceDataStore } from "@/stores/invoiceData.js";
 import { useAuthStore } from "@/stores/Auth.js";
 import { Badge } from "flowbite-vue";
 import { useNotifications } from "@/stores/Notification.js";
+import { usePrintJobsStore } from "@/stores/printJobs.js";
+import PrintJobsModal from "./PrintJobsModal.vue";
 
 export default {
   name: "RecentOrder",
   components: {
     Badge,
+    PrintJobsModal,
   },
   methods: {
     handleConfirmCancellation() {
@@ -649,7 +667,8 @@ export default {
     const invoiceData = useInvoiceDataStore();
     const auth = useAuthStore();
     const notification = useNotifications();
-    return { recentOrders, invoiceData, auth, notification };
+    const printJobs = usePrintJobsStore();
+    return { recentOrders, invoiceData, auth, notification, printJobs };
   },
   mounted() {
     this.recentOrders.handleStatusChange();

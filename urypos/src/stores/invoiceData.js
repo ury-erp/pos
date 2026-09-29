@@ -501,85 +501,59 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
             }
           }
         } else if (this.print_type === "network") {
+          // Network printing lifecycle is asynchronous: CUPS polling and the
+          // backend finalizer mark the invoice printed on completion and emit
+          // print job socket events (tracked by the printJobs store). The
+          // invoice must NOT be marked printed here at submission time.
+          let method, payload;
           if (this.auth.cashier && !this.multipleCashier) {
-            const sendObj = {
+            method = "ury.ury.api.ury_print.network_printing";
+            payload = {
               doctype: "POS Invoice",
               name: invoiceNo,
               printer_setting: this.printer,
               print_format: this.print_format,
             };
-            const printingCall = async () => {
-              const res = await this.call.post(
-                "ury.ury.api.ury_print.network_printing",
-                sendObj
-              );
-              return res.message;
-            };
-            let i = 0;
-            let errorMessage = "";
-            do {
-              const res = await printingCall();
-              if (res === "Success") {
-                this.notification.createNotification("Print Successful");
-                const sendObj = {
-                  invoice: invoiceNo,
-                };
-                  await this.call.post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1000);
-                  return "Success"
-              }
-              errorMessage = res;
-              i++;
-            } while (i < 5);
-            throw {
-              alert: this.alert.createAlert(
-                "Message",
-                `Message:${errorMessage}`,
-                "OK"
-              ),
-              custom: (this.isPrinting = false),
-            };
           } else {
-            const networkPrint = {
+            method = "ury.ury.api.ury_print.select_network_printer";
+            payload = {
               invoice_id: invoiceNo,
               pos_profile: this.posProfile,
             };
-            const networkPrintPrintingCall = async () => {
-              const res = await this.call.post(
-                "ury.ury.api.ury_print.select_network_printer",
-                networkPrint
-              );
-              return res.message;
-            };
-            let i = 0;
-            let errorMessage = "";
-            do {
-              const res = await networkPrintPrintingCall();
-              if (res === "Success") {
-                this.notification.createNotification("Print Successful");
-                const sendObj = {
-                  invoice: invoiceNo,
-                };
-                  await this.call.post("ury.ury.api.ury_print.qz_print_update", sendObj)
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1000);
-                  return "Success"
-              }
-              errorMessage = res;
-              i++;
-            } while (i < 5);
-            throw {
-              alert: this.alert.createAlert(
-                "Message",
-                `Message:${errorMessage}`,
-                "OK"
-              ),
-              custom: (this.isPrinting = false),
-            };
           }
+          let res;
+          try {
+            res = await this.call.post(method, payload);
+          } catch (error) {
+            this.isPrinting = false;
+            this.alert.createAlert(
+              "Error",
+              error?.message || "Print submission failed",
+              "OK"
+            );
+            return;
+          }
+          this.isPrinting = false;
+          const message = res?.message;
+          const isSuccess =
+            (message &&
+              typeof message === "object" &&
+              message.status === "Success") ||
+            message === "Success";
+          if (isSuccess) {
+            this.notification.createNotification("Print job submitted");
+            return;
+          }
+          const errorMessageText =
+            message && typeof message === "object" && message.message
+              ? message.message
+              : message;
+          this.alert.createAlert(
+            "Message",
+            `Message:${errorMessageText}`,
+            "OK"
+          );
+          return;
         } else {
           // Socket printing using printview redirection
           const url = `/printview?doctype=POS Invoice&name=${invoiceNo}&format=${this.print_format}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;

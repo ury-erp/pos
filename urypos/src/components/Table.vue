@@ -186,6 +186,13 @@
               >
                 {{ table.name }}
               </h5>
+              <span
+                v-if="printJobs.hasTableFailed(table.name)"
+                @click.stop="printJobs.openJobsModal(null, table.name)"
+                class="mt-1 inline-block cursor-pointer rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
+              >
+                Print failed
+              </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 {{
                   table.occupied === 1
@@ -485,6 +492,7 @@ import { useMenuStore } from "@/stores/Menu.js";
 import takeAwayTable from "./takeAwayTable.vue";
 import { usetoggleRecentOrder } from "@/stores/recentOrder.js";
 import { useInvoiceDataStore } from "@/stores/invoiceData.js";
+import { usePrintJobsStore } from "@/stores/printJobs.js";
 
 export default {
   name: "Table",
@@ -498,7 +506,8 @@ export default {
     const menu = useMenuStore();
     const recentOrders = usetoggleRecentOrder();
     
-    return { table, invoiceData, auth, menu,recentOrders };
+    const printJobs = usePrintJobsStore();
+    return { table, invoiceData, auth, menu,recentOrders, printJobs };
   },
 };
 </script>
