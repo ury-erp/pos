@@ -29,10 +29,12 @@
         </div>
 
         <!-- User Menu Section -->
-        <div
-          v-if="!this.tabClick.isLoginPage"
-          class="relative ml-4 flex-shrink-0"
-        >
+        <div class="flex items-center">
+          <PrinterWatch />
+          <div
+            v-if="!this.tabClick.isLoginPage"
+            class="relative ml-4 flex-shrink-0"
+          >
           <button
             type="button"
             class="flex items-center rounded-full bg-gray-100 p-1 text-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
@@ -88,6 +90,7 @@
               </a>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -104,9 +107,13 @@ import { posClosing } from "@/stores/posClosing.js";
 import uriPosImage from "@/assets/logos/URY_POS.jpg";
 import { tabFunctions } from "@/stores/bottomTabs.js";
 import { useTableStore } from "@/stores/Table.js";
+import PrinterWatch from "./PrinterWatch.vue";
 
 export default {
   name: "Header",
+  components: {
+    PrinterWatch,
+  },
   setup() {
     const auth = useAuthStore();
     const posOpen = posOpening();
