@@ -8,6 +8,8 @@ import axios from "axios";
 import { useAlert } from "./Alert.js";
 import router from "../router";
 import { disconnectQzPrinter } from "./utils/PrintWithQz";
+import { usePrintJobsStore } from "./printJobs.js";
+import { usePrinterWatchStore } from "./printerWatch.js";
 
 axios.defaults.baseURL = frappe.url;
 
@@ -92,6 +94,8 @@ export const useAuthStore = defineStore("auth", {
             localStorage.removeItem("userAuth");
           } else {
             this.userAuth = true;
+            usePrintJobsStore().init(this.sessionUser);
+            usePrinterWatchStore().init();
             this.invoiceData.fetchInvoiceDetails().then(() => {
               router.push("/Table");
               this.table.fetchRoom();
@@ -247,6 +251,7 @@ export const useAuthStore = defineStore("auth", {
           });
           localStorage.removeItem("userAuth", "true");
           disconnectQzPrinter();
+          usePrintJobsStore().disconnectSocket();
         })
         .catch((error) => console.error(error));
     },

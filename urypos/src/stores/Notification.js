@@ -57,5 +57,47 @@ export const useNotifications = defineStore("notification", {
         container.remove(); // Remove the container after the notification is removed
       }, 900);
     },
+    // Persistent error notification (no auto-dismiss); used for print failures.
+    createErrorNotification(message) {
+      const container = document.createElement("div");
+      container.classList.add("fixed", "bottom-20", "right-5", "z-50");
+      document.body.appendChild(container);
+
+      const notif = document.createElement("div");
+      notif.classList.add("bg-red-100", "text-red-800", "py-2", "px-2", "mr-3");
+      notif.style.borderRadius = "5px";
+      notif.style.width = "400px";
+      notif.style.minHeight = "65px";
+      const mq = window.matchMedia("(max-width: 640px)");
+      if (mq.matches) {
+        notif.style.width = "300px";
+      }
+
+      const closeBtn = document.createElement("span");
+      closeBtn.innerHTML = `
+          <span class="sr-only">Close</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>`;
+      closeBtn.classList.add(
+        "cursor-pointer",
+        "absolute",
+        "top-4",
+        "right-7"
+      );
+      closeBtn.addEventListener("click", () => {
+        notif.remove();
+        container.remove();
+      });
+
+      notif.appendChild(closeBtn);
+
+      const messageEl = document.createElement("h2");
+      messageEl.textContent = message;
+      messageEl.classList.add("mt-2", "pr-6", "text-sm");
+      notif.appendChild(messageEl);
+
+      container.appendChild(notif);
+    },
   },
 });
